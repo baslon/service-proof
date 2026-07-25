@@ -51,12 +51,33 @@ function JobList({ jobs, sites, onSelect }) {
 }
 
 function SubmissionForm({ job, site, onCancel, onSubmit }) {
-  const [completionStatus, setCompletionStatus] = useState(DEFAULT_COMPLETION_STATUS[job.status] || 'Completed')
+  const initialCompletionStatus = DEFAULT_COMPLETION_STATUS[job.status] || 'Completed'
+  const initialNotes = job.notes || ''
+  const initialPhotosCount = (job.photos || []).length
+
+  const [completionStatus, setCompletionStatus] = useState(initialCompletionStatus)
   const [photos, setPhotos] = useState(job.photos || [])
-  const [notes, setNotes] = useState(job.notes || '')
+  const [notes, setNotes] = useState(initialNotes)
   const [error, setError] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const fileInputRef = useRef(null)
+
+  const isDirty =
+    notes !== initialNotes || photos.length !== initialPhotosCount || completionStatus !== initialCompletionStatus
+
+  const handleCancelClick = () => {
+    if (isDirty) {
+      setShowDiscardConfirm(true)
+    } else {
+      onCancel()
+    }
+  }
+
+  const confirmDiscard = () => {
+    setShowDiscardConfirm(false)
+    onCancel()
+  }
 
   const slotsLeft = job.photosRequired - photos.length
 
@@ -189,7 +210,9 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
               setError('')
             }}
             placeholder={
-              completionStatus === 'Completed' ? 'Optional notes about this job...' : 'Explain what happened...'
+              completionStatus === 'Completed'
+                ? 'Optional notes about this job...'
+                : 'Provide a progress update note'
             }
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
@@ -200,7 +223,7 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
 
       <div className="mt-6 flex gap-2">
         <button
-          onClick={onCancel}
+          onClick={handleCancelClick}
           className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
         >
           Cancel
@@ -244,6 +267,40 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
                 className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white"
               >
                 Yes, submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDiscardConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-6">
+          <div className="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.63-1.516 2.63H3.72c-1.347 0-2.189-1.463-1.516-2.63L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <h3 className="mt-3 text-base font-semibold text-slate-900">Discard changes?</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              You have unsaved changes on this job. If you leave now, they&apos;ll be lost.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setShowDiscardConfirm(false)}
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
+              >
+                Keep editing
+              </button>
+              <button
+                onClick={confirmDiscard}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white"
+              >
+                Discard
               </button>
             </div>
           </div>
