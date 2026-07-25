@@ -4,13 +4,13 @@ import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 
-const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Incomplete']
-const ACTIONABLE_STATUSES = ['Scheduled', 'Missing Evidence', 'At Risk']
+const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Unable to complete']
+const ACTIONABLE_STATUSES = ['Incomplete', 'Missing Evidence', 'At Risk']
 
 // A job that was already flagged carries a sensible starting point for the
 // operative reopening it, rather than always defaulting to "Completed".
 const DEFAULT_COMPLETION_STATUS = {
-  'Missing Evidence': 'Incomplete',
+  'Missing Evidence': 'Unable to complete',
   'At Risk': 'Completed with issue',
 }
 
@@ -62,11 +62,11 @@ function JobList({ jobs, sites, onSelect }) {
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-semibold text-slate-900">{job.id}</span>
-              {job.status === 'Scheduled' ? (
-                <span className="text-xs text-slate-400">{job.scheduledTime?.replace('T', ' ')}</span>
-              ) : (
-                <StatusBadge status={job.status} className="!px-2 !py-0.5" />
-              )}
+              <StatusBadge
+                status={job.status}
+                label={job.status === 'Incomplete' ? 'Assigned' : undefined}
+                className="!px-2 !py-0.5"
+              />
             </div>
             <p className="mt-1 text-sm text-slate-700">{job.taskType}</p>
             <p className="text-xs text-slate-500">{site?.name}</p>
@@ -139,7 +139,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
   const handleSubmitClick = () => {
     if (completionStatus === 'Completed' && photos.length < job.photosRequired) {
       setError(
-        `You need ${job.photosRequired - photos.length} more photo(s) to mark this Completed, or choose "Completed with issue" / "Incomplete" instead.`
+        `You need ${job.photosRequired - photos.length} more photo(s) to mark this Completed, or choose "Completed with issue" / "Unable to complete" instead.`
       )
       return
     }
@@ -272,10 +272,10 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
         <button
           onClick={handleSubmitClick}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${
-            completionStatus === 'Incomplete' ? 'bg-slate-600' : 'bg-indigo-600'
+            completionStatus === 'Unable to complete' ? 'bg-slate-600' : 'bg-indigo-600'
           }`}
         >
-          {completionStatus === 'Incomplete' ? 'Save' : 'Submit proof'}
+          {completionStatus === 'Unable to complete' ? 'Save' : 'Submit proof'}
         </button>
       </div>
 

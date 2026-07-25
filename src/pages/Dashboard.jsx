@@ -11,8 +11,8 @@ const SUMMARY_CARDS = [
   { label: 'Missing Evidence', match: (j) => j.status === 'Missing Evidence', color: 'text-amber-600' },
   { label: 'At Risk', match: (j) => j.status === 'At Risk', color: 'text-red-600' },
   {
-    label: 'Scheduled / Pending',
-    match: (j) => j.status === 'Scheduled' || j.status === 'Awaiting Review',
+    label: 'Incomplete / Pending',
+    match: (j) => j.status === 'Incomplete' || j.status === 'Awaiting Review',
     color: 'text-slate-600',
   },
 ]
