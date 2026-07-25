@@ -14,7 +14,7 @@ export default function ScheduleJobModal({ onClose }) {
     operativeId: operatives[0]?.id || '',
     area: '',
     scheduledTime: '',
-    photosRequired: 3,
+    photosRequired: 6,
     notes: '',
   })
 
