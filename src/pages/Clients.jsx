@@ -14,7 +14,7 @@ export default function Clients() {
 
   const sitesForClient = (clientId) => sites.filter((s) => s.clientId === clientId)
   const jobsForClient = (clientId) => jobs.filter((j) => j.clientId === clientId)
-  const activeJobsCount = jobs.filter((j) => j.status === 'Scheduled' || j.status === 'Awaiting Review').length
+  const activeJobsCount = jobs.filter((j) => j.status === 'Incomplete' || j.status === 'Awaiting Review').length
 
   const completionRateFor = (clientId) => {
     const cJobs = jobsForClient(clientId)

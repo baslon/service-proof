@@ -203,7 +203,7 @@ export const INITIAL_JOBS = [
     photosSubmitted: 0,
     photos: [],
     submittedTime: null,
-    status: 'Scheduled',
+    status: 'Incomplete',
     notes: '',
   },
   {
@@ -267,7 +267,7 @@ export const INITIAL_JOBS = [
     photosSubmitted: 0,
     photos: [],
     submittedTime: null,
-    status: 'Scheduled',
+    status: 'Incomplete',
     notes: '',
   },
   {
@@ -299,7 +299,7 @@ export const INITIAL_JOBS = [
     photosSubmitted: 0,
     photos: [],
     submittedTime: null,
-    status: 'Scheduled',
+    status: 'Incomplete',
     notes: '',
   },
 ]
@@ -330,6 +330,6 @@ export const JOB_STATUSES = [
   'Completed & Evidenced',
   'Missing Evidence',
   'At Risk',
-  'Scheduled',
+  'Incomplete',
   'Awaiting Review',
 ]

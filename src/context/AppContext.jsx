@@ -31,7 +31,7 @@ function reducer(state, action) {
         photosSubmitted: 0,
         photos: [],
         submittedTime: null,
-        status: 'Scheduled',
+        status: 'Incomplete',
         notes: '',
         ...action.payload,
       }
@@ -61,7 +61,7 @@ function reducer(state, action) {
       const statusMap = {
         Completed: 'Completed & Evidenced',
         'Completed with issue': 'At Risk',
-        Incomplete: 'Missing Evidence',
+        'Unable to complete': 'Missing Evidence',
       }
       return {
         ...state,
