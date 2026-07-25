@@ -81,6 +81,10 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
       )
       return
     }
+    if (completionStatus !== 'Completed' && !notes.trim()) {
+      setError('Add a note explaining what happened before saving.')
+      return
+    }
     setError('')
     // Marking a job Completed locks it — it can no longer be edited or
     // resubmitted afterward, so make sure that's clearly understood first.
@@ -174,12 +178,19 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">Notes</p>
+          <p className="mb-2 text-sm font-medium text-slate-700">
+            Notes{completionStatus !== 'Completed' && <span className="text-red-500"> (required)</span>}
+          </p>
           <textarea
             rows={3}
             value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Optional notes about this job..."
+            onChange={(e) => {
+              setNotes(e.target.value)
+              setError('')
+            }}
+            placeholder={
+              completionStatus === 'Completed' ? 'Optional notes about this job...' : 'Explain what happened...'
+            }
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
@@ -196,9 +207,11 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
         </button>
         <button
           onClick={handleSubmitClick}
-          className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white"
+          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${
+            completionStatus === 'Incomplete' ? 'bg-slate-600' : 'bg-indigo-600'
+          }`}
         >
-          Submit proof
+          {completionStatus === 'Incomplete' ? 'Save' : 'Submit proof'}
         </button>
       </div>
 
