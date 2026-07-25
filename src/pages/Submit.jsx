@@ -185,6 +185,11 @@ export default function Submit() {
     }
   }
 
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <div className="min-h-screen bg-slate-200 sm:py-8">
       <div className="mx-auto flex h-screen w-full flex-col overflow-hidden bg-slate-50 sm:h-auto sm:max-w-sm sm:rounded-[2rem] sm:border-8 sm:border-slate-900 sm:shadow-2xl">
@@ -194,6 +199,15 @@ export default function Submit() {
           </button>
           <span className="text-sm font-semibold text-white">ServiceProof Field</span>
           <span className="w-9" />
+        </div>
+
+        <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-100 px-4 py-2">
+          <span className="text-xs text-slate-500">
+            Signed in as <span className="font-medium text-slate-700">{user?.name}</span>
+          </span>
+          <button onClick={handleLogout} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+            Log out
+          </button>
         </div>
 
         <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
