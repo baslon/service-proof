@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
@@ -12,6 +12,41 @@ const ACTIONABLE_STATUSES = ['Scheduled', 'Missing Evidence', 'At Risk']
 const DEFAULT_COMPLETION_STATUS = {
   'Missing Evidence': 'Incomplete',
   'At Risk': 'Completed with issue',
+}
+
+function ConfirmDialog({ tone = 'neutral', title, body, cancelLabel = 'Cancel', confirmLabel, confirmClassName, onCancel, onConfirm }) {
+  const iconClass = tone === 'warning' ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-500'
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-6">
+      <div className="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl">
+        <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${iconClass}`}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              fillRule="evenodd"
+              d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.63-1.516 2.63H3.72c-1.347 0-2.189-1.463-1.516-2.63L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 8a1 1 0 100-2 1 1 0 000 2z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </div>
+        <h3 className="mt-3 text-base font-semibold text-slate-900">{title}</h3>
+        <p className="mt-2 text-sm text-slate-500">{body}</p>
+        <div className="mt-5 flex gap-2">
+          <button
+            onClick={onCancel}
+            className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
+          >
+            {cancelLabel}
+          </button>
+          <button
+            onClick={onConfirm}
+            className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${confirmClassName || 'bg-indigo-600'}`}
+          >
+            {confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function JobList({ jobs, sites, onSelect }) {
@@ -50,7 +85,7 @@ function JobList({ jobs, sites, onSelect }) {
   )
 }
 
-function SubmissionForm({ job, site, onCancel, onSubmit }) {
+const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel, onSubmit }, ref) {
   const initialCompletionStatus = DEFAULT_COMPLETION_STATUS[job.status] || 'Completed'
   const initialNotes = job.notes || ''
   const initialPhotosCount = (job.photos || []).length
@@ -65,6 +100,12 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
 
   const isDirty =
     notes !== initialNotes || photos.length !== initialPhotosCount || completionStatus !== initialCompletionStatus
+
+  // Lets the parent (the top-bar Exit button) check for unsaved changes too,
+  // since that action lives outside this component.
+  useImperativeHandle(ref, () => ({
+    isDirty: () => isDirty,
+  }))
 
   const handleCancelClick = () => {
     if (isDirty) {
@@ -239,82 +280,43 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
       </div>
 
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-6">
-          <div className="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.63-1.516 2.63H3.72c-1.347 0-2.189-1.463-1.516-2.63L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <h3 className="mt-3 text-base font-semibold text-slate-900">Submit as Completed?</h3>
-            <p className="mt-2 text-sm text-slate-500">
+        <ConfirmDialog
+          tone="warning"
+          title="Submit as Completed?"
+          body={
+            <>
               This marks the job as <strong>Completed &amp; Evidenced</strong>. Once submitted, you won&apos;t be
               able to edit or resubmit it &mdash; this action is final.
-            </p>
-            <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmSubmit}
-                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white"
-              >
-                Yes, submit
-              </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+          confirmLabel="Yes, submit"
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={confirmSubmit}
+        />
       )}
 
       {showDiscardConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-6">
-          <div className="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.63-1.516 2.63H3.72c-1.347 0-2.189-1.463-1.516-2.63L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 8a1 1 0 100-2 1 1 0 000 2z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <h3 className="mt-3 text-base font-semibold text-slate-900">Discard changes?</h3>
-            <p className="mt-2 text-sm text-slate-500">
-              You have unsaved changes on this job. If you leave now, they&apos;ll be lost.
-            </p>
-            <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => setShowDiscardConfirm(false)}
-                className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
-              >
-                Keep editing
-              </button>
-              <button
-                onClick={confirmDiscard}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white"
-              >
-                Discard
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          title="Discard changes?"
+          body="You have unsaved changes on this job. If you leave now, they'll be lost."
+          cancelLabel="Keep editing"
+          confirmLabel="Discard"
+          confirmClassName="bg-red-600"
+          onCancel={() => setShowDiscardConfirm(false)}
+          onConfirm={confirmDiscard}
+        />
       )}
     </div>
   )
-}
+})
 
 export default function Submit() {
   const { jobs, sites, submitProof } = useApp()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [selectedJobId, setSelectedJobId] = useState(null)
+  const [showExitDiscardConfirm, setShowExitDiscardConfirm] = useState(false)
+  const formRef = useRef(null)
 
   const myJobs = jobs.filter(
     (j) => ACTIONABLE_STATUSES.includes(j.status) && (user?.role === 'admin' || j.operativeId === user?.operativeId)
@@ -327,12 +329,20 @@ export default function Submit() {
     setSelectedJobId(null)
   }
 
-  const handleExit = () => {
+  const performExit = () => {
     if (user?.role === 'admin') {
       navigate('/dashboard')
     } else {
       logout()
       navigate('/login', { replace: true })
+    }
+  }
+
+  const handleExit = () => {
+    if (selectedJob && formRef.current?.isDirty()) {
+      setShowExitDiscardConfirm(true)
+    } else {
+      performExit()
     }
   }
 
@@ -370,6 +380,7 @@ export default function Submit() {
         <div className="flex-1 overflow-y-auto sm:max-h-[70vh] sm:min-h-[70vh]">
           {selectedJob ? (
             <SubmissionForm
+              ref={formRef}
               job={selectedJob}
               site={selectedSite}
               onCancel={() => setSelectedJobId(null)}
@@ -380,6 +391,21 @@ export default function Submit() {
           )}
         </div>
       </div>
+
+      {showExitDiscardConfirm && (
+        <ConfirmDialog
+          title="Discard changes?"
+          body="You have unsaved changes on this job. If you leave now, they'll be lost."
+          cancelLabel="Keep editing"
+          confirmLabel="Discard"
+          confirmClassName="bg-red-600"
+          onCancel={() => setShowExitDiscardConfirm(false)}
+          onConfirm={() => {
+            setShowExitDiscardConfirm(false)
+            performExit()
+          }}
+        />
+      )}
     </div>
   )
 }
