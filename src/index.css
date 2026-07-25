@@ -8,6 +8,18 @@ html {
   font-family: var(--font-sans);
 }
 
+/* iOS Safari zooms the page in when focusing a text input/select/textarea
+   smaller than 16px, and — since this is a client-side SPA with no full page
+   reload — that zoom persists across route changes (e.g. Login -> Submit)
+   until manually pinched back out. Force 16px on mobile to prevent it. */
+@media (max-width: 639px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 @media print {
   .no-print {
     display: none !important;

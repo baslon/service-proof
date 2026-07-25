@@ -87,7 +87,29 @@ export default function Report() {
 
         <section className="border-b border-slate-200 py-6">
           <h3 className="text-base font-semibold text-slate-900">Completed &amp; evidenced jobs</h3>
-          <div className="mt-4 overflow-x-auto">
+
+          {/* Mobile: card list */}
+          <div className="mt-4 space-y-3 md:hidden print:hidden">
+            {evidencedJobs.map((j) => (
+              <div key={j.id} className="rounded-lg border border-slate-200 p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-900">{j.id}</span>
+                  <span className="text-xs text-slate-400">{j.submittedTime?.replace('T', ' ') || '—'}</span>
+                </div>
+                <p className="mt-1 text-sm text-slate-700">{j.taskType}</p>
+                <p className="text-xs text-slate-500">{siteName(j.siteId)}</p>
+                <p className="mt-1 text-xs text-slate-400">{operativeName(j.operativeId)}</p>
+              </div>
+            ))}
+            {evidencedJobs.length === 0 && (
+              <p className="rounded-lg border border-dashed border-slate-300 py-6 text-center text-sm text-slate-400">
+                No evidenced jobs in this scope yet.
+              </p>
+            )}
+          </div>
+
+          {/* Desktop / print: table */}
+          <div className="mt-4 hidden overflow-x-auto md:block print:block">
             <table className="min-w-full divide-y divide-slate-200">
               <thead>
                 <tr>
