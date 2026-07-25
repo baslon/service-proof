@@ -55,6 +55,7 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
   const [photos, setPhotos] = useState(job.photos || [])
   const [notes, setNotes] = useState(job.notes || '')
   const [error, setError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
   const fileInputRef = useRef(null)
 
   const slotsLeft = job.photosRequired - photos.length
@@ -81,6 +82,17 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
       return
     }
     setError('')
+    // Marking a job Completed locks it — it can no longer be edited or
+    // resubmitted afterward, so make sure that's clearly understood first.
+    if (completionStatus === 'Completed') {
+      setShowConfirm(true)
+    } else {
+      onSubmit({ completionStatus, photos, notes })
+    }
+  }
+
+  const confirmSubmit = () => {
+    setShowConfirm(false)
     onSubmit({ completionStatus, photos, notes })
   }
 
@@ -189,6 +201,41 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
           Submit proof
         </button>
       </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-6">
+          <div className="w-full max-w-xs rounded-2xl bg-white p-5 text-center shadow-2xl">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.63-1.516 2.63H3.72c-1.347 0-2.189-1.463-1.516-2.63L8.485 2.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 8a1 1 0 100-2 1 1 0 000 2z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <h3 className="mt-3 text-base font-semibold text-slate-900">Submit as Completed?</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              This marks the job as <strong>Completed &amp; Evidenced</strong>. Once submitted, you won&apos;t be
+              able to edit or resubmit it &mdash; this action is final.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSubmit}
+                className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white"
+              >
+                Yes, submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

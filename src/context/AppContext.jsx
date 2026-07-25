@@ -51,6 +51,13 @@ function reducer(state, action) {
 
     case 'SUBMIT_PROOF': {
       const { jobId, completionStatus, photos, notes } = action.payload
+      const target = state.jobs.find((j) => j.id === jobId)
+      // Once a job is Completed & Evidenced it's locked — evidence that can be
+      // silently rewritten after the fact isn't proof of anything. Corrections
+      // past this point go through an admin (Edit Job), not a re-submission.
+      if (!target || target.status === 'Completed & Evidenced') {
+        return state
+      }
       const statusMap = {
         Completed: 'Completed & Evidenced',
         'Completed with issue': 'At Risk',
