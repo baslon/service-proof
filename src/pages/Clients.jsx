@@ -15,7 +15,16 @@ export default function Clients() {
   const sitesForClient = (clientId) => sites.filter((s) => s.clientId === clientId)
   const jobsForClient = (clientId) => jobs.filter((j) => j.clientId === clientId)
   const activeJobsCount = jobs.filter((j) => j.status === 'Scheduled' || j.status === 'Awaiting Review').length
-  const avgCompletion = Math.round(clients.reduce((sum, c) => sum + c.completionRate, 0) / (clients.length || 1))
+
+  const completionRateFor = (clientId) => {
+    const cJobs = jobsForClient(clientId)
+    if (cJobs.length === 0) return 0
+    const evidenced = cJobs.filter((j) => j.status === 'Completed & Evidenced').length
+    return Math.round((evidenced / cJobs.length) * 100)
+  }
+
+  const totalEvidenced = jobs.filter((j) => j.status === 'Completed & Evidenced').length
+  const avgCompletion = jobs.length ? Math.round((totalEvidenced / jobs.length) * 100) : 0
 
   const filteredClients = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -93,12 +102,12 @@ export default function Clients() {
             <div className="mt-4">
               <div className="flex items-center justify-between text-xs text-slate-500">
                 <span>Completion rate</span>
-                <span className="font-semibold text-slate-700">{client.completionRate}%</span>
+                <span className="font-semibold text-slate-700">{completionRateFor(client.id)}%</span>
               </div>
               <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
-                  className={`h-full rounded-full ${client.completionRate >= 90 ? 'bg-emerald-500' : client.completionRate >= 75 ? 'bg-amber-500' : 'bg-red-500'}`}
-                  style={{ width: `${client.completionRate}%` }}
+                  className={`h-full rounded-full ${completionRateFor(client.id) >= 90 ? 'bg-emerald-500' : completionRateFor(client.id) >= 75 ? 'bg-amber-500' : 'bg-red-500'}`}
+                  style={{ width: `${completionRateFor(client.id)}%` }}
                 />
               </div>
             </div>
@@ -125,12 +134,12 @@ export default function Clients() {
             <div>
               <div className="flex items-center justify-between text-xs text-slate-500">
                 <span>Completion rate</span>
-                <span className="font-semibold text-slate-700">{activeClient.completionRate}%</span>
+                <span className="font-semibold text-slate-700">{completionRateFor(activeClient.id)}%</span>
               </div>
               <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
                 <div
                   className="h-full rounded-full bg-emerald-500"
-                  style={{ width: `${activeClient.completionRate}%` }}
+                  style={{ width: `${completionRateFor(activeClient.id)}%` }}
                 />
               </div>
             </div>

@@ -14,11 +14,18 @@ export default function EditJobModal({ job, onClose }) {
   })
   const [photos, setPhotos] = useState(job.photos || [])
   const [viewingPhoto, setViewingPhoto] = useState(null)
+  const [error, setError] = useState('')
   const fileInputRef = useRef(null)
 
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+  const set = (key) => (e) => {
+    setForm((f) => ({ ...f, [key]: e.target.value }))
+    setError('')
+  }
 
-  const removePhoto = (photoId) => setPhotos((prev) => prev.filter((p) => p.id !== photoId))
+  const removePhoto = (photoId) => {
+    setPhotos((prev) => prev.filter((p) => p.id !== photoId))
+    setError('')
+  }
 
   const addPhotos = (e) => {
     Array.from(e.target.files).forEach((file) => {
@@ -29,10 +36,17 @@ export default function EditJobModal({ job, onClose }) {
       reader.readAsDataURL(file)
     })
     e.target.value = ''
+    setError('')
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (form.status === 'Completed & Evidenced' && photos.length < job.photosRequired) {
+      setError(
+        `Cannot mark as Completed & Evidenced with only ${photos.length} of ${job.photosRequired} required photos.`
+      )
+      return
+    }
     updateJob(job.id, { ...form, photos, photosSubmitted: photos.length })
     onClose()
   }
@@ -127,6 +141,8 @@ export default function EditJobModal({ job, onClose }) {
         <FormField label="Notes">
           <textarea rows={3} className={inputClass} value={form.notes} onChange={set('notes')} />
         </FormField>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex items-center justify-between pt-2">
           <button

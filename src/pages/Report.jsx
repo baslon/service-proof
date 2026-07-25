@@ -15,12 +15,7 @@ export default function Report() {
   const evidencedJobs = scopedJobs.filter((j) => j.status === 'Completed & Evidenced')
   const exceptions = scopedJobs.filter((j) => j.status === 'Missing Evidence' || j.status === 'At Risk')
 
-  const completionRate = useMemo(() => {
-    if (clientId) {
-      return clients.find((c) => c.id === clientId)?.completionRate || 0
-    }
-    return Math.round(clients.reduce((sum, c) => sum + c.completionRate, 0) / (clients.length || 1))
-  }, [clientId, clients])
+  const completionRate = scopedJobs.length ? Math.round((evidencedJobs.length / scopedJobs.length) * 100) : 0
 
   const today = new Date().toISOString().slice(0, 10)
 

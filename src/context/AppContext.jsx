@@ -85,7 +85,6 @@ function reducer(state, action) {
     case 'ADD_CLIENT': {
       const client = {
         id: `CL-${String(state.clients.length + 1).padStart(2, '0')}`,
-        completionRate: 100,
         ...action.payload,
       }
       return { ...state, clients: [...state.clients, client] }

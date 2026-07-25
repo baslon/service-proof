@@ -2,8 +2,17 @@ import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
+import StatusBadge from '../components/StatusBadge'
 
 const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Unable to complete']
+const ACTIONABLE_STATUSES = ['Scheduled', 'Missing Evidence', 'At Risk']
+
+// A job that was already flagged carries a sensible starting point for the
+// operative reopening it, rather than always defaulting to "Completed".
+const DEFAULT_COMPLETION_STATUS = {
+  'Missing Evidence': 'Unable to complete',
+  'At Risk': 'Completed with issue',
+}
 
 function JobList({ jobs, sites, onSelect }) {
   return (
@@ -16,13 +25,19 @@ function JobList({ jobs, sites, onSelect }) {
             onClick={() => onSelect(job)}
             className="block w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-semibold text-slate-900">{job.id}</span>
-              <span className="text-xs text-slate-400">{job.scheduledTime?.replace('T', ' ')}</span>
+              {job.status === 'Scheduled' ? (
+                <span className="text-xs text-slate-400">{job.scheduledTime?.replace('T', ' ')}</span>
+              ) : (
+                <StatusBadge status={job.status} className="!px-2 !py-0.5" />
+              )}
             </div>
             <p className="mt-1 text-sm text-slate-700">{job.taskType}</p>
             <p className="text-xs text-slate-500">{site?.name}</p>
-            <p className="mt-2 text-xs font-medium text-indigo-600">{job.photosRequired} photo(s) required &rarr;</p>
+            <p className="mt-2 text-xs font-medium text-indigo-600">
+              {job.photosSubmitted}/{job.photosRequired} photo(s) &rarr;
+            </p>
           </button>
         )
       })}
@@ -36,9 +51,10 @@ function JobList({ jobs, sites, onSelect }) {
 }
 
 function SubmissionForm({ job, site, onCancel, onSubmit }) {
-  const [completionStatus, setCompletionStatus] = useState('Completed')
-  const [photos, setPhotos] = useState([])
-  const [notes, setNotes] = useState('')
+  const [completionStatus, setCompletionStatus] = useState(DEFAULT_COMPLETION_STATUS[job.status] || 'Completed')
+  const [photos, setPhotos] = useState(job.photos || [])
+  const [notes, setNotes] = useState(job.notes || '')
+  const [error, setError] = useState('')
   const fileInputRef = useRef(null)
 
   const slotsLeft = job.photosRequired - photos.length
@@ -56,6 +72,17 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
   }
 
   const removePhoto = (id) => setPhotos((prev) => prev.filter((p) => p.id !== id))
+
+  const handleSubmitClick = () => {
+    if (completionStatus === 'Completed' && photos.length < job.photosRequired) {
+      setError(
+        `You need ${job.photosRequired - photos.length} more photo(s) to mark this Completed, or choose "Completed with issue" / "Unable to complete" instead.`
+      )
+      return
+    }
+    setError('')
+    onSubmit({ completionStatus, photos, notes })
+  }
 
   return (
     <div className="px-4 py-4">
@@ -82,7 +109,10 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
                   name="completionStatus"
                   className="h-4 w-4 text-indigo-600"
                   checked={completionStatus === opt}
-                  onChange={() => setCompletionStatus(opt)}
+                  onChange={() => {
+                    setCompletionStatus(opt)
+                    setError('')
+                  }}
                 />
                 {opt}
               </label>
@@ -141,6 +171,8 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
         </div>
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
       </div>
 
       <div className="mt-6 flex gap-2">
@@ -151,7 +183,7 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
           Cancel
         </button>
         <button
-          onClick={() => onSubmit({ completionStatus, photos, notes })}
+          onClick={handleSubmitClick}
           className="flex-1 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white"
         >
           Submit proof
@@ -167,7 +199,9 @@ export default function Submit() {
   const navigate = useNavigate()
   const [selectedJobId, setSelectedJobId] = useState(null)
 
-  const pendingJobs = jobs.filter((j) => j.status === 'Scheduled')
+  const myJobs = jobs.filter(
+    (j) => ACTIONABLE_STATUSES.includes(j.status) && (user?.role === 'admin' || j.operativeId === user?.operativeId)
+  )
   const selectedJob = jobs.find((j) => j.id === selectedJobId) || null
   const selectedSite = selectedJob ? sites.find((s) => s.id === selectedJob.siteId) : null
 
@@ -212,7 +246,7 @@ export default function Submit() {
 
         <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
           <h1 className="text-base font-semibold text-slate-900">
-            {selectedJob ? 'Submit proof' : `Today's jobs (${pendingJobs.length})`}
+            {selectedJob ? 'Submit proof' : `Your jobs (${myJobs.length})`}
           </h1>
         </div>
 
@@ -225,7 +259,7 @@ export default function Submit() {
               onSubmit={handleSubmit}
             />
           ) : (
-            <JobList jobs={pendingJobs} sites={sites} onSelect={(j) => setSelectedJobId(j.id)} />
+            <JobList jobs={myJobs} sites={sites} onSelect={(j) => setSelectedJobId(j.id)} />
           )}
         </div>
       </div>

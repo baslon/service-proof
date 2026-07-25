@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
     if (!match) {
       throw new Error('Incorrect username or password.')
     }
-    const session = { id: match.id, name: match.name, role: match.role }
+    const session = { id: match.id, name: match.name, role: match.role, operativeId: match.operativeId }
     setUser(session)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
     return session
