@@ -61,7 +61,7 @@ function reducer(state, action) {
       const statusMap = {
         Completed: 'Completed & Evidenced',
         'Completed with issue': 'At Risk',
-        'Unable to complete': 'Missing Evidence',
+        Incomplete: 'Missing Evidence',
       }
       return {
         ...state,

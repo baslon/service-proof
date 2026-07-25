@@ -4,13 +4,13 @@ import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 
-const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Unable to complete']
+const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Incomplete']
 const ACTIONABLE_STATUSES = ['Scheduled', 'Missing Evidence', 'At Risk']
 
 // A job that was already flagged carries a sensible starting point for the
 // operative reopening it, rather than always defaulting to "Completed".
 const DEFAULT_COMPLETION_STATUS = {
-  'Missing Evidence': 'Unable to complete',
+  'Missing Evidence': 'Incomplete',
   'At Risk': 'Completed with issue',
 }
 
@@ -77,7 +77,7 @@ function SubmissionForm({ job, site, onCancel, onSubmit }) {
   const handleSubmitClick = () => {
     if (completionStatus === 'Completed' && photos.length < job.photosRequired) {
       setError(
-        `You need ${job.photosRequired - photos.length} more photo(s) to mark this Completed, or choose "Completed with issue" / "Unable to complete" instead.`
+        `You need ${job.photosRequired - photos.length} more photo(s) to mark this Completed, or choose "Completed with issue" / "Incomplete" instead.`
       )
       return
     }
