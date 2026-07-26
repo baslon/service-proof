@@ -207,7 +207,7 @@ export default function Landing() {
 
       <section id="pricing" className="bg-slate-900 py-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white">Run a 6-week pilot on us</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Run a 4-week pilot on us</h2>
           <p className="mt-4 text-slate-300">
             Pick two sites. We'll get your operatives submitting evidence within a day, and your first client
             report out within a week. No contract required to trial it.

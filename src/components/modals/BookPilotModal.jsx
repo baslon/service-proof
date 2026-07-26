@@ -52,7 +52,7 @@ export default function BookPilotModal({ onClose }) {
     <Modal open onClose={onClose} title="Book a pilot" centered>
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-slate-500">
-          Tell us a bit about your team and we'll set up a free 6-week pilot on two sites.
+          Tell us a bit about your team and we'll set up a free 4-week pilot on two sites.
         </p>
 
         <FormField label="Full name">
