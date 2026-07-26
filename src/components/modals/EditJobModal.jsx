@@ -10,6 +10,7 @@ export default function EditJobModal({ job, onClose }) {
     status: job.status,
     operativeId: job.operativeId,
     scheduledTime: job.scheduledTime,
+    instructions: job.instructions || '',
     notes: job.notes || '',
   })
   const [photos, setPhotos] = useState(job.photos || [])
@@ -135,6 +136,16 @@ export default function EditJobModal({ job, onClose }) {
             className={inputClass}
             value={form.scheduledTime}
             onChange={set('scheduledTime')}
+          />
+        </FormField>
+
+        <FormField label="Instructions for the operative">
+          <textarea
+            rows={3}
+            className={inputClass}
+            placeholder="e.g. which products to use, access quirks, areas to avoid..."
+            value={form.instructions}
+            onChange={set('instructions')}
           />
         </FormField>
 

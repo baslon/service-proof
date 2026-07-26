@@ -15,6 +15,7 @@ export default function ScheduleJobModal({ onClose }) {
     area: '',
     scheduledTime: '',
     photosRequired: 6,
+    instructions: '',
     notes: '',
   })
 
@@ -111,6 +112,16 @@ export default function ScheduleJobModal({ onClose }) {
 
         <FormField label="Photos required">
           <input type="number" min={0} className={inputClass} value={form.photosRequired} onChange={set('photosRequired')} />
+        </FormField>
+
+        <FormField label="Instructions for the operative">
+          <textarea
+            rows={3}
+            className={inputClass}
+            placeholder="e.g. which products to use, access quirks, areas to avoid..."
+            value={form.instructions}
+            onChange={set('instructions')}
+          />
         </FormField>
 
         <FormField label="Notes">

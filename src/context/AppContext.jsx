@@ -33,6 +33,7 @@ function reducer(state, action) {
         submittedTime: null,
         status: 'Incomplete',
         notes: '',
+        instructions: '',
         ...action.payload,
       }
       return { ...state, jobs: [job, ...state.jobs] }
