@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { inputClass } from '../components/FormField'
 
@@ -48,12 +48,12 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2" title="Back to home page">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
             SP
           </div>
           <span className="text-base font-semibold text-slate-900">ServiceProof</span>
-        </div>
+        </Link>
 
         <h1 className="mt-6 text-xl font-bold text-slate-900">Sign in</h1>
         <p className="mt-1 text-sm text-slate-500">Manager and operative access.</p>
