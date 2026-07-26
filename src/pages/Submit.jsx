@@ -86,7 +86,11 @@ function JobList({ jobs, sites, onSelect }) {
 }
 
 const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel, onSubmit }, ref) {
-  const initialCompletionStatus = DEFAULT_COMPLETION_STATUS[job.status] || 'Completed'
+  // Fresh (Assigned) jobs start with no outcome pre-selected — the operative
+  // must actively answer "how did this job go?" rather than the app assuming.
+  // Re-entries into already-flagged jobs still carry their previous outcome
+  // forward, since that's the operative's own prior answer, not an assumption.
+  const initialCompletionStatus = DEFAULT_COMPLETION_STATUS[job.status] || ''
   const initialNotes = job.notes || ''
   const initialPhotosCount = (job.photos || []).length
 
@@ -137,6 +141,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
   const removePhoto = (id) => setPhotos((prev) => prev.filter((p) => p.id !== id))
 
   const handleSubmitClick = () => {
+    if (!completionStatus) return
     if (completionStatus === 'Completed' && photos.length < job.photosRequired) {
       setError(
         `You need ${job.photosRequired - photos.length} more photo(s) to mark this Completed, or choose "Completed with issue" / "Unable to complete" instead.`
@@ -173,7 +178,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
 
       <div className="mt-4 space-y-4">
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">Completion status</p>
+          <p className="mb-2 text-sm font-medium text-slate-700">How did this job go?</p>
           <div className="space-y-2">
             {COMPLETION_OPTIONS.map((opt) => (
               <label
@@ -241,7 +246,10 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
 
         <div>
           <p className="mb-2 text-sm font-medium text-slate-700">
-            Notes{completionStatus !== 'Completed' && <span className="text-red-500"> (required)</span>}
+            Notes
+            {completionStatus && completionStatus !== 'Completed' && (
+              <span className="text-red-500"> (required)</span>
+            )}
           </p>
           <textarea
             rows={3}
@@ -251,9 +259,9 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
               setError('')
             }}
             placeholder={
-              completionStatus === 'Completed'
-                ? 'Optional notes about this job...'
-                : 'Provide a progress update note'
+              completionStatus && completionStatus !== 'Completed'
+                ? 'Provide a progress update note'
+                : 'Optional notes about this job...'
             }
             className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
@@ -271,7 +279,8 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
         </button>
         <button
           onClick={handleSubmitClick}
-          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${
+          disabled={!completionStatus}
+          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 ${
             completionStatus === 'Unable to complete' ? 'bg-slate-600' : 'bg-indigo-600'
           }`}
         >
