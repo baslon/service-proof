@@ -4,7 +4,7 @@ import ConfirmDialog from '../ConfirmDialog'
 import FormField, { inputClass } from '../FormField'
 import { useApp } from '../../context/AppContext'
 import { JOB_STATUSES } from '../../context/mockData'
-import { formatTime } from '../../utils/time'
+import { formatTime, formatDateTime } from '../../utils/time'
 
 const initialFormFor = (job) => ({
   status: job.status,
@@ -219,7 +219,7 @@ export default function EditJobModal({ job, onClose }) {
             className="max-h-full max-w-full rounded-lg shadow-2xl"
           />
           {viewingPhoto.capturedAt && (
-            <p className="text-sm font-medium text-white">Captured {formatTime(viewingPhoto.capturedAt)}</p>
+            <p className="text-sm font-medium text-white">Captured {formatDateTime(viewingPhoto.capturedAt)}</p>
           )}
         </div>
       )}

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { useApp } from '../context/AppContext'
-import { formatTime } from '../utils/time'
+import { formatTime, formatDateTime, isSameDay } from '../utils/time'
 
 export default function Report() {
   const { clients, sites, jobs, operatives } = useApp()
@@ -14,12 +14,16 @@ export default function Report() {
   // Shows the spread of when evidence was actually captured, not just when
   // the job record was saved — a single submission time can't show whether
   // photos were taken minutes apart on-site or all at once after the fact.
+  // Re-opened/resubmitted jobs can carry photos from an earlier day alongside
+  // fresh ones, so the range is date-qualified whenever it crosses a day.
   const photoTimeRange = (job) => {
     const times = (job.photos || []).map((p) => p.capturedAt).filter(Boolean).sort()
     if (times.length === 0) return null
-    const first = formatTime(times[0])
-    const last = formatTime(times[times.length - 1])
-    return first === last ? first : `${first}–${last}`
+    const first = times[0]
+    const last = times[times.length - 1]
+    if (first === last) return formatTime(first)
+    const format = isSameDay(first, last) ? formatTime : formatDateTime
+    return `${format(first)} – ${format(last)}`
   }
 
   const scopedJobs = useMemo(() => (clientId ? jobs.filter((j) => j.clientId === clientId) : jobs), [jobs, clientId])
