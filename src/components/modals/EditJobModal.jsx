@@ -4,6 +4,7 @@ import ConfirmDialog from '../ConfirmDialog'
 import FormField, { inputClass } from '../FormField'
 import { useApp } from '../../context/AppContext'
 import { JOB_STATUSES } from '../../context/mockData'
+import { formatTime } from '../../utils/time'
 
 const initialFormFor = (job) => ({
   status: job.status,
@@ -50,7 +51,10 @@ export default function EditJobModal({ job, onClose }) {
     Array.from(e.target.files).forEach((file) => {
       const reader = new FileReader()
       reader.onload = () => {
-        setPhotos((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, dataUrl: reader.result }])
+        setPhotos((prev) => [
+          ...prev,
+          { id: `${Date.now()}-${Math.random()}`, dataUrl: reader.result, capturedAt: new Date().toISOString() },
+        ])
       }
       reader.readAsDataURL(file)
     })
@@ -93,7 +97,7 @@ export default function EditJobModal({ job, onClose }) {
               <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setViewingPhoto(p.dataUrl)}
+                  onClick={() => setViewingPhoto(p)}
                   className="h-full w-full transition hover:ring-2 hover:ring-indigo-400"
                 >
                   <img src={p.dataUrl} alt="Evidence" className="h-full w-full object-cover" />
@@ -106,6 +110,11 @@ export default function EditJobModal({ job, onClose }) {
                 >
                   &times;
                 </button>
+                {p.capturedAt && (
+                  <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    {formatTime(p.capturedAt)}
+                  </span>
+                )}
               </div>
             ))}
             <button
@@ -201,10 +210,17 @@ export default function EditJobModal({ job, onClose }) {
 
       {viewingPhoto && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-6"
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-slate-900/80 p-6"
           onClick={() => setViewingPhoto(null)}
         >
-          <img src={viewingPhoto} alt="Evidence full size" className="max-h-full max-w-full rounded-lg shadow-2xl" />
+          <img
+            src={viewingPhoto.dataUrl}
+            alt="Evidence full size"
+            className="max-h-full max-w-full rounded-lg shadow-2xl"
+          />
+          {viewingPhoto.capturedAt && (
+            <p className="text-sm font-medium text-white">Captured {formatTime(viewingPhoto.capturedAt)}</p>
+          )}
         </div>
       )}
 

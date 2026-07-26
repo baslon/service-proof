@@ -134,10 +134,14 @@ export const SITES = [
   },
 ]
 
-function seedPhotos(count, hex) {
+// Spaces seeded photos a few minutes apart, ending at submittedTime — mirrors
+// how real evidence trickles in over a job rather than landing in one instant.
+function seedPhotos(count, hex, submittedTime) {
+  const end = new Date(submittedTime).getTime()
   return Array.from({ length: count }, (_, i) => ({
     id: `seed-${hex}-${i}`,
     dataUrl: `https://placehold.co/400x300/${hex}/ffffff?text=Evidence+${i + 1}`,
+    capturedAt: new Date(end - (count - 1 - i) * 4 * 60 * 1000).toISOString(),
   }))
 }
 
@@ -154,7 +158,7 @@ export const INITIAL_JOBS = [
     operativeId: 'OP-01',
     photosRequired: 6,
     photosSubmitted: 6,
-    photos: seedPhotos(6, '10b981'),
+    photos: seedPhotos(6, '10b981', '2026-07-24T07:12'),
     submittedTime: '2026-07-24T07:12',
     status: 'Completed & Evidenced',
     notes: 'All areas cleaned to standard, no issues.',
@@ -171,7 +175,7 @@ export const INITIAL_JOBS = [
     operativeId: 'OP-02',
     photosRequired: 6,
     photosSubmitted: 1,
-    photos: seedPhotos(1, 'f59e0b'),
+    photos: seedPhotos(1, 'f59e0b', '2026-07-24T06:50'),
     submittedTime: '2026-07-24T06:50',
     status: 'Missing Evidence',
     notes: 'Only one photo uploaded, operative reported app connectivity issue.',
@@ -188,7 +192,7 @@ export const INITIAL_JOBS = [
     operativeId: 'OP-03',
     photosRequired: 6,
     photosSubmitted: 2,
-    photos: seedPhotos(2, 'ef4444'),
+    photos: seedPhotos(2, 'ef4444', '2026-07-23T19:40'),
     submittedTime: '2026-07-23T19:40',
     status: 'At Risk',
     notes: 'Operative left site early due to reported illness, remaining floors not covered.',
@@ -222,7 +226,7 @@ export const INITIAL_JOBS = [
     operativeId: 'OP-05',
     photosRequired: 6,
     photosSubmitted: 6,
-    photos: seedPhotos(6, '3b82f6'),
+    photos: seedPhotos(6, '3b82f6', '2026-07-24T08:05'),
     submittedTime: '2026-07-24T08:05',
     status: 'Completed & Evidenced',
     notes: 'Full evidence submitted, all treatment rooms confirmed clean.',
@@ -239,7 +243,7 @@ export const INITIAL_JOBS = [
     operativeId: 'OP-06',
     photosRequired: 6,
     photosSubmitted: 6,
-    photos: seedPhotos(6, '10b981'),
+    photos: seedPhotos(6, '10b981', '2026-07-24T07:15'),
     submittedTime: '2026-07-24T07:15',
     status: 'Completed & Evidenced',
     notes: 'Clean completed, waiting room stock replenished.',
@@ -256,7 +260,7 @@ export const INITIAL_JOBS = [
     operativeId: 'OP-01',
     photosRequired: 6,
     photosSubmitted: 2,
-    photos: seedPhotos(2, 'f59e0b'),
+    photos: seedPhotos(2, 'f59e0b', '2026-07-23T18:10'),
     submittedTime: '2026-07-23T18:10',
     status: 'Missing Evidence',
     notes: 'Two photos missing for Year 3-6 block, operative to resubmit.',

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { useApp } from '../context/AppContext'
+import { formatTime } from '../utils/time'
 
 export default function Report() {
   const { clients, sites, jobs, operatives } = useApp()
@@ -9,6 +10,17 @@ export default function Report() {
   const clientName = (id) => clients.find((c) => c.id === id)?.name || 'Unknown client'
   const siteName = (id) => sites.find((s) => s.id === id)?.name || 'Unknown site'
   const operativeName = (id) => operatives.find((o) => o.id === id)?.name || 'Unassigned'
+
+  // Shows the spread of when evidence was actually captured, not just when
+  // the job record was saved — a single submission time can't show whether
+  // photos were taken minutes apart on-site or all at once after the fact.
+  const photoTimeRange = (job) => {
+    const times = (job.photos || []).map((p) => p.capturedAt).filter(Boolean).sort()
+    if (times.length === 0) return null
+    const first = formatTime(times[0])
+    const last = formatTime(times[times.length - 1])
+    return first === last ? first : `${first}–${last}`
+  }
 
   const scopedJobs = useMemo(() => (clientId ? jobs.filter((j) => j.clientId === clientId) : jobs), [jobs, clientId])
 
@@ -94,6 +106,7 @@ export default function Report() {
                 <p className="mt-1 text-sm text-slate-700">{j.taskType}</p>
                 <p className="text-xs text-slate-500">{siteName(j.siteId)}</p>
                 <p className="mt-1 text-xs text-slate-400">{operativeName(j.operativeId)}</p>
+                <p className="mt-1 text-xs text-slate-400">Photos captured {photoTimeRange(j) || '—'}</p>
               </div>
             ))}
             {evidencedJobs.length === 0 && (
@@ -108,7 +121,7 @@ export default function Report() {
             <table className="min-w-full divide-y divide-slate-200">
               <thead>
                 <tr>
-                  {['Job', 'Site', 'Task', 'Operative', 'Submitted'].map((h) => (
+                  {['Job', 'Site', 'Task', 'Operative', 'Photos captured', 'Submitted'].map((h) => (
                     <th key={h} className="whitespace-nowrap px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                       {h}
                     </th>
@@ -122,12 +135,13 @@ export default function Report() {
                     <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{siteName(j.siteId)}</td>
                     <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{j.taskType}</td>
                     <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{operativeName(j.operativeId)}</td>
+                    <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{photoTimeRange(j) || '—'}</td>
                     <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{j.submittedTime?.replace('T', ' ') || '—'}</td>
                   </tr>
                 ))}
                 {evidencedJobs.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-3 py-6 text-center text-sm text-slate-400">
+                    <td colSpan={6} className="px-3 py-6 text-center text-sm text-slate-400">
                       No evidenced jobs in this scope yet.
                     </td>
                   </tr>

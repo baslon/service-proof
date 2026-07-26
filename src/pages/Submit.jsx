@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { formatTime } from '../utils/time'
 
 const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Unable to complete']
 const ACTIONABLE_STATUSES = ['Incomplete', 'Missing Evidence', 'At Risk']
@@ -98,7 +99,10 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
     files.forEach((file) => {
       const reader = new FileReader()
       reader.onload = () => {
-        setPhotos((prev) => [...prev, { id: `${Date.now()}-${Math.random()}`, dataUrl: reader.result }])
+        setPhotos((prev) => [
+          ...prev,
+          { id: `${Date.now()}-${Math.random()}`, dataUrl: reader.result, capturedAt: new Date().toISOString() },
+        ])
       }
       reader.readAsDataURL(file)
     })
@@ -205,6 +209,11 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
                   >
                     &times;
                   </button>
+                  {p.capturedAt && (
+                    <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                      {formatTime(p.capturedAt)}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
