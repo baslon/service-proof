@@ -39,8 +39,15 @@ export default function Dashboard() {
     [sites, clientFilter]
   )
 
+  // "Incomplete / Pending" groups two statuses, so it can't be an exact match.
+  const matchesStatus = (job) => {
+    if (!statusFilter) return true
+    const card = SUMMARY_CARDS.find((c) => c.label === statusFilter)
+    return card ? card.match(job) : job.status === statusFilter
+  }
+
   const filteredJobs = jobs.filter((j) => {
-    if (statusFilter && j.status !== statusFilter) return false
+    if (!matchesStatus(j)) return false
     if (clientFilter && j.clientId !== clientFilter) return false
     if (siteFilter && j.siteId !== siteFilter) return false
     return true

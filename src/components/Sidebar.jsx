@@ -11,9 +11,12 @@ const NAV_LINKS = [
 
 const STATUS_FILTERS = [
   { label: 'All jobs', value: '' },
-  { label: 'Evidenced', value: 'Completed & Evidenced' },
+  { label: 'Completed & Evidenced', value: 'Completed & Evidenced' },
   { label: 'Missing Evidence', value: 'Missing Evidence' },
   { label: 'At Risk', value: 'At Risk' },
+  // Multi-status filter: mirrors the "Incomplete / Pending" summary card,
+  // which groups fresh Assigned jobs with those awaiting admin review.
+  { label: 'Incomplete / Pending', value: 'Incomplete / Pending' },
 ]
 
 function Icon({ name, className }) {
@@ -50,6 +53,7 @@ export default function Sidebar({ open, onClose }) {
     'Completed & Evidenced': jobs.filter((j) => j.status === 'Completed & Evidenced').length,
     'Missing Evidence': jobs.filter((j) => j.status === 'Missing Evidence').length,
     'At Risk': jobs.filter((j) => j.status === 'At Risk').length,
+    'Incomplete / Pending': jobs.filter((j) => j.status === 'Incomplete' || j.status === 'Awaiting Review').length,
   }
 
   return (
