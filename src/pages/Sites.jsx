@@ -7,7 +7,7 @@ import AddSiteModal from '../components/modals/AddSiteModal'
 import { useApp } from '../context/AppContext'
 
 export default function Sites() {
-  const { clients, sites, jobs } = useApp()
+  const { clients, sites, jobs, deleteSite } = useApp()
   const [search, setSearch] = useState('')
   const [clientFilter, setClientFilter] = useState('')
   const [activeSite, setActiveSite] = useState(null)
@@ -172,6 +172,18 @@ export default function Sites() {
             >
               View jobs for this site
             </Link>
+
+            <button
+              onClick={() => {
+                if (confirm(`Delete site ${activeSite.name}? This cannot be undone.`)) {
+                  deleteSite(activeSite.id)
+                  setActiveSite(null)
+                }
+              }}
+              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            >
+              Delete site
+            </button>
           </div>
         )}
       </SlideOver>

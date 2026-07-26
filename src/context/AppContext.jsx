@@ -12,12 +12,12 @@ function initialState() {
   }
 }
 
-function nextJobId(jobs) {
-  const max = jobs.reduce((acc, j) => {
-    const n = parseInt(j.id.replace('SP-', ''), 10)
+function nextId(items, prefix, padLength) {
+  const max = items.reduce((acc, item) => {
+    const n = parseInt(item.id.slice(prefix.length), 10)
     return Number.isFinite(n) && n > acc ? n : acc
   }, 0)
-  return `SP-${String(max + 1).padStart(4, '0')}`
+  return `${prefix}${String(max + 1).padStart(padLength, '0')}`
 }
 
 function reducer(state, action) {
@@ -27,7 +27,7 @@ function reducer(state, action) {
 
     case 'ADD_JOB': {
       const job = {
-        id: nextJobId(state.jobs),
+        id: nextId(state.jobs, 'SP-', 4),
         photosSubmitted: 0,
         photos: [],
         submittedTime: null,
@@ -83,19 +83,27 @@ function reducer(state, action) {
 
     case 'ADD_SITE': {
       const site = {
-        id: `ST-${String(state.sites.length + 1).padStart(2, '0')}`,
+        id: nextId(state.sites, 'ST-', 2),
         addedDate: new Date().toISOString().slice(0, 10),
         ...action.payload,
       }
       return { ...state, sites: [...state.sites, site] }
     }
 
+    case 'DELETE_SITE': {
+      return { ...state, sites: state.sites.filter((s) => s.id !== action.payload.id) }
+    }
+
     case 'ADD_CLIENT': {
       const client = {
-        id: `CL-${String(state.clients.length + 1).padStart(2, '0')}`,
+        id: nextId(state.clients, 'CL-', 2),
         ...action.payload,
       }
       return { ...state, clients: [...state.clients, client] }
+    }
+
+    case 'DELETE_CLIENT': {
+      return { ...state, clients: state.clients.filter((c) => c.id !== action.payload.id) }
     }
 
     default:
@@ -115,7 +123,9 @@ export function AppProvider({ children }) {
     []
   )
   const addSite = useCallback((payload) => dispatch({ type: 'ADD_SITE', payload }), [])
+  const deleteSite = useCallback((id) => dispatch({ type: 'DELETE_SITE', payload: { id } }), [])
   const addClient = useCallback((payload) => dispatch({ type: 'ADD_CLIENT', payload }), [])
+  const deleteClient = useCallback((id) => dispatch({ type: 'DELETE_CLIENT', payload: { id } }), [])
   const resetDemo = useCallback(() => dispatch({ type: 'RESET_DEMO' }), [])
 
   const value = useMemo(
@@ -126,10 +136,12 @@ export function AppProvider({ children }) {
       deleteJob,
       submitProof,
       addSite,
+      deleteSite,
       addClient,
+      deleteClient,
       resetDemo,
     }),
-    [state, addJob, updateJob, deleteJob, submitProof, addSite, addClient, resetDemo]
+    [state, addJob, updateJob, deleteJob, submitProof, addSite, deleteSite, addClient, deleteClient, resetDemo]
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

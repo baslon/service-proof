@@ -5,16 +5,13 @@ import StatusBadge from '../components/StatusBadge'
 import EditJobModal from '../components/modals/EditJobModal'
 import ScheduleJobModal from '../components/modals/ScheduleJobModal'
 import { useApp } from '../context/AppContext'
+import { STATUS_TEXT_COLOR, isPendingStatus } from '../context/statusStyles'
 
 const SUMMARY_CARDS = [
-  { label: 'Completed & Evidenced', match: (j) => j.status === 'Completed & Evidenced', color: 'text-emerald-600' },
-  { label: 'Missing Evidence', match: (j) => j.status === 'Missing Evidence', color: 'text-amber-600' },
-  { label: 'At Risk', match: (j) => j.status === 'At Risk', color: 'text-red-600' },
-  {
-    label: 'Incomplete / Pending',
-    match: (j) => j.status === 'Incomplete' || j.status === 'Awaiting Review',
-    color: 'text-slate-600',
-  },
+  { label: 'Completed & Evidenced', match: (j) => j.status === 'Completed & Evidenced', color: STATUS_TEXT_COLOR['Completed & Evidenced'] },
+  { label: 'Missing Evidence', match: (j) => j.status === 'Missing Evidence', color: STATUS_TEXT_COLOR['Missing Evidence'] },
+  { label: 'At Risk', match: (j) => j.status === 'At Risk', color: STATUS_TEXT_COLOR['At Risk'] },
+  { label: 'Incomplete / Pending', match: isPendingStatus, color: STATUS_TEXT_COLOR.Incomplete },
 ]
 
 export default function Dashboard() {

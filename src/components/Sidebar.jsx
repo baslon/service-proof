@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
+import { isPendingStatus } from '../context/statusStyles'
 
 const NAV_LINKS = [
   { to: '/dashboard', label: 'Dashboard', icon: 'grid' },
@@ -53,7 +54,7 @@ export default function Sidebar({ open, onClose }) {
     'Completed & Evidenced': jobs.filter((j) => j.status === 'Completed & Evidenced').length,
     'Missing Evidence': jobs.filter((j) => j.status === 'Missing Evidence').length,
     'At Risk': jobs.filter((j) => j.status === 'At Risk').length,
-    'Incomplete / Pending': jobs.filter((j) => j.status === 'Incomplete' || j.status === 'Awaiting Review').length,
+    'Incomplete / Pending': jobs.filter(isPendingStatus).length,
   }
 
   return (

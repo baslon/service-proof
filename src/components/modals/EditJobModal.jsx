@@ -1,22 +1,40 @@
 import { useRef, useState } from 'react'
 import Modal from '../Modal'
+import ConfirmDialog from '../ConfirmDialog'
 import FormField, { inputClass } from '../FormField'
 import { useApp } from '../../context/AppContext'
 import { JOB_STATUSES } from '../../context/mockData'
 
+const initialFormFor = (job) => ({
+  status: job.status,
+  operativeId: job.operativeId,
+  scheduledTime: job.scheduledTime,
+  instructions: job.instructions || '',
+  notes: job.notes || '',
+})
+
 export default function EditJobModal({ job, onClose }) {
   const { operatives, updateJob, deleteJob } = useApp()
-  const [form, setForm] = useState({
-    status: job.status,
-    operativeId: job.operativeId,
-    scheduledTime: job.scheduledTime,
-    instructions: job.instructions || '',
-    notes: job.notes || '',
-  })
+  const initialForm = initialFormFor(job)
+  const initialPhotoIds = (job.photos || []).map((p) => p.id).join(',')
+  const [form, setForm] = useState(initialForm)
   const [photos, setPhotos] = useState(job.photos || [])
   const [viewingPhoto, setViewingPhoto] = useState(null)
   const [error, setError] = useState('')
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const fileInputRef = useRef(null)
+
+  const isDirty =
+    Object.keys(initialForm).some((key) => form[key] !== initialForm[key]) ||
+    photos.map((p) => p.id).join(',') !== initialPhotoIds
+
+  const attemptClose = () => {
+    if (isDirty) {
+      setShowDiscardConfirm(true)
+    } else {
+      onClose()
+    }
+  }
 
   const set = (key) => (e) => {
     setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -60,7 +78,7 @@ export default function EditJobModal({ job, onClose }) {
   }
 
   return (
-    <Modal open onClose={onClose} title={`Edit job ${job.id}`}>
+    <Modal open onClose={attemptClose} title={`Edit job ${job.id}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-slate-500">
           {job.taskType} &middot; {job.area}
@@ -166,7 +184,7 @@ export default function EditJobModal({ job, onClose }) {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={attemptClose}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               Cancel
@@ -188,6 +206,21 @@ export default function EditJobModal({ job, onClose }) {
         >
           <img src={viewingPhoto} alt="Evidence full size" className="max-h-full max-w-full rounded-lg shadow-2xl" />
         </div>
+      )}
+
+      {showDiscardConfirm && (
+        <ConfirmDialog
+          title="Discard changes?"
+          body="You have unsaved changes on this job. If you leave now, they'll be lost."
+          cancelLabel="Keep editing"
+          confirmLabel="Discard"
+          confirmClassName="bg-red-600"
+          onCancel={() => setShowDiscardConfirm(false)}
+          onConfirm={() => {
+            setShowDiscardConfirm(false)
+            onClose()
+          }}
+        />
       )}
     </Modal>
   )
