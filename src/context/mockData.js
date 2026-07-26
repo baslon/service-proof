@@ -224,8 +224,8 @@ export const INITIAL_JOBS = [
     photosSubmitted: 6,
     photos: seedPhotos(6, '3b82f6'),
     submittedTime: '2026-07-24T08:05',
-    status: 'Awaiting Review',
-    notes: 'Full evidence submitted, pending manager sign-off.',
+    status: 'Completed & Evidenced',
+    notes: 'Full evidence submitted, all treatment rooms confirmed clean.',
   },
   {
     id: 'SP-0046',
@@ -336,10 +336,4 @@ export const SECTORS = [
 
 export const ACCOUNT_MANAGERS = ['Priya Chandra', 'Owen Bradley', 'Sam Whitfield', 'Nadia Hussein']
 
-export const JOB_STATUSES = [
-  'Completed & Evidenced',
-  'Missing Evidence',
-  'At Risk',
-  'Incomplete',
-  'Awaiting Review',
-]
+export const JOB_STATUSES = ['Completed & Evidenced', 'Missing Evidence', 'At Risk', 'Incomplete']

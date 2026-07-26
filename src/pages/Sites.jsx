@@ -175,7 +175,11 @@ export default function Sites() {
 
             <button
               onClick={() => {
-                if (confirm(`Delete site ${activeSite.name}? This cannot be undone.`)) {
+                const dependentJobs = jobsForSite(activeSite.id).length
+                const warning = dependentJobs
+                  ? ` It has ${dependentJobs} job${dependentJobs === 1 ? '' : 's'} on record that will be orphaned.`
+                  : ''
+                if (confirm(`Delete site ${activeSite.name}?${warning} This cannot be undone.`)) {
                   deleteSite(activeSite.id)
                   setActiveSite(null)
                 }

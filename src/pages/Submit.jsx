@@ -66,6 +66,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
   const [error, setError] = useState('')
   const [showConfirm, setShowConfirm] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+  const [showEvidenceLossConfirm, setShowEvidenceLossConfirm] = useState(false)
   const fileInputRef = useRef(null)
 
   const isDirty =
@@ -127,6 +128,10 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
     // resubmitted afterward, so make sure that's clearly understood first.
     if (completionStatus === 'Completed') {
       setShowConfirm(true)
+    } else if (photos.length < initialPhotosCount) {
+      // Removing previously captured evidence on the "issue"/"unable" paths
+      // isn't blocked like it is for Completed, so flag it explicitly instead.
+      setShowEvidenceLossConfirm(true)
     } else {
       onSubmit({ completionStatus, photos, notes })
     }
@@ -134,6 +139,11 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
 
   const confirmSubmit = () => {
     setShowConfirm(false)
+    onSubmit({ completionStatus, photos, notes })
+  }
+
+  const confirmEvidenceLoss = () => {
+    setShowEvidenceLossConfirm(false)
     onSubmit({ completionStatus, photos, notes })
   }
 
@@ -287,6 +297,19 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
           confirmClassName="bg-red-600"
           onCancel={() => setShowDiscardConfirm(false)}
           onConfirm={confirmDiscard}
+        />
+      )}
+
+      {showEvidenceLossConfirm && (
+        <ConfirmDialog
+          tone="warning"
+          title="Remove existing evidence?"
+          body={`You're saving with ${photos.length} of the ${initialPhotosCount} photo(s) already on record for this job. The rest will be permanently removed.`}
+          cancelLabel="Keep editing"
+          confirmLabel="Save anyway"
+          confirmClassName="bg-red-600"
+          onCancel={() => setShowEvidenceLossConfirm(false)}
+          onConfirm={confirmEvidenceLoss}
         />
       )}
     </div>

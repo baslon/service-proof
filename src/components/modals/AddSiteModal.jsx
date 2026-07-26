@@ -14,11 +14,16 @@ export default function AddSiteModal({ onClose }) {
     phone: '',
     accessNotes: '',
   })
+  const [error, setError] = useState('')
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if (!form.clientId) {
+      setError('Add a client before adding a site — every site must belong to one.')
+      return
+    }
     addSite(form)
     onClose()
   }
@@ -31,12 +36,16 @@ export default function AddSiteModal({ onClose }) {
         </FormField>
 
         <FormField label="Client">
-          <select className={inputClass} value={form.clientId} onChange={set('clientId')}>
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
+          <select className={inputClass} value={form.clientId} onChange={set('clientId')} disabled={clients.length === 0}>
+            {clients.length === 0 ? (
+              <option value="">No clients yet — add a client first</option>
+            ) : (
+              clients.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))
+            )}
           </select>
         </FormField>
 
@@ -61,6 +70,8 @@ export default function AddSiteModal({ onClose }) {
           <textarea rows={3} className={inputClass} value={form.accessNotes} onChange={set('accessNotes')} />
         </FormField>
 
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         <div className="flex justify-end gap-2 pt-2">
           <button
             type="button"
@@ -71,7 +82,8 @@ export default function AddSiteModal({ onClose }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            disabled={clients.length === 0}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Add site
           </button>

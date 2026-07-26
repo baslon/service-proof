@@ -70,7 +70,7 @@ function reducer(state, action) {
           j.id === jobId
             ? {
                 ...j,
-                status: statusMap[completionStatus] || 'Awaiting Review',
+                status: statusMap[completionStatus] || target.status,
                 photos,
                 photosSubmitted: photos.length,
                 notes,

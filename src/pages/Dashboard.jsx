@@ -11,7 +11,7 @@ const SUMMARY_CARDS = [
   { label: 'Completed & Evidenced', match: (j) => j.status === 'Completed & Evidenced', color: STATUS_TEXT_COLOR['Completed & Evidenced'] },
   { label: 'Missing Evidence', match: (j) => j.status === 'Missing Evidence', color: STATUS_TEXT_COLOR['Missing Evidence'] },
   { label: 'At Risk', match: (j) => j.status === 'At Risk', color: STATUS_TEXT_COLOR['At Risk'] },
-  { label: 'Incomplete / Pending', match: isPendingStatus, color: STATUS_TEXT_COLOR.Incomplete },
+  { label: 'Incomplete', match: isPendingStatus, color: STATUS_TEXT_COLOR.Incomplete },
 ]
 
 export default function Dashboard() {
@@ -36,7 +36,6 @@ export default function Dashboard() {
     [sites, clientFilter]
   )
 
-  // "Incomplete / Pending" groups two statuses, so it can't be an exact match.
   const matchesStatus = (job) => {
     if (!statusFilter) return true
     const card = SUMMARY_CARDS.find((c) => c.label === statusFilter)

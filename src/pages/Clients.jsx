@@ -194,7 +194,13 @@ export default function Clients() {
 
             <button
               onClick={() => {
-                if (confirm(`Delete client ${activeClient.name}? This cannot be undone.`)) {
+                const dependentSites = sitesForClient(activeClient.id).length
+                const dependentJobs = jobsForClient(activeClient.id).length
+                const parts = []
+                if (dependentSites) parts.push(`${dependentSites} site${dependentSites === 1 ? '' : 's'}`)
+                if (dependentJobs) parts.push(`${dependentJobs} job${dependentJobs === 1 ? '' : 's'}`)
+                const warning = parts.length ? ` This will orphan ${parts.join(' and ')}.` : ''
+                if (confirm(`Delete client ${activeClient.name}?${warning} This cannot be undone.`)) {
                   deleteClient(activeClient.id)
                   setActiveClient(null)
                 }
