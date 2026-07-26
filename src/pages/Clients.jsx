@@ -29,6 +29,8 @@ export default function Clients() {
 
   const activeClientRate = activeClient ? completionRateFor(activeClient.id) : 0
   const activeClientSites = activeClient ? sitesForClient(activeClient.id) : []
+  const activeClientJobCount = activeClient ? jobsForClient(activeClient.id).length : 0
+  const activeClientCanDelete = activeClientSites.length === 0 && activeClientJobCount === 0
 
   const filteredClients = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -194,21 +196,24 @@ export default function Clients() {
 
             <button
               onClick={() => {
-                const dependentSites = sitesForClient(activeClient.id).length
-                const dependentJobs = jobsForClient(activeClient.id).length
-                const parts = []
-                if (dependentSites) parts.push(`${dependentSites} site${dependentSites === 1 ? '' : 's'}`)
-                if (dependentJobs) parts.push(`${dependentJobs} job${dependentJobs === 1 ? '' : 's'}`)
-                const warning = parts.length ? ` This will orphan ${parts.join(' and ')}.` : ''
-                if (confirm(`Delete client ${activeClient.name}?${warning} This cannot be undone.`)) {
+                if (!activeClientCanDelete) return
+                if (confirm(`Delete client ${activeClient.name}? This cannot be undone.`)) {
                   deleteClient(activeClient.id)
                   setActiveClient(null)
                 }
               }}
-              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              disabled={!activeClientCanDelete}
+              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
             >
               Delete client
             </button>
+            {!activeClientCanDelete && (
+              <p className="text-center text-xs text-slate-400">
+                Can&apos;t delete &mdash; this client still has {activeClientSites.length} site
+                {activeClientSites.length === 1 ? '' : 's'} and {activeClientJobCount} job
+                {activeClientJobCount === 1 ? '' : 's'}. Remove those first.
+              </p>
+            )}
           </div>
         )}
       </SlideOver>

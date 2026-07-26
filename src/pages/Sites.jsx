@@ -34,6 +34,8 @@ export default function Sites() {
   const totalMissing = jobs.filter((j) => j.status === 'Missing Evidence').length
   const totalAtRisk = jobs.filter((j) => j.status === 'At Risk').length
 
+  const activeSiteJobCount = activeSite ? jobsForSite(activeSite.id).length : 0
+
   const copyAccessNotes = (text) => {
     navigator.clipboard?.writeText(text)
     setCopied(true)
@@ -175,19 +177,24 @@ export default function Sites() {
 
             <button
               onClick={() => {
-                const dependentJobs = jobsForSite(activeSite.id).length
-                const warning = dependentJobs
-                  ? ` It has ${dependentJobs} job${dependentJobs === 1 ? '' : 's'} on record that will be orphaned.`
-                  : ''
-                if (confirm(`Delete site ${activeSite.name}?${warning} This cannot be undone.`)) {
+                if (activeSiteJobCount > 0) return
+                if (confirm(`Delete site ${activeSite.name}? This cannot be undone.`)) {
                   deleteSite(activeSite.id)
                   setActiveSite(null)
                 }
               }}
-              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              disabled={activeSiteJobCount > 0}
+              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
             >
               Delete site
             </button>
+            {activeSiteJobCount > 0 && (
+              <p className="text-center text-xs text-slate-400">
+                Can&apos;t delete &mdash; {activeSiteJobCount} job{activeSiteJobCount === 1 ? '' : 's'} still
+                reference{activeSiteJobCount === 1 ? 's' : ''} this site. Reassign or delete{' '}
+                {activeSiteJobCount === 1 ? 'it' : 'them'} first.
+              </p>
+            )}
           </div>
         )}
       </SlideOver>
