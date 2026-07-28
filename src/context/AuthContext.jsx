@@ -1,45 +1,65 @@
-import { createContext, useContext, useState, useCallback, useMemo } from 'react'
-import { MOCK_USERS } from './mockUsers'
+import { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react'
+import { supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext(null)
-const STORAGE_KEY = 'serviceproof_auth'
 
-function loadStoredUser() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
+// Supabase's own session only carries auth identity (id, email) — the
+// app-specific fields (role, org, which operative this is) live in our own
+// profiles table and have to be loaded separately after authenticating.
+async function loadProfile(authUser) {
+  if (!authUser) return null
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('organization_id, role, name, operative_id')
+    .eq('id', authUser.id)
+    .single()
+  if (error || !data) return null
+  return {
+    id: authUser.id,
+    name: data.name,
+    role: data.role,
+    operativeId: data.operative_id,
+    organizationId: data.organization_id,
   }
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(loadStoredUser)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // Mock implementation today: checks credentials against a local list and
-  // resolves instantly. Swapping in real auth later means replacing the body
-  // of this function with an API call (e.g. `await fetch('/api/login', ...)`)
-  // — everything that calls useAuth() keeps working unchanged, since login()
-  // stays async and either resolves with a session or throws.
-  const login = useCallback(async (username, password) => {
-    const match = MOCK_USERS.find(
-      (u) => u.username.toLowerCase() === username.trim().toLowerCase() && u.password === password
-    )
-    if (!match) {
-      throw new Error('Incorrect username or password.')
+  // onAuthStateChange fires immediately with the current session on
+  // subscribe, so it covers both the initial load and every later change
+  // (login, logout, token refresh) without a separate getSession() call.
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setUser(await loadProfile(session?.user ?? null))
+      setLoading(false)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const login = useCallback(async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      throw new Error('Incorrect email or password.')
     }
-    const session = { id: match.id, name: match.name, role: match.role, operativeId: match.operativeId }
-    setUser(session)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
-    return session
+    const profile = await loadProfile(data.user)
+    if (!profile) {
+      await supabase.auth.signOut()
+      throw new Error('No profile is set up for this account yet.')
+    }
+    setUser(profile)
+    return profile
   }, [])
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut()
     setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
   }, [])
 
-  const value = useMemo(() => ({ user, login, logout }), [user, login, logout])
+  const value = useMemo(() => ({ user, loading, login, logout }), [user, loading, login, logout])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

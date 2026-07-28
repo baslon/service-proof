@@ -41,8 +41,8 @@ export default function Sidebar({ open, onClose }) {
   const activeStatus = searchParams.get('status') || ''
   const onDashboard = location.pathname === '/dashboard'
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login', { replace: true })
     onClose?.()
   }

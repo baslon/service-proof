@@ -344,11 +344,11 @@ export default function Submit() {
     setSelectedJobId(null)
   }
 
-  const performExit = () => {
+  const performExit = async () => {
     if (user?.role === 'admin') {
       navigate('/dashboard')
     } else {
-      logout()
+      await logout()
       navigate('/login', { replace: true })
     }
   }
@@ -361,8 +361,8 @@ export default function Submit() {
     }
   }
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
+    await logout()
     navigate('/login', { replace: true })
   }
 

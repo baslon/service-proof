@@ -19,13 +19,17 @@ function resolveDestination(role, requestedPath) {
 }
 
 export default function Login() {
-  const { user, login } = useAuth()
+  const { user, loading, login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+
+  if (loading) {
+    return null
+  }
 
   if (user) {
     return <Navigate to={resolveDestination(user.role, location.state?.from?.pathname)} replace />
@@ -36,7 +40,7 @@ export default function Login() {
     setError('')
     setSubmitting(true)
     try {
-      const session = await login(username, password)
+      const session = await login(email, password)
       navigate(resolveDestination(session.role, location.state?.from?.pathname), { replace: true })
     } catch (err) {
       setError(err.message)
@@ -60,13 +64,14 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Username</span>
+            <span className="mb-1 block text-sm font-medium text-slate-700">Email</span>
             <input
+              type="email"
               className={inputClass}
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               autoFocus
-              autoComplete="username"
+              autoComplete="email"
             />
           </label>
           <label className="block">
@@ -90,16 +95,6 @@ export default function Login() {
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-
-        <div className="mt-6 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-          <p className="font-medium text-slate-600">Demo credentials</p>
-          <p className="mt-1">
-            Manager: <span className="font-mono">admin</span> / <span className="font-mono">admin123</span>
-          </p>
-          <p>
-            Operative: <span className="font-mono">operative</span> / <span className="font-mono">operative123</span>
-          </p>
-        </div>
       </div>
     </div>
   )
