@@ -36,7 +36,7 @@ export default function Sidebar({ open, onClose }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { jobs, resetDemo } = useApp()
+  const { jobs, refreshData } = useApp()
   const { user, logout } = useAuth()
   const activeStatus = searchParams.get('status') || ''
   const onDashboard = location.pathname === '/dashboard'
@@ -157,12 +157,12 @@ export default function Sidebar({ open, onClose }) {
           </Link>
           <button
             onClick={() => {
-              if (confirm('Reset all demo data back to the original mock state?')) resetDemo()
+              refreshData()
               onClose?.()
             }}
             className="flex w-full items-center justify-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200"
           >
-            Reset demo data
+            Refresh data
           </button>
         </div>
       </aside>

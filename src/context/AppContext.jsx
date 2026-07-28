@@ -1,16 +1,8 @@
-import { createContext, useContext, useReducer, useCallback, useMemo } from 'react'
-import { CLIENTS, SITES, INITIAL_JOBS, OPERATIVES } from './mockData'
+import { createContext, useContext, useCallback, useMemo, useRef, useState, useEffect } from 'react'
+import { supabase } from '../lib/supabaseClient'
+import { useAuth } from './AuthContext'
 
 const AppContext = createContext(null)
-
-function initialState() {
-  return {
-    clients: CLIENTS,
-    sites: SITES,
-    jobs: INITIAL_JOBS,
-    operatives: OPERATIVES,
-  }
-}
 
 function nextId(items, prefix, padLength) {
   const max = items.reduce((acc, item) => {
@@ -20,117 +12,285 @@ function nextId(items, prefix, padLength) {
   return `${prefix}${String(max + 1).padStart(padLength, '0')}`
 }
 
-function reducer(state, action) {
-  switch (action.type) {
-    case 'RESET_DEMO':
-      return initialState()
+// Every component in the app was built against display codes like "SP-0041"
+// as the job/client/site "id" — Supabase's real primary keys are UUIDs, with
+// the display code stored separately as display_id. Rather than touch every
+// component to juggle both, AppContext maps display_id -> "id" on the way
+// out, and keeps UUID lookup maps privately (via refs) for use on the way
+// back in, so nothing outside this file needs to know UUIDs exist at all.
+function mapClient(row) {
+  return {
+    id: row.display_id,
+    name: row.name,
+    sector: row.sector,
+    contactName: row.contact_name,
+    contactEmail: row.contact_email,
+    contactPhone: row.contact_phone,
+    accountManager: row.account_manager,
+    contractStartDate: row.contract_start_date,
+    notes: row.notes || '',
+  }
+}
 
-    case 'ADD_JOB': {
-      const job = {
-        id: nextId(state.jobs, 'SP-', 4),
-        photosSubmitted: 0,
-        photos: [],
-        submittedTime: null,
+function mapSite(row, clientDisplayIdByUuid) {
+  return {
+    id: row.display_id,
+    clientId: clientDisplayIdByUuid[row.client_id] || '',
+    name: row.name,
+    address: row.address,
+    postcode: row.postcode,
+    siteContact: row.site_contact,
+    phone: row.phone,
+    accessNotes: row.access_notes,
+    addedDate: row.added_date,
+  }
+}
+
+function mapOperative(row) {
+  return { id: row.id, name: row.name }
+}
+
+function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid) {
+  const photos = photosByJobUuid[row.id] || []
+  return {
+    id: row.display_id,
+    clientId: clientDisplayIdByUuid[row.client_id] || '',
+    siteId: siteDisplayIdByUuid[row.site_id] || '',
+    taskType: row.task_type,
+    area: row.area,
+    instructions: row.instructions || '',
+    recurrence: row.recurrence,
+    scheduledTime: row.scheduled_time ? row.scheduled_time.slice(0, 16) : '',
+    operativeId: row.operative_id,
+    photosRequired: row.photos_required,
+    photosSubmitted: photos.length,
+    photos,
+    submittedTime: row.submitted_time ? row.submitted_time.slice(0, 16) : null,
+    status: row.status,
+    notes: row.notes || '',
+  }
+}
+
+export function AppProvider({ children }) {
+  const { user } = useAuth()
+  const [state, setState] = useState({ clients: [], sites: [], jobs: [], operatives: [] })
+  const [loading, setLoading] = useState(true)
+  const clientUuidByDisplayIdRef = useRef({})
+  const siteUuidByDisplayIdRef = useRef({})
+
+  const fetchAll = useCallback(async () => {
+    if (!user) {
+      setState({ clients: [], sites: [], jobs: [], operatives: [] })
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+
+    const [clientsRes, sitesRes, jobsRes, operativesRes] = await Promise.all([
+      supabase.from('clients').select('*'),
+      supabase.from('sites').select('*'),
+      supabase.from('jobs').select('*').order('display_id', { ascending: false }),
+      supabase.from('operatives').select('*'),
+    ])
+
+    const clientRows = clientsRes.data || []
+    const siteRows = sitesRes.data || []
+    const jobRows = jobsRes.data || []
+    const operativeRows = operativesRes.data || []
+
+    const jobUuids = jobRows.map((j) => j.id)
+    const photosRes = jobUuids.length
+      ? await supabase.from('job_photos').select('*').in('job_id', jobUuids)
+      : { data: [] }
+    const photoRows = photosRes.data || []
+
+    const clientDisplayIdByUuid = Object.fromEntries(clientRows.map((c) => [c.id, c.display_id]))
+    const siteDisplayIdByUuid = Object.fromEntries(siteRows.map((s) => [s.id, s.display_id]))
+    clientUuidByDisplayIdRef.current = Object.fromEntries(clientRows.map((c) => [c.display_id, c.id]))
+    siteUuidByDisplayIdRef.current = Object.fromEntries(siteRows.map((s) => [s.display_id, s.id]))
+
+    const photosByJobUuid = {}
+    photoRows.forEach((p) => {
+      ;(photosByJobUuid[p.job_id] ||= []).push({ id: p.id, dataUrl: p.storage_url, capturedAt: p.captured_at })
+    })
+    Object.values(photosByJobUuid).forEach((arr) => arr.sort((a, b) => (a.capturedAt < b.capturedAt ? -1 : 1)))
+
+    setState({
+      clients: clientRows.map(mapClient),
+      sites: siteRows.map((s) => mapSite(s, clientDisplayIdByUuid)),
+      jobs: jobRows.map((j) => mapJob(j, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid)),
+      operatives: operativeRows.map(mapOperative),
+    })
+    setLoading(false)
+  }, [user])
+
+  useEffect(() => {
+    fetchAll()
+  }, [fetchAll])
+
+  const addJob = useCallback(
+    async (payload) => {
+      const { error } = await supabase.from('jobs').insert({
+        organization_id: user.organizationId,
+        display_id: nextId(state.jobs, 'SP-', 4),
+        client_id: clientUuidByDisplayIdRef.current[payload.clientId],
+        site_id: siteUuidByDisplayIdRef.current[payload.siteId],
+        task_type: payload.taskType,
+        area: payload.area,
+        instructions: payload.instructions || '',
+        recurrence: payload.recurrence,
+        scheduled_time: payload.scheduledTime,
+        operative_id: payload.operativeId,
+        photos_required: payload.photosRequired,
         status: 'Incomplete',
-        notes: '',
-        instructions: '',
-        ...action.payload,
+        notes: payload.notes || '',
+      })
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [state.jobs, user, fetchAll]
+  )
+
+  const updateJob = useCallback(
+    async (id, patch) => {
+      const { photos, photosSubmitted, ...rest } = patch
+      const columnPatch = {}
+      if ('status' in rest) columnPatch.status = rest.status
+      if ('operativeId' in rest) columnPatch.operative_id = rest.operativeId
+      if ('scheduledTime' in rest) columnPatch.scheduled_time = rest.scheduledTime
+      if ('instructions' in rest) columnPatch.instructions = rest.instructions
+      if ('notes' in rest) columnPatch.notes = rest.notes
+
+      const { data, error } = await supabase
+        .from('jobs')
+        .update(columnPatch)
+        .eq('display_id', id)
+        .select()
+        .single()
+      if (error) throw new Error(error.message)
+
+      if (photos) {
+        await supabase.from('job_photos').delete().eq('job_id', data.id)
+        if (photos.length) {
+          const { error: photoError } = await supabase
+            .from('job_photos')
+            .insert(photos.map((p) => ({ job_id: data.id, storage_url: p.dataUrl, captured_at: p.capturedAt })))
+          if (photoError) throw new Error(photoError.message)
+        }
       }
-      return { ...state, jobs: [job, ...state.jobs] }
-    }
+      await fetchAll()
+    },
+    [fetchAll]
+  )
 
-    case 'UPDATE_JOB': {
-      return {
-        ...state,
-        jobs: state.jobs.map((j) => (j.id === action.payload.id ? { ...j, ...action.payload.patch } : j)),
-      }
-    }
+  const deleteJob = useCallback(
+    async (id) => {
+      const { error } = await supabase.from('jobs').delete().eq('display_id', id)
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [fetchAll]
+  )
 
-    case 'DELETE_JOB': {
-      return { ...state, jobs: state.jobs.filter((j) => j.id !== action.payload.id) }
-    }
-
-    case 'SUBMIT_PROOF': {
-      const { jobId, completionStatus, photos, notes } = action.payload
+  const submitProof = useCallback(
+    async (jobId, completionStatus, photos, notes) => {
       const target = state.jobs.find((j) => j.id === jobId)
       // Once a job is Completed & Evidenced it's locked — evidence that can be
       // silently rewritten after the fact isn't proof of anything. Corrections
       // past this point go through an admin (Edit Job), not a re-submission.
-      if (!target || target.status === 'Completed & Evidenced') {
-        return state
-      }
+      if (!target || target.status === 'Completed & Evidenced') return
+
       const statusMap = {
         Completed: 'Completed & Evidenced',
         'Completed with issue': 'At Risk',
         'Unable to complete': 'Missing Evidence',
       }
-      return {
-        ...state,
-        jobs: state.jobs.map((j) =>
-          j.id === jobId
-            ? {
-                ...j,
-                status: statusMap[completionStatus] || target.status,
-                photos,
-                photosSubmitted: photos.length,
-                notes,
-                submittedTime: new Date().toISOString().slice(0, 16),
-              }
-            : j
-        ),
+
+      const { data, error } = await supabase
+        .from('jobs')
+        .update({
+          status: statusMap[completionStatus] || target.status,
+          notes,
+          submitted_time: new Date().toISOString(),
+        })
+        .eq('display_id', jobId)
+        .select()
+        .single()
+      if (error) throw new Error(error.message)
+
+      await supabase.from('job_photos').delete().eq('job_id', data.id)
+      if (photos.length) {
+        const { error: photoError } = await supabase
+          .from('job_photos')
+          .insert(photos.map((p) => ({ job_id: data.id, storage_url: p.dataUrl, captured_at: p.capturedAt })))
+        if (photoError) throw new Error(photoError.message)
       }
-    }
-
-    case 'ADD_SITE': {
-      const site = {
-        id: nextId(state.sites, 'ST-', 2),
-        addedDate: new Date().toISOString().slice(0, 10),
-        ...action.payload,
-      }
-      return { ...state, sites: [...state.sites, site] }
-    }
-
-    case 'DELETE_SITE': {
-      return { ...state, sites: state.sites.filter((s) => s.id !== action.payload.id) }
-    }
-
-    case 'ADD_CLIENT': {
-      const client = {
-        id: nextId(state.clients, 'CL-', 2),
-        ...action.payload,
-      }
-      return { ...state, clients: [...state.clients, client] }
-    }
-
-    case 'DELETE_CLIENT': {
-      return { ...state, clients: state.clients.filter((c) => c.id !== action.payload.id) }
-    }
-
-    default:
-      return state
-  }
-}
-
-export function AppProvider({ children }) {
-  const [state, dispatch] = useReducer(reducer, undefined, initialState)
-
-  const addJob = useCallback((payload) => dispatch({ type: 'ADD_JOB', payload }), [])
-  const updateJob = useCallback((id, patch) => dispatch({ type: 'UPDATE_JOB', payload: { id, patch } }), [])
-  const deleteJob = useCallback((id) => dispatch({ type: 'DELETE_JOB', payload: { id } }), [])
-  const submitProof = useCallback(
-    (jobId, completionStatus, photos, notes) =>
-      dispatch({ type: 'SUBMIT_PROOF', payload: { jobId, completionStatus, photos, notes } }),
-    []
+      await fetchAll()
+    },
+    [state.jobs, fetchAll]
   )
-  const addSite = useCallback((payload) => dispatch({ type: 'ADD_SITE', payload }), [])
-  const deleteSite = useCallback((id) => dispatch({ type: 'DELETE_SITE', payload: { id } }), [])
-  const addClient = useCallback((payload) => dispatch({ type: 'ADD_CLIENT', payload }), [])
-  const deleteClient = useCallback((id) => dispatch({ type: 'DELETE_CLIENT', payload: { id } }), [])
-  const resetDemo = useCallback(() => dispatch({ type: 'RESET_DEMO' }), [])
+
+  const addSite = useCallback(
+    async (payload) => {
+      const { error } = await supabase.from('sites').insert({
+        organization_id: user.organizationId,
+        display_id: nextId(state.sites, 'ST-', 2),
+        client_id: clientUuidByDisplayIdRef.current[payload.clientId],
+        name: payload.name,
+        address: payload.address,
+        postcode: payload.postcode,
+        site_contact: payload.siteContact,
+        phone: payload.phone,
+        access_notes: payload.accessNotes,
+      })
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [state.sites, user, fetchAll]
+  )
+
+  const deleteSite = useCallback(
+    async (id) => {
+      const { error } = await supabase.from('sites').delete().eq('display_id', id)
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
+  const addClient = useCallback(
+    async (payload) => {
+      const { error } = await supabase.from('clients').insert({
+        organization_id: user.organizationId,
+        display_id: nextId(state.clients, 'CL-', 2),
+        name: payload.name,
+        sector: payload.sector,
+        contact_name: payload.contactName,
+        contact_email: payload.contactEmail,
+        contact_phone: payload.contactPhone,
+        account_manager: payload.accountManager,
+        contract_start_date: payload.contractStartDate || null,
+        notes: payload.notes,
+      })
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [state.clients, user, fetchAll]
+  )
+
+  const deleteClient = useCallback(
+    async (id) => {
+      const { error } = await supabase.from('clients').delete().eq('display_id', id)
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [fetchAll]
+  )
 
   const value = useMemo(
     () => ({
       ...state,
+      loading,
       addJob,
       updateJob,
       deleteJob,
@@ -139,9 +299,9 @@ export function AppProvider({ children }) {
       deleteSite,
       addClient,
       deleteClient,
-      resetDemo,
+      refreshData: fetchAll,
     }),
-    [state, addJob, updateJob, deleteJob, submitProof, addSite, deleteSite, addClient, deleteClient, resetDemo]
+    [state, loading, addJob, updateJob, deleteJob, submitProof, addSite, deleteSite, addClient, deleteClient, fetchAll]
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
