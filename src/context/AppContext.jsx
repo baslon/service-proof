@@ -26,7 +26,6 @@ function mapClient(row) {
     contactName: row.contact_name,
     contactEmail: row.contact_email,
     contactPhone: row.contact_phone,
-    accountManager: row.account_manager,
     contractStartDate: row.contract_start_date,
     notes: row.notes || '',
   }
@@ -268,7 +267,6 @@ export function AppProvider({ children }) {
         contact_name: payload.contactName,
         contact_email: payload.contactEmail,
         contact_phone: payload.contactPhone,
-        account_manager: payload.accountManager,
         contract_start_date: payload.contractStartDate || null,
         notes: payload.notes,
       })

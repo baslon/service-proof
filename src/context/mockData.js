@@ -18,6 +18,4 @@ export const SECTORS = [
   'Hospitality',
 ]
 
-export const ACCOUNT_MANAGERS = ['Priya Chandra', 'Owen Bradley', 'Sam Whitfield', 'Nadia Hussein']
-
 export const JOB_STATUSES = ['Completed & Evidenced', 'Missing Evidence', 'At Risk', 'Incomplete']

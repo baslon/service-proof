@@ -2,14 +2,13 @@ import { useState } from 'react'
 import Modal from '../Modal'
 import FormField, { inputClass } from '../FormField'
 import { useApp } from '../../context/AppContext'
-import { SECTORS, ACCOUNT_MANAGERS } from '../../context/mockData'
+import { SECTORS } from '../../context/mockData'
 
 export default function AddClientModal({ onClose }) {
   const { addClient } = useApp()
   const [form, setForm] = useState({
     name: '',
     sector: SECTORS[0],
-    accountManager: ACCOUNT_MANAGERS[0],
     contactName: '',
     contactEmail: '',
     contactPhone: '',
@@ -32,22 +31,13 @@ export default function AddClientModal({ onClose }) {
           <input className={inputClass} value={form.name} onChange={set('name')} required />
         </FormField>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField label="Sector">
-            <select className={inputClass} value={form.sector} onChange={set('sector')}>
-              {SECTORS.map((s) => (
-                <option key={s}>{s}</option>
-              ))}
-            </select>
-          </FormField>
-          <FormField label="Account manager">
-            <select className={inputClass} value={form.accountManager} onChange={set('accountManager')}>
-              {ACCOUNT_MANAGERS.map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </select>
-          </FormField>
-        </div>
+        <FormField label="Sector">
+          <select className={inputClass} value={form.sector} onChange={set('sector')}>
+            {SECTORS.map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+        </FormField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="Contact name">

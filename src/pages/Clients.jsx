@@ -158,10 +158,6 @@ export default function Clients() {
                 <p className="mt-1 text-sm text-slate-700">{activeClient.contactName}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Account manager</p>
-                <p className="mt-1 text-sm text-slate-700">{activeClient.accountManager}</p>
-              </div>
-              <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Email</p>
                 <p className="mt-1 text-sm text-slate-700">{activeClient.contactEmail}</p>
               </div>
