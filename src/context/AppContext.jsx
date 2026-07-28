@@ -285,6 +285,29 @@ export function AppProvider({ children }) {
     [fetchAll]
   )
 
+  // Creating another person's login account needs the service_role key,
+  // which can never touch the browser — so this calls a serverless function
+  // instead of talking to Supabase directly, unlike every other action here.
+  const inviteOperative = useCallback(
+    async ({ name, email }) => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const res = await fetch('/api/invite-operative', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ name, email }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to invite operative')
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
   const value = useMemo(
     () => ({
       ...state,
@@ -297,9 +320,23 @@ export function AppProvider({ children }) {
       deleteSite,
       addClient,
       deleteClient,
+      inviteOperative,
       refreshData: fetchAll,
     }),
-    [state, loading, addJob, updateJob, deleteJob, submitProof, addSite, deleteSite, addClient, deleteClient, fetchAll]
+    [
+      state,
+      loading,
+      addJob,
+      updateJob,
+      deleteJob,
+      submitProof,
+      addSite,
+      deleteSite,
+      addClient,
+      deleteClient,
+      inviteOperative,
+      fetchAll,
+    ]
   )
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

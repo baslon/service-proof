@@ -4,6 +4,7 @@ import DashboardLayout from '../components/DashboardLayout'
 import StatusBadge from '../components/StatusBadge'
 import EditJobModal from '../components/modals/EditJobModal'
 import ScheduleJobModal from '../components/modals/ScheduleJobModal'
+import AddOperativeModal from '../components/modals/AddOperativeModal'
 import { useApp } from '../context/AppContext'
 import { STATUS_TEXT_COLOR, isPendingStatus } from '../context/statusStyles'
 
@@ -21,6 +22,7 @@ export default function Dashboard() {
   const [siteFilter, setSiteFilter] = useState(searchParams.get('site') || '')
   const [editingJob, setEditingJob] = useState(null)
   const [scheduling, setScheduling] = useState(false)
+  const [addingOperative, setAddingOperative] = useState(false)
 
   const statusFilter = searchParams.get('status') || ''
 
@@ -56,12 +58,20 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
           <p className="mt-1 text-sm text-slate-500">Live evidence status across every client and site.</p>
         </div>
-        <button
-          onClick={() => setScheduling(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
-        >
-          + Schedule new job
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setAddingOperative(true)}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            + Add operative
+          </button>
+          <button
+            onClick={() => setScheduling(true)}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+          >
+            + Schedule new job
+          </button>
+        </div>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -230,6 +240,7 @@ export default function Dashboard() {
 
       {editingJob && <EditJobModal job={editingJob} onClose={() => setEditingJob(null)} />}
       {scheduling && <ScheduleJobModal onClose={() => setScheduling(false)} />}
+      {addingOperative && <AddOperativeModal onClose={() => setAddingOperative(false)} />}
     </DashboardLayout>
   )
 }
