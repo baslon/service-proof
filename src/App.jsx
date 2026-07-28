@@ -6,6 +6,7 @@ import Sites from './pages/Sites'
 import Clients from './pages/Clients'
 import Report from './pages/Report'
 import Submit from './pages/Submit'
+import SetPassword from './pages/SetPassword'
 import RequireAuth from './components/RequireAuth'
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
 
       <Route element={<RequireAuth roles={['admin', 'operative']} />}>
         <Route path="/submit" element={<Submit />} />
+        <Route path="/set-password" element={<SetPassword />} />
       </Route>
     </Routes>
   )

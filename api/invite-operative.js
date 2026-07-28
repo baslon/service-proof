@@ -55,7 +55,14 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: operativeError.message })
     }
 
-    const { data: invitedUser, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email)
+    // Send the invite link straight to the password-setup page, rather than
+    // wherever the project's Site URL happens to point — otherwise a new
+    // operative lands on an arbitrary page already signed in with no
+    // password ever set.
+    const origin = req.headers.origin || `https://${req.headers.host}`
+    const { data: invitedUser, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${origin}/set-password`,
+    })
 
     if (inviteError) {
       // Roll back the roster entry rather than leaving an orphaned
