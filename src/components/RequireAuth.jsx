@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { homeFor } from '../lib/roleHome'
 
 export default function RequireAuth({ roles }) {
   const { user, loading } = useAuth()
@@ -16,7 +17,7 @@ export default function RequireAuth({ roles }) {
   }
 
   if (roles && !roles.includes(user.role)) {
-    return <Navigate to={user.role === 'admin' ? '/dashboard' : '/submit'} replace />
+    return <Navigate to={homeFor(user.role)} replace />
   }
 
   return <Outlet />

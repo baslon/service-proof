@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../context/AuthContext'
+import { homeFor } from '../lib/roleHome'
 import { inputClass } from '../components/FormField'
 
 export default function SetPassword() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
@@ -32,7 +35,7 @@ export default function SetPassword() {
       return
     }
 
-    navigate('/submit', { replace: true })
+    navigate(homeFor(user?.role), { replace: true })
   }
 
   return (

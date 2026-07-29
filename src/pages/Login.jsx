@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { homeFor } from '../lib/roleHome'
 import { inputClass } from '../components/FormField'
 
-const ROLE_HOME = { admin: '/dashboard', operative: '/submit' }
 const ADMIN_ONLY_PATHS = ['/dashboard', '/sites', '/clients', '/report']
 
 // A "come back here after signing in" path can be left over in browser
@@ -15,7 +15,7 @@ function resolveDestination(role, requestedPath) {
   if (requestedPath && (role === 'admin' || !ADMIN_ONLY_PATHS.includes(requestedPath))) {
     return requestedPath
   }
-  return ROLE_HOME[role] || '/'
+  return homeFor(role)
 }
 
 export default function Login() {
