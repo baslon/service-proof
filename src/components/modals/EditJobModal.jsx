@@ -112,11 +112,20 @@ export default function EditJobModal({ job, onClose }) {
   }
 
   return (
-    <Modal open onClose={attemptClose} title={`Edit job ${job.id}`}>
+    <Modal open onClose={attemptClose} title={isSealed ? `Job ${job.id}` : `Edit job ${job.id}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-slate-500">
           {job.taskType} &middot; {job.area}
         </p>
+
+        {isSealed && (
+          <div className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
+            <p className="font-medium">Sealed {job.submittedTime ? formatDateTime(job.submittedTime) : ''}</p>
+            <p className="mt-0.5 text-xs text-emerald-700">
+              This record is evidence and can no longer be changed &mdash; by anyone.
+            </p>
+          </div>
+        )}
 
         <div>
           <span className="mb-1 block text-sm font-medium text-slate-700">
@@ -132,14 +141,16 @@ export default function EditJobModal({ job, onClose }) {
                 >
                   <img src={p.dataUrl} alt="Evidence" className="h-full w-full object-cover" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => removePhoto(p.id)}
-                  aria-label="Delete photo"
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white transition hover:bg-red-600"
-                >
-                  &times;
-                </button>
+                {!isSealed && (
+                  <button
+                    type="button"
+                    onClick={() => removePhoto(p.id)}
+                    aria-label="Delete photo"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white transition hover:bg-red-600"
+                  >
+                    &times;
+                  </button>
+                )}
                 {p.capturedAt && (
                   <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
                     {formatTime(p.capturedAt)}
@@ -147,24 +158,26 @@ export default function EditJobModal({ job, onClose }) {
                 )}
               </div>
             ))}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              aria-label="Add photo"
-              className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition hover:border-indigo-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {uploading ? (
-                <span className="text-xs">Uploading…</span>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
-                </svg>
-              )}
-            </button>
+            {!isSealed && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                aria-label="Add photo"
+                className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition hover:border-indigo-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploading ? (
+                  <span className="text-xs">Uploading…</span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                  </svg>
+                )}
+              </button>
+            )}
           </div>
           <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={addPhotos} className="hidden" />
-          {photos.length === 0 && (
+          {photos.length === 0 && !isSealed && (
             <p className="mt-1.5 text-xs text-slate-400">No photos submitted yet — add one above if needed.</p>
           )}
           {photos.length !== (job.photos?.length || 0) && (
@@ -180,15 +193,10 @@ export default function EditJobModal({ job, onClose }) {
               <option key={s}>{s}</option>
             ))}
           </select>
-          {isSealed && (
-            <p className="mt-1.5 text-xs text-slate-400">
-              Evidenced jobs are sealed — the status can no longer be changed.
-            </p>
-          )}
         </FormField>
 
         <FormField label="Operative">
-          <select className={inputClass} value={form.operativeId} onChange={set('operativeId')}>
+          <select className={inputClass} value={form.operativeId} onChange={set('operativeId')} disabled={isSealed}>
             {operatives.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
@@ -203,6 +211,7 @@ export default function EditJobModal({ job, onClose }) {
             className={inputClass}
             value={form.scheduledTime}
             onChange={set('scheduledTime')}
+            disabled={isSealed}
           />
         </FormField>
 
@@ -213,36 +222,38 @@ export default function EditJobModal({ job, onClose }) {
             placeholder="e.g. which products to use, access quirks, areas to avoid..."
             value={form.instructions}
             onChange={set('instructions')}
+            disabled={isSealed}
           />
         </FormField>
 
         <FormField label="Notes">
-          <textarea rows={3} className={inputClass} value={form.notes} onChange={set('notes')} />
+          <textarea rows={3} className={inputClass} value={form.notes} onChange={set('notes')} disabled={isSealed} />
         </FormField>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <div className="flex items-center justify-between pt-2">
-          {isSealed ? (
-            <span className="text-xs text-slate-400">Sealed — cannot be deleted</span>
-          ) : (
+        {/* Nothing on a sealed job can be saved or deleted, so the only
+            action left is to close it. Offering Save and Delete anyway would
+            just be two buttons that always fail. */}
+        <div className="flex items-center justify-end gap-2 pt-2">
+          {!isSealed && (
             <button
               type="button"
               onClick={handleDelete}
               disabled={saving}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+              className="mr-auto rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60"
             >
               Delete job
             </button>
           )}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={attemptClose}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-            >
-              Cancel
-            </button>
+          <button
+            type="button"
+            onClick={attemptClose}
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            {isSealed ? 'Close' : 'Cancel'}
+          </button>
+          {!isSealed && (
             <button
               type="submit"
               disabled={uploading || saving}
@@ -250,7 +261,7 @@ export default function EditJobModal({ job, onClose }) {
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>
-          </div>
+          )}
         </div>
       </form>
 
