@@ -4,6 +4,7 @@ import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 import ConfirmDialog from '../components/ConfirmDialog'
+import DataErrorBanner from '../components/DataErrorBanner'
 import { formatTime } from '../utils/time'
 import { uploadPhoto } from '../lib/uploadPhoto'
 
@@ -17,7 +18,7 @@ const DEFAULT_COMPLETION_STATUS = {
   'At Risk': 'Completed with issue',
 }
 
-function JobList({ jobs, sites, onSelect }) {
+function JobList({ jobs, sites, onSelect, unreliable }) {
   return (
     <div className="space-y-3 px-4 py-4">
       {jobs.map((job) => {
@@ -44,7 +45,10 @@ function JobList({ jobs, sites, onSelect }) {
           </button>
         )
       })}
-      {jobs.length === 0 && (
+      {/* "Nice work" is the wrong thing to tell someone whose job list simply
+          failed to arrive — an operative could walk off site on the strength
+          of it. Stay silent about it unless the list is actually trustworthy. */}
+      {jobs.length === 0 && !unreliable && (
         <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-400">
           No jobs pending right now. Nice work.
         </div>
@@ -349,7 +353,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
 })
 
 export default function Submit() {
-  const { jobs, sites, submitProof } = useApp()
+  const { jobs, sites, submitProof, loading, error } = useApp()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [selectedJobId, setSelectedJobId] = useState(null)
@@ -429,7 +433,18 @@ export default function Submit() {
               onSubmit={handleSubmit}
             />
           ) : (
-            <JobList jobs={myJobs} sites={sites} onSelect={(j) => setSelectedJobId(j.id)} />
+            <>
+              {error && <DataErrorBanner className="mx-4 mt-4" />}
+              {loading && myJobs.length === 0 && (
+                <p className="px-4 py-8 text-center text-sm text-slate-400">Loading your jobs…</p>
+              )}
+              <JobList
+                jobs={myJobs}
+                sites={sites}
+                onSelect={(j) => setSelectedJobId(j.id)}
+                unreliable={loading || !!error}
+              />
+            </>
           )}
         </div>
       </div>

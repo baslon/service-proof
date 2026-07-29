@@ -67,6 +67,7 @@ export function AppProvider({ children }) {
   const { user } = useAuth()
   const [state, setState] = useState({ clients: [], sites: [], jobs: [], operatives: [] })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const clientUuidByDisplayIdRef = useRef({})
   const siteUuidByDisplayIdRef = useRef({})
   const jobUuidByDisplayIdRef = useRef({})
@@ -74,6 +75,7 @@ export function AppProvider({ children }) {
   const fetchAll = useCallback(async () => {
     if (!user) {
       setState({ clients: [], sites: [], jobs: [], operatives: [] })
+      setError('')
       setLoading(false)
       return
     }
@@ -86,15 +88,27 @@ export function AppProvider({ children }) {
       supabase.from('operatives').select('*'),
     ])
 
+    const jobUuids = (jobsRes.data || []).map((j) => j.id)
+    const photosRes = jobUuids.length
+      ? await supabase.from('job_photos').select('*').in('job_id', jobUuids)
+      : { data: [] }
+
+    // A failed fetch used to fall through to `data || []` and render as a
+    // perfectly normal empty account - the most alarming possible way to
+    // report a network blip to someone who had data a minute ago. Bail out
+    // instead, leaving whatever was last loaded on screen.
+    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, photosRes].find((r) => r.error)
+    if (failure) {
+      setError(failure.error.message || 'Could not load your data.')
+      setLoading(false)
+      return
+    }
+    setError('')
+
     const clientRows = clientsRes.data || []
     const siteRows = sitesRes.data || []
     const jobRows = jobsRes.data || []
     const operativeRows = operativesRes.data || []
-
-    const jobUuids = jobRows.map((j) => j.id)
-    const photosRes = jobUuids.length
-      ? await supabase.from('job_photos').select('*').in('job_id', jobUuids)
-      : { data: [] }
     const photoRows = photosRes.data || []
 
     const clientDisplayIdByUuid = Object.fromEntries(clientRows.map((c) => [c.id, c.display_id]))
@@ -315,6 +329,7 @@ export function AppProvider({ children }) {
     () => ({
       ...state,
       loading,
+      error,
       addJob,
       updateJob,
       deleteJob,
@@ -329,6 +344,7 @@ export function AppProvider({ children }) {
     [
       state,
       loading,
+      error,
       addJob,
       updateJob,
       deleteJob,
