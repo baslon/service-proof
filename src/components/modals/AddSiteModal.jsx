@@ -15,17 +15,26 @@ export default function AddSiteModal({ onClose }) {
     accessNotes: '',
   })
   const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.clientId) {
       setError('Add a client before adding a site — every site must belong to one.')
       return
     }
-    addSite(form)
-    onClose()
+    setError('')
+    setSubmitting(true)
+    try {
+      await addSite(form)
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -82,10 +91,10 @@ export default function AddSiteModal({ onClose }) {
           </button>
           <button
             type="submit"
-            disabled={clients.length === 0}
+            disabled={clients.length === 0 || submitting}
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Add site
+            {submitting ? 'Adding…' : 'Add site'}
           </button>
         </div>
       </form>

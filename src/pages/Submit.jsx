@@ -68,6 +68,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
   const [notes, setNotes] = useState(initialNotes)
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [showEvidenceLossConfirm, setShowEvidenceLossConfirm] = useState(false)
@@ -119,6 +120,20 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
 
   const removePhoto = (id) => setPhotos((prev) => prev.filter((p) => p.id !== id))
 
+  // Failure has to leave the form exactly as it was — an operative who loses
+  // a set of photos to a dropped connection has to walk the site again.
+  const runSubmit = async () => {
+    setError('')
+    setSubmitting(true)
+    try {
+      await onSubmit({ completionStatus, photos, notes })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const handleSubmitClick = () => {
     if (!completionStatus) return
     if (completionStatus === 'Completed' && photos.length < job.photosRequired) {
@@ -145,18 +160,18 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
       // isn't blocked like it is for Completed, so flag it explicitly instead.
       setShowEvidenceLossConfirm(true)
     } else {
-      onSubmit({ completionStatus, photos, notes })
+      runSubmit()
     }
   }
 
   const confirmSubmit = () => {
     setShowConfirm(false)
-    onSubmit({ completionStatus, photos, notes })
+    runSubmit()
   }
 
   const confirmEvidenceLoss = () => {
     setShowEvidenceLossConfirm(false)
-    onSubmit({ completionStatus, photos, notes })
+    runSubmit()
   }
 
   return (
@@ -280,12 +295,12 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
         </button>
         <button
           onClick={handleSubmitClick}
-          disabled={!completionStatus || uploading}
+          disabled={!completionStatus || uploading || submitting}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 ${
             completionStatus === 'Unable to complete' ? 'bg-slate-600' : 'bg-indigo-600'
           }`}
         >
-          {completionStatus === 'Unable to complete' ? 'Save' : 'Submit proof'}
+          {submitting ? 'Saving…' : completionStatus === 'Unable to complete' ? 'Save' : 'Submit proof'}
         </button>
       </div>
 
@@ -347,8 +362,12 @@ export default function Submit() {
   const selectedJob = jobs.find((j) => j.id === selectedJobId) || null
   const selectedSite = selectedJob ? sites.find((s) => s.id === selectedJob.siteId) : null
 
-  const handleSubmit = ({ completionStatus, photos, notes }) => {
-    submitProof(selectedJob.id, completionStatus, photos, notes)
+  // Deliberately not caught here: SubmissionForm awaits this and shows the
+  // error itself, and letting it throw means the job stays selected with the
+  // operative's photos and notes still on screen rather than being closed
+  // as though the submission had gone through.
+  const handleSubmit = async ({ completionStatus, photos, notes }) => {
+    await submitProof(selectedJob.id, completionStatus, photos, notes)
     setSelectedJobId(null)
   }
 

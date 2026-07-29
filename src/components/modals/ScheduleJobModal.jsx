@@ -18,6 +18,8 @@ export default function ScheduleJobModal({ onClose }) {
     instructions: '',
     notes: '',
   })
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const sitesForClient = useMemo(() => sites.filter((s) => s.clientId === form.clientId), [sites, form.clientId])
 
@@ -31,11 +33,19 @@ export default function ScheduleJobModal({ onClose }) {
       return next
     })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.siteId) return
-    addJob({ ...form, photosRequired: Number(form.photosRequired) })
-    onClose()
+    setError('')
+    setSubmitting(true)
+    try {
+      await addJob({ ...form, photosRequired: Number(form.photosRequired) })
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -128,6 +138,8 @@ export default function ScheduleJobModal({ onClose }) {
           <textarea rows={3} className={inputClass} value={form.notes} onChange={set('notes')} />
         </FormField>
 
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         <div className="flex justify-end gap-2 pt-2">
           <button
             type="button"
@@ -138,9 +150,10 @@ export default function ScheduleJobModal({ onClose }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            disabled={submitting}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
           >
-            Schedule job
+            {submitting ? 'Scheduling…' : 'Schedule job'}
           </button>
         </div>
       </form>

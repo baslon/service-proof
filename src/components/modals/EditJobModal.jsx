@@ -26,6 +26,7 @@ export default function EditJobModal({ job, onClose }) {
   const [viewingPhoto, setViewingPhoto] = useState(null)
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const fileInputRef = useRef(null)
 
@@ -71,7 +72,7 @@ export default function EditJobModal({ job, onClose }) {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (form.status === 'Completed & Evidenced' && photos.length < job.photosRequired) {
       setError(
@@ -79,14 +80,29 @@ export default function EditJobModal({ job, onClose }) {
       )
       return
     }
-    updateJob(job.id, { ...form, photos, photosSubmitted: photos.length })
-    onClose()
+    setError('')
+    setSaving(true)
+    try {
+      await updateJob(job.id, { ...form, photos, photosSubmitted: photos.length })
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const handleDelete = () => {
-    if (confirm(`Delete job ${job.id}? This cannot be undone.`)) {
-      deleteJob(job.id)
+  const handleDelete = async () => {
+    if (!confirm(`Delete job ${job.id}? This cannot be undone.`)) return
+    setError('')
+    setSaving(true)
+    try {
+      await deleteJob(job.id)
       onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -200,7 +216,8 @@ export default function EditJobModal({ job, onClose }) {
           <button
             type="button"
             onClick={handleDelete}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            disabled={saving}
+            className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60"
           >
             Delete job
           </button>
@@ -214,10 +231,10 @@ export default function EditJobModal({ job, onClose }) {
             </button>
             <button
               type="submit"
-              disabled={uploading}
+              disabled={uploading || saving}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Save changes
+              {saving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </div>

@@ -15,13 +15,23 @@ export default function AddClientModal({ onClose }) {
     contractStartDate: '',
     notes: '',
   })
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    addClient(form)
-    onClose()
+    setError('')
+    setSubmitting(true)
+    try {
+      await addClient(form)
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -60,6 +70,8 @@ export default function AddClientModal({ onClose }) {
           <textarea rows={3} className={inputClass} value={form.notes} onChange={set('notes')} />
         </FormField>
 
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
         <div className="flex justify-end gap-2 pt-2">
           <button
             type="button"
@@ -70,9 +82,10 @@ export default function AddClientModal({ onClose }) {
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            disabled={submitting}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
           >
-            Add client
+            {submitting ? 'Adding…' : 'Add client'}
           </button>
         </div>
       </form>

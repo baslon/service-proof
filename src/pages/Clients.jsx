@@ -12,6 +12,8 @@ export default function Clients() {
   const [sectorFilter, setSectorFilter] = useState('')
   const [activeClient, setActiveClient] = useState(null)
   const [adding, setAdding] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const sitesForClient = (clientId) => sites.filter((s) => s.clientId === clientId)
   const jobsForClient = (clientId) => jobs.filter((j) => j.clientId === clientId)
@@ -103,7 +105,10 @@ export default function Clients() {
           return (
             <button
               key={client.id}
-              onClick={() => setActiveClient(client)}
+              onClick={() => {
+                setDeleteError('')
+                setActiveClient(client)
+              }}
               className="rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:shadow-md hover:ring-1 hover:ring-indigo-200"
             >
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{client.sector}</p>
@@ -136,7 +141,10 @@ export default function Clients() {
 
       <SlideOver
         open={!!activeClient}
-        onClose={() => setActiveClient(null)}
+        onClose={() => {
+          setDeleteError('')
+          setActiveClient(null)
+        }}
         title={activeClient?.name}
         subtitle={activeClient?.sector}
       >
@@ -191,18 +199,26 @@ export default function Clients() {
             </div>
 
             <button
-              onClick={() => {
+              onClick={async () => {
                 if (!activeClientCanDelete) return
-                if (confirm(`Delete client ${activeClient.name}? This cannot be undone.`)) {
-                  deleteClient(activeClient.id)
+                if (!confirm(`Delete client ${activeClient.name}? This cannot be undone.`)) return
+                setDeleteError('')
+                setDeleting(true)
+                try {
+                  await deleteClient(activeClient.id)
                   setActiveClient(null)
+                } catch (err) {
+                  setDeleteError(err.message)
+                } finally {
+                  setDeleting(false)
                 }
               }}
-              disabled={!activeClientCanDelete}
+              disabled={!activeClientCanDelete || deleting}
               className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
             >
-              Delete client
+              {deleting ? 'Deleting…' : 'Delete client'}
             </button>
+            {deleteError && <p className="text-center text-sm text-red-600">{deleteError}</p>}
             {!activeClientCanDelete && (
               <p className="text-center text-xs text-slate-400">
                 Can&apos;t delete &mdash; this client still has {activeClientSites.length} site
