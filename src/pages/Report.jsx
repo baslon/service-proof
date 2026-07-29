@@ -1,11 +1,56 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { useApp } from '../context/AppContext'
 import { formatTime, formatDateTime, isSameDay } from '../utils/time'
 
+// A proof-of-service report is tied to a contract period, so it opens on the
+// current month rather than every job ever recorded for a client.
+function currentMonthRange() {
+  const now = new Date()
+  const pad = (n) => String(n).padStart(2, '0')
+  const first = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-01`
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+  const last = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(lastDay)}`
+  return { from: first, to: last }
+}
+
+function formatDay(value) {
+  if (!value) return ''
+  const [y, m, d] = value.split('-')
+  return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString([], {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+}
+
+// Screen only. The printed report stays a summary — embedding evidence in a
+// PDF makes a file nobody opens, and the point of showing photos is that
+// someone can actually look at them, which is a thing you do on screen.
+function PhotoStrip({ photos, onView }) {
+  if (!photos || photos.length === 0) return null
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5 print:hidden">
+      {photos.map((p) => (
+        <button
+          key={p.id}
+          type="button"
+          onClick={() => onView(p)}
+          className="h-12 w-12 overflow-hidden rounded border border-slate-200 transition hover:ring-2 hover:ring-indigo-400"
+          title={p.capturedAt ? `Captured ${formatDateTime(p.capturedAt)}` : 'Evidence photo'}
+        >
+          <img src={p.dataUrl} alt="Evidence" className="h-full w-full object-cover" />
+        </button>
+      ))}
+    </div>
+  )
+}
+
 export default function Report() {
   const { clients, sites, jobs, operatives } = useApp()
   const [clientId, setClientId] = useState('')
+  const [{ from, to }, setRange] = useState(currentMonthRange)
+  const [viewingPhoto, setViewingPhoto] = useState(null)
 
   const clientName = (id) => clients.find((c) => c.id === id)?.name || 'Unknown client'
   const siteName = (id) => sites.find((s) => s.id === id)?.name || 'Unknown site'
@@ -26,7 +71,21 @@ export default function Report() {
     return `${format(first)} – ${format(last)}`
   }
 
-  const scopedJobs = useMemo(() => (clientId ? jobs.filter((j) => j.clientId === clientId) : jobs), [jobs, clientId])
+  // Filtered on scheduled date rather than submission: the period a client
+  // is asking about is when the work was due, not when the paperwork landed.
+  // scheduledTime is "YYYY-MM-DDTHH:mm", so a string compare on the date part
+  // is both correct and free of timezone reinterpretation.
+  const scopedJobs = useMemo(
+    () =>
+      jobs.filter((j) => {
+        if (clientId && j.clientId !== clientId) return false
+        const day = (j.scheduledTime || '').slice(0, 10)
+        if (from && day && day < from) return false
+        if (to && day && day > to) return false
+        return true
+      }),
+    [jobs, clientId, from, to]
+  )
 
   const evidencedJobs = scopedJobs.filter((j) => j.status === 'Completed & Evidenced')
   const exceptions = scopedJobs.filter((j) => j.status === 'Missing Evidence' || j.status === 'At Risk')
@@ -55,6 +114,23 @@ export default function Report() {
               </option>
             ))}
           </select>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              aria-label="Period start"
+              value={from}
+              onChange={(e) => setRange((r) => ({ ...r, from: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+            />
+            <span className="text-sm text-slate-400">to</span>
+            <input
+              type="date"
+              aria-label="Period end"
+              value={to}
+              onChange={(e) => setRange((r) => ({ ...r, to: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+            />
+          </div>
           <button
             onClick={() => window.print()}
             className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 sm:w-auto"
@@ -76,6 +152,9 @@ export default function Report() {
             <h2 className="mt-4 text-xl font-bold text-slate-900">
               Proof-of-service report {clientId ? `— ${clientName(clientId)}` : '— All clients'}
             </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              {from || to ? `Period: ${formatDay(from) || 'start'} – ${formatDay(to) || 'today'}` : 'All dates'}
+            </p>
           </div>
           <p className="text-sm text-slate-400">Generated {today}</p>
         </div>
@@ -111,6 +190,7 @@ export default function Report() {
                 <p className="text-xs text-slate-500">{siteName(j.siteId)}</p>
                 <p className="mt-1 text-xs text-slate-400">{operativeName(j.operativeId)}</p>
                 <p className="mt-1 text-xs text-slate-400">Photos captured {photoTimeRange(j) || '—'}</p>
+                <PhotoStrip photos={j.photos} onView={setViewingPhoto} />
               </div>
             ))}
             {evidencedJobs.length === 0 && (
@@ -134,14 +214,23 @@ export default function Report() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {evidencedJobs.map((j) => (
-                  <tr key={j.id}>
-                    <td className="whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-900">{j.id}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{siteName(j.siteId)}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{j.taskType}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{operativeName(j.operativeId)}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{photoTimeRange(j) || '—'}</td>
-                    <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{j.submittedTime?.replace('T', ' ') || '—'}</td>
-                  </tr>
+                  <Fragment key={j.id}>
+                    <tr>
+                      <td className="whitespace-nowrap px-3 py-2 text-sm font-medium text-slate-900">{j.id}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{siteName(j.siteId)}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{j.taskType}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{operativeName(j.operativeId)}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{photoTimeRange(j) || '—'}</td>
+                      <td className="whitespace-nowrap px-3 py-2 text-sm text-slate-600">{j.submittedTime?.replace('T', ' ') || '—'}</td>
+                    </tr>
+                    {j.photos?.length > 0 && (
+                      <tr className="print:hidden">
+                        <td colSpan={6} className="px-3 pb-3 pt-0">
+                          <PhotoStrip photos={j.photos} onView={setViewingPhoto} />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 ))}
                 {evidencedJobs.length === 0 && (
                   <tr>
@@ -178,6 +267,9 @@ export default function Report() {
                   {j.photosSubmitted}/{j.photosRequired} photos submitted
                 </p>
                 {j.notes && <p className="mt-2 text-sm text-slate-600">{j.notes}</p>}
+                {/* A job that fell short is exactly where someone wants to see
+                    what evidence does exist, rather than only the shortfall. */}
+                <PhotoStrip photos={j.photos} onView={setViewingPhoto} />
               </div>
             ))}
             {exceptions.length === 0 && (
@@ -185,7 +277,23 @@ export default function Report() {
             )}
           </div>
         </section>
+
+        <p className="hidden pt-4 text-xs text-slate-400 print:block">
+          Photo evidence for these jobs is viewable on screen in ServiceProof.
+        </p>
       </div>
+
+      {viewingPhoto && (
+        <div
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-slate-900/80 p-6 print:hidden"
+          onClick={() => setViewingPhoto(null)}
+        >
+          <img src={viewingPhoto.dataUrl} alt="Evidence full size" className="max-h-full max-w-full rounded-lg shadow-2xl" />
+          {viewingPhoto.capturedAt && (
+            <p className="text-sm font-medium text-white">Captured {formatDateTime(viewingPhoto.capturedAt)}</p>
+          )}
+        </div>
+      )}
     </DashboardLayout>
   )
 }
