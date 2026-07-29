@@ -1,6 +1,7 @@
 import { createContext, useContext, useCallback, useMemo, useRef, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from './AuthContext'
+import { toLocalTimestamp } from '../utils/time'
 
 const AppContext = createContext(null)
 
@@ -204,7 +205,7 @@ export function AppProvider({ children }) {
         .update({
           status: statusMap[completionStatus] || target.status,
           notes,
-          submitted_time: new Date().toISOString(),
+          submitted_time: toLocalTimestamp(),
         })
         .eq('display_id', jobId)
         .select()
