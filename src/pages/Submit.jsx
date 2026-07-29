@@ -404,7 +404,7 @@ export default function Submit() {
           <button onClick={handleExit} className="text-xs font-medium text-slate-300">
             &larr; Exit
           </button>
-          <span className="text-sm font-semibold text-white">ServiceProof Field</span>
+          <span className="text-sm font-semibold text-white">Provaserve Field</span>
           <span className="w-9" />
         </div>
 

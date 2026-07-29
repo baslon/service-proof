@@ -68,9 +68,9 @@ export default function Sidebar({ open, onClose }) {
         <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-6 py-5">
           <Link to="/" className="flex items-center gap-2" title="Back to home page">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-              SP
+              P
             </div>
-            <span className="text-base font-semibold text-slate-900">ServiceProof</span>
+            <span className="text-base font-semibold text-slate-900">Provaserve</span>
           </Link>
           <button
             onClick={onClose}

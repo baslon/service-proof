@@ -106,9 +106,9 @@ export default function Report() {
           <div>
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-                SP
+                P
               </div>
-              <span className="text-base font-semibold text-slate-900">ServiceProof</span>
+              <span className="text-base font-semibold text-slate-900">Provaserve</span>
             </div>
             <h2 className="mt-4 text-xl font-bold text-slate-900">
               Service Report {clientId ? `— ${clientName(clientId)}` : '— All clients'}

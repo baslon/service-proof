@@ -56,8 +56,8 @@ export default function Landing() {
       <header className="border-b border-slate-100">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">SP</div>
-            <span className="text-base font-semibold text-slate-900">ServiceProof</span>
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">P</div>
+            <span className="text-base font-semibold text-slate-900">Provaserve</span>
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -134,7 +134,7 @@ export default function Landing() {
             Stop guessing whether the clean actually happened.
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-indigo-100">
-            ServiceProof turns every cleaning job into evidence: timestamped photos, completion status, and a
+            Provaserve turns every cleaning job into evidence: timestamped photos, completion status, and a
             report your client can trust &mdash; without a single extra spreadsheet.
           </p>
           <div className="mt-10 flex justify-center gap-4">
@@ -229,7 +229,7 @@ export default function Landing() {
 
       <footer className="border-t border-slate-100 py-8">
         <div className="mx-auto max-w-7xl px-6 text-center text-sm text-slate-400">
-          &copy; 2026 ServiceProof. Demo prototype &mdash; not a real product.
+          &copy; 2026 Provaserve. Demo prototype &mdash; not a real product.
         </div>
       </footer>
 

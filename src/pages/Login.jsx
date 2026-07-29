@@ -54,9 +54,9 @@ export default function Login() {
       <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
         <Link to="/" className="flex items-center gap-2" title="Back to home page">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-            SP
+            P
           </div>
-          <span className="text-base font-semibold text-slate-900">ServiceProof</span>
+          <span className="text-base font-semibold text-slate-900">Provaserve</span>
         </Link>
 
         <h1 className="mt-6 text-xl font-bold text-slate-900">Sign in</h1>
