@@ -30,6 +30,11 @@ export default function EditJobModal({ job, onClose }) {
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const fileInputRef = useRef(null)
 
+  // An evidenced job is sealed: its status can't be moved back and it can't
+  // be deleted. The database enforces both, so these controls could only
+  // ever have produced an error — better not to offer them at all.
+  const isSealed = job.status === 'Completed & Evidenced'
+
   const isDirty =
     Object.keys(initialForm).some((key) => form[key] !== initialForm[key]) ||
     photos.map((p) => p.id).join(',') !== initialPhotoIds
@@ -170,11 +175,16 @@ export default function EditJobModal({ job, onClose }) {
         </div>
 
         <FormField label="Status">
-          <select className={inputClass} value={form.status} onChange={set('status')}>
+          <select className={inputClass} value={form.status} onChange={set('status')} disabled={isSealed}>
             {JOB_STATUSES.map((s) => (
               <option key={s}>{s}</option>
             ))}
           </select>
+          {isSealed && (
+            <p className="mt-1.5 text-xs text-slate-400">
+              Evidenced jobs are sealed — the status can no longer be changed.
+            </p>
+          )}
         </FormField>
 
         <FormField label="Operative">
@@ -213,14 +223,18 @@ export default function EditJobModal({ job, onClose }) {
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         <div className="flex items-center justify-between pt-2">
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={saving}
-            className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60"
-          >
-            Delete job
-          </button>
+          {isSealed ? (
+            <span className="text-xs text-slate-400">Sealed — cannot be deleted</span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={saving}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:opacity-60"
+            >
+              Delete job
+            </button>
+          )}
           <div className="flex gap-2">
             <button
               type="button"
