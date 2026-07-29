@@ -25,9 +25,14 @@ export default async function handler(req, res) {
     // The caller's own organization is looked up server-side rather than
     // trusted from the request body, so one org's admin can never invite an
     // operative into a different organization.
+    // The organization's name comes along for the ride so the invite email can
+    // name the employer. A recipient gets this from a domain they have never
+    // heard of asking them to set a password — "Riverside Cleaning Co has
+    // invited you" is the difference between that reading as legitimate and
+    // reading as phishing.
     const { data: callerProfile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('role, organization_id')
+      .select('role, organization_id, organizations(name)')
       .eq('id', userData.user.id)
       .single()
 
@@ -62,6 +67,7 @@ export default async function handler(req, res) {
     const origin = req.headers.origin || `https://${req.headers.host}`
     const { data: invitedUser, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       redirectTo: `${origin}/set-password`,
+      data: { org_name: callerProfile.organizations?.name || '' },
     })
 
     if (inviteError) {

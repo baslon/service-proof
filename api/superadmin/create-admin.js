@@ -33,12 +33,27 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Organization, name and email are required' })
     }
 
+    // Resolving the organization here does double duty: it gives the invite
+    // email a name to show the recipient, and it rejects a bad organizationId
+    // up front rather than letting it surface later as a foreign key violation
+    // after an auth account has already been created.
+    const { data: organization, error: orgError } = await supabaseAdmin
+      .from('organizations')
+      .select('name')
+      .eq('id', organizationId)
+      .single()
+
+    if (orgError || !organization) {
+      return res.status(400).json({ error: 'That organization does not exist' })
+    }
+
     // Same redirect as the operative invite flow, so a newly invited admin
     // lands on the password-setup page instead of signed in with no
     // password ever set.
     const origin = req.headers.origin || `https://${req.headers.host}`
     const { data: invitedUser, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       redirectTo: `${origin}/set-password`,
+      data: { org_name: organization.name },
     })
 
     if (inviteError) {

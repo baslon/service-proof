@@ -36,6 +36,19 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Organization, name and email are required' })
     }
 
+    // Resolved before anything is created: the invite email needs the name,
+    // and a bad organizationId should be rejected here rather than after an
+    // operative row and an auth account already exist.
+    const { data: organization, error: orgError } = await supabaseAdmin
+      .from('organizations')
+      .select('name')
+      .eq('id', organizationId)
+      .single()
+
+    if (orgError || !organization) {
+      return res.status(400).json({ error: 'That organization does not exist' })
+    }
+
     const { data: operative, error: operativeError } = await supabaseAdmin
       .from('operatives')
       .insert({
@@ -54,6 +67,7 @@ export default async function handler(req, res) {
     const origin = req.headers.origin || `https://${req.headers.host}`
     const { data: invitedUser, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
       redirectTo: `${origin}/set-password`,
+      data: { org_name: organization.name },
     })
 
     if (inviteError) {
