@@ -3,8 +3,10 @@ import Modal from '../Modal'
 import ConfirmDialog from '../ConfirmDialog'
 import FormField, { inputClass } from '../FormField'
 import { useApp } from '../../context/AppContext'
+import { useAuth } from '../../context/AuthContext'
 import { JOB_STATUSES } from '../../context/mockData'
 import { formatTime, formatDateTime } from '../../utils/time'
+import { uploadPhoto } from '../../lib/uploadPhoto'
 
 const initialFormFor = (job) => ({
   status: job.status,
@@ -16,12 +18,14 @@ const initialFormFor = (job) => ({
 
 export default function EditJobModal({ job, onClose }) {
   const { operatives, updateJob, deleteJob } = useApp()
+  const { user } = useAuth()
   const initialForm = initialFormFor(job)
   const initialPhotoIds = (job.photos || []).map((p) => p.id).join(',')
   const [form, setForm] = useState(initialForm)
   const [photos, setPhotos] = useState(job.photos || [])
   const [viewingPhoto, setViewingPhoto] = useState(null)
   const [error, setError] = useState('')
+  const [uploading, setUploading] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const fileInputRef = useRef(null)
 
@@ -47,19 +51,24 @@ export default function EditJobModal({ job, onClose }) {
     setError('')
   }
 
-  const addPhotos = (e) => {
-    Array.from(e.target.files).forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        setPhotos((prev) => [
-          ...prev,
-          { id: `${Date.now()}-${Math.random()}`, dataUrl: reader.result, capturedAt: new Date().toISOString() },
-        ])
-      }
-      reader.readAsDataURL(file)
-    })
+  const addPhotos = async (e) => {
+    const files = Array.from(e.target.files)
     e.target.value = ''
     setError('')
+    setUploading(true)
+    try {
+      for (const file of files) {
+        const url = await uploadPhoto(file, user.organizationId)
+        setPhotos((prev) => [
+          ...prev,
+          { id: `${Date.now()}-${Math.random()}`, dataUrl: url, capturedAt: new Date().toISOString() },
+        ])
+      }
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const handleSubmit = (e) => {
@@ -120,12 +129,17 @@ export default function EditJobModal({ job, onClose }) {
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
               aria-label="Add photo"
-              className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition hover:border-indigo-400 hover:text-indigo-600"
+              className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition hover:border-indigo-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
-              </svg>
+              {uploading ? (
+                <span className="text-xs">Uploading…</span>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                </svg>
+              )}
             </button>
           </div>
           <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={addPhotos} className="hidden" />
@@ -200,7 +214,8 @@ export default function EditJobModal({ job, onClose }) {
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+              disabled={uploading}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Save changes
             </button>

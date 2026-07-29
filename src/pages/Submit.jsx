@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { formatTime } from '../utils/time'
+import { uploadPhoto } from '../lib/uploadPhoto'
 
 const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Unable to complete']
 const ACTIONABLE_STATUSES = ['Incomplete', 'Missing Evidence', 'At Risk']
@@ -60,11 +61,13 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
   const initialCompletionStatus = DEFAULT_COMPLETION_STATUS[job.status] || ''
   const initialNotes = job.notes || ''
   const initialPhotosCount = (job.photos || []).length
+  const { user } = useAuth()
 
   const [completionStatus, setCompletionStatus] = useState(initialCompletionStatus)
   const [photos, setPhotos] = useState(job.photos || [])
   const [notes, setNotes] = useState(initialNotes)
   const [error, setError] = useState('')
+  const [uploading, setUploading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [showEvidenceLossConfirm, setShowEvidenceLossConfirm] = useState(false)
@@ -94,19 +97,24 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
 
   const slotsLeft = job.photosRequired - photos.length
 
-  const handleFiles = (e) => {
+  const handleFiles = async (e) => {
     const files = Array.from(e.target.files).slice(0, Math.max(slotsLeft, 0))
-    files.forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = () => {
+    e.target.value = ''
+    setUploading(true)
+    setError('')
+    try {
+      for (const file of files) {
+        const url = await uploadPhoto(file, user.organizationId)
         setPhotos((prev) => [
           ...prev,
-          { id: `${Date.now()}-${Math.random()}`, dataUrl: reader.result, capturedAt: new Date().toISOString() },
+          { id: `${Date.now()}-${Math.random()}`, dataUrl: url, capturedAt: new Date().toISOString() },
         ])
       }
-      reader.readAsDataURL(file)
-    })
-    e.target.value = ''
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+    }
   }
 
   const removePhoto = (id) => setPhotos((prev) => prev.filter((p) => p.id !== id))
@@ -230,10 +238,10 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={slotsLeft <= 0}
+            disabled={slotsLeft <= 0 || uploading}
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 py-6 text-sm font-medium text-slate-500 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-indigo-400 hover:text-indigo-600"
           >
-            {slotsLeft > 0 ? 'Tap to take or upload a photo' : 'All required photos added'}
+            {uploading ? 'Uploading…' : slotsLeft > 0 ? 'Tap to take or upload a photo' : 'All required photos added'}
           </button>
           <p className="mt-2 text-center text-sm font-medium text-slate-600">
             {photos.length} / {job.photosRequired} required
@@ -272,7 +280,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
         </button>
         <button
           onClick={handleSubmitClick}
-          disabled={!completionStatus}
+          disabled={!completionStatus || uploading}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 ${
             completionStatus === 'Unable to complete' ? 'bg-slate-600' : 'bg-indigo-600'
           }`}
