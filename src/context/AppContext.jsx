@@ -4,14 +4,6 @@ import { useAuth } from './AuthContext'
 
 const AppContext = createContext(null)
 
-function nextId(items, prefix, padLength) {
-  const max = items.reduce((acc, item) => {
-    const n = parseInt(item.id.slice(prefix.length), 10)
-    return Number.isFinite(n) && n > acc ? n : acc
-  }, 0)
-  return `${prefix}${String(max + 1).padStart(padLength, '0')}`
-}
-
 // Every component in the app was built against display codes like "SP-0041"
 // as the job/client/site "id" — Supabase's real primary keys are UUIDs, with
 // the display code stored separately as display_id. Rather than touch every
@@ -129,25 +121,27 @@ export function AppProvider({ children }) {
 
   const addJob = useCallback(
     async (payload) => {
-      const { error } = await supabase.from('jobs').insert({
-        organization_id: user.organizationId,
-        display_id: nextId(state.jobs, 'SP-', 4),
-        client_id: clientUuidByDisplayIdRef.current[payload.clientId],
-        site_id: siteUuidByDisplayIdRef.current[payload.siteId],
-        task_type: payload.taskType,
-        area: payload.area,
-        instructions: payload.instructions || '',
-        recurrence: payload.recurrence,
-        scheduled_time: payload.scheduledTime,
-        operative_id: payload.operativeId,
-        photos_required: payload.photosRequired,
-        status: 'Incomplete',
-        notes: payload.notes || '',
+      // The display_id (e.g. "SP-0041") is generated inside this RPC, in
+      // the same transaction as the insert - computing it client-side and
+      // inserting separately let two concurrent creates race for the same
+      // number.
+      const { error } = await supabase.rpc('create_job', {
+        p_organization_id: user.organizationId,
+        p_client_id: clientUuidByDisplayIdRef.current[payload.clientId],
+        p_site_id: siteUuidByDisplayIdRef.current[payload.siteId],
+        p_task_type: payload.taskType,
+        p_area: payload.area,
+        p_instructions: payload.instructions || '',
+        p_recurrence: payload.recurrence,
+        p_scheduled_time: payload.scheduledTime,
+        p_operative_id: payload.operativeId,
+        p_photos_required: payload.photosRequired,
+        p_notes: payload.notes || '',
       })
       if (error) throw new Error(error.message)
       await fetchAll()
     },
-    [state.jobs, user, fetchAll]
+    [user, fetchAll]
   )
 
   const updateJob = useCallback(
@@ -231,21 +225,20 @@ export function AppProvider({ children }) {
 
   const addSite = useCallback(
     async (payload) => {
-      const { error } = await supabase.from('sites').insert({
-        organization_id: user.organizationId,
-        display_id: nextId(state.sites, 'ST-', 2),
-        client_id: clientUuidByDisplayIdRef.current[payload.clientId],
-        name: payload.name,
-        address: payload.address,
-        postcode: payload.postcode,
-        site_contact: payload.siteContact,
-        phone: payload.phone,
-        access_notes: payload.accessNotes,
+      const { error } = await supabase.rpc('create_site', {
+        p_organization_id: user.organizationId,
+        p_client_id: clientUuidByDisplayIdRef.current[payload.clientId],
+        p_name: payload.name,
+        p_address: payload.address,
+        p_postcode: payload.postcode,
+        p_site_contact: payload.siteContact,
+        p_phone: payload.phone,
+        p_access_notes: payload.accessNotes,
       })
       if (error) throw new Error(error.message)
       await fetchAll()
     },
-    [state.sites, user, fetchAll]
+    [user, fetchAll]
   )
 
   const deleteSite = useCallback(
@@ -259,21 +252,20 @@ export function AppProvider({ children }) {
 
   const addClient = useCallback(
     async (payload) => {
-      const { error } = await supabase.from('clients').insert({
-        organization_id: user.organizationId,
-        display_id: nextId(state.clients, 'CL-', 2),
-        name: payload.name,
-        sector: payload.sector,
-        contact_name: payload.contactName,
-        contact_email: payload.contactEmail,
-        contact_phone: payload.contactPhone,
-        contract_start_date: payload.contractStartDate || null,
-        notes: payload.notes,
+      const { error } = await supabase.rpc('create_client', {
+        p_organization_id: user.organizationId,
+        p_name: payload.name,
+        p_sector: payload.sector,
+        p_contact_name: payload.contactName,
+        p_contact_email: payload.contactEmail,
+        p_contact_phone: payload.contactPhone,
+        p_contract_start_date: payload.contractStartDate || null,
+        p_notes: payload.notes,
       })
       if (error) throw new Error(error.message)
       await fetchAll()
     },
-    [state.clients, user, fetchAll]
+    [user, fetchAll]
   )
 
   const deleteClient = useCallback(
