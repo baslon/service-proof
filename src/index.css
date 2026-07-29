@@ -71,10 +71,16 @@ html {
   table {
     width: 100% !important;
     table-layout: auto;
+    /* Screen type sizes are too wide for A4 once six columns are involved.
+       Shrinking here is what lets each job stay on a single line - wrapping
+       instead produced a table that split "SP-0005" across two rows, which
+       is not what you want on a document a client keeps. */
+    font-size: 11px !important;
   }
   th,
   td {
     white-space: normal !important;
-    word-break: break-word;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
   }
 }
