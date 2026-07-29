@@ -59,4 +59,22 @@ html {
   .break-avoid {
     break-inside: avoid;
   }
+
+  /* Same failure on the horizontal axis: tables sit in an overflow-x-auto
+     wrapper so they can scroll on a narrow screen, but paper cannot scroll -
+     anything past the page width is simply cut off, which was quietly losing
+     the right-hand columns. Let the table use the full page and wrap its
+     cells instead of holding them on one line. */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+  table {
+    width: 100% !important;
+    table-layout: auto;
+  }
+  th,
+  td {
+    white-space: normal !important;
+    word-break: break-word;
+  }
 }
