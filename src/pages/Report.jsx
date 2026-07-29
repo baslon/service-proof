@@ -250,7 +250,7 @@ export default function Report() {
             {exceptions.map((j) => (
               <div
                 key={j.id}
-                className={`rounded-lg border p-4 ${j.status === 'At Risk' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'}`}
+                className={`break-avoid rounded-lg border p-4 ${j.status === 'At Risk' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'}`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-slate-900">{j.id}</span>

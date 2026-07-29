@@ -27,4 +27,36 @@ html {
   body {
     background: white !important;
   }
+
+  /* DashboardLayout pins its shell to h-screen and scrolls the content inside
+     <main>, which is right on screen — the sidebar stays put while the page
+     scrolls. In print it was silently destructive: the document is only ever
+     one viewport tall, so the browser had nothing to paginate and everything
+     below the first page was dropped. A client would have received a report
+     ending mid-table with no indication anything was missing.
+
+     Releasing the height and overflow lets the document report its real
+     height, which is all the browser needs to paginate properly. */
+  html,
+  body,
+  #root,
+  .print-shell {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .print-shell {
+    display: block !important;
+  }
+  main {
+    overflow: visible !important;
+    height: auto !important;
+    flex: none !important;
+  }
+
+  /* Once it paginates, keep a job on one page rather than letting a row split
+     across the boundary. */
+  tr,
+  .break-avoid {
+    break-inside: avoid;
+  }
 }
