@@ -40,8 +40,18 @@ export async function removePhotoObjects(urls) {
   const paths = (urls || []).map(storagePathFromUrl).filter(Boolean)
   if (paths.length === 0) return
 
-  const { error } = await supabase.storage.from(BUCKET).remove(paths)
+  const { data, error } = await supabase.storage.from(BUCKET).remove(paths)
   if (error) {
     console.warn('Could not remove orphaned photo files from storage:', error.message)
+    return
+  }
+  // remove() reports success even when it matched nothing - a missing RLS
+  // policy made it return an empty array rather than an error, which hid a
+  // total failure to delete anything for as long as nobody checked the
+  // bucket. Compare what came back against what was asked for.
+  if ((data || []).length < paths.length) {
+    console.warn(
+      `Storage removed ${(data || []).length} of ${paths.length} photo file(s); the rest were not deleted.`
+    )
   }
 }
