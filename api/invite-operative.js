@@ -85,6 +85,13 @@ export default async function handler(req, res) {
     })
 
     if (linkError) {
+      // Roll back everything created so far. Without this, a failure here
+      // leaves a dangling Auth account with no profile — a confusing
+      // "authenticated but unrecognized" dead end if they ever click their
+      // invite link — plus an operative stuck at "invited" forever, since
+      // its name is now taken by an entry with no working invite.
+      await supabaseAdmin.auth.admin.deleteUser(invitedUser.user.id)
+      await supabaseAdmin.from('operatives').delete().eq('id', operative.id)
       return res.status(500).json({ error: linkError.message })
     }
 
