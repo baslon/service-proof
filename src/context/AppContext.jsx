@@ -2,6 +2,7 @@ import { createContext, useContext, useCallback, useMemo, useRef, useState, useE
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from './AuthContext'
 import { toLocalTimestamp } from '../utils/time'
+import { removePhotoObjects } from '../lib/uploadPhoto'
 
 const AppContext = createContext(null)
 
@@ -180,6 +181,15 @@ export function AppProvider({ children }) {
       if (error) throw new Error(error.message)
 
       if (photos) {
+        // Read the stored set before replacing it. Rows are deleted and
+        // re-inserted wholesale, so "rows we deleted" isn't the same as
+        // "photos the user removed" — only the URLs missing from the
+        // incoming set are actually orphaned.
+        const { data: storedPhotos } = await supabase
+          .from('job_photos')
+          .select('storage_url')
+          .eq('job_id', data.id)
+
         await supabase.from('job_photos').delete().eq('job_id', data.id)
         if (photos.length) {
           const { error: photoError } = await supabase
@@ -187,6 +197,9 @@ export function AppProvider({ children }) {
             .insert(photos.map((p) => ({ job_id: data.id, storage_url: p.dataUrl, captured_at: p.capturedAt })))
           if (photoError) throw new Error(photoError.message)
         }
+
+        const kept = new Set(photos.map((p) => p.dataUrl))
+        await removePhotoObjects((storedPhotos || []).map((r) => r.storage_url).filter((u) => !kept.has(u)))
       }
       await fetchAll()
     },
@@ -195,8 +208,19 @@ export function AppProvider({ children }) {
 
   const deleteJob = useCallback(
     async (id) => {
+      const jobUuid = jobUuidByDisplayIdRef.current[id]
+      const { data: storedPhotos } = await supabase
+        .from('job_photos')
+        .select('storage_url')
+        .eq('job_id', jobUuid)
+
       const { error } = await supabase.from('jobs').delete().eq('display_id', id)
       if (error) throw new Error(error.message)
+
+      // The job_photos rows went with the job via cascade, but a cascade
+      // can't reach into Storage — without this the files outlive the job
+      // they were evidence for, still readable at their public URLs.
+      await removePhotoObjects((storedPhotos || []).map((r) => r.storage_url))
       await fetchAll()
     },
     [fetchAll]
@@ -221,6 +245,11 @@ export function AppProvider({ children }) {
       // for that job, so doing this the other way round would seal the job
       // and then have its own evidence write rejected.
       const jobUuid = jobUuidByDisplayIdRef.current[jobId]
+      const { data: storedPhotos } = await supabase
+        .from('job_photos')
+        .select('storage_url')
+        .eq('job_id', jobUuid)
+
       await supabase.from('job_photos').delete().eq('job_id', jobUuid)
       if (photos.length) {
         const { error: photoError } = await supabase
@@ -242,6 +271,11 @@ export function AppProvider({ children }) {
       // An empty result means RLS refused the write (someone else's job, or
       // one already sealed) rather than the row simply being unchanged.
       if (!data?.length) throw new Error('This job can no longer be updated.')
+
+      // Only once the job itself is saved — deleting the files first would
+      // destroy evidence for a submission that then failed.
+      const kept = new Set(photos.map((p) => p.dataUrl))
+      await removePhotoObjects((storedPhotos || []).map((r) => r.storage_url).filter((u) => !kept.has(u)))
 
       await fetchAll()
     },
