@@ -69,6 +69,7 @@ export function AppProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const clientUuidByDisplayIdRef = useRef({})
   const siteUuidByDisplayIdRef = useRef({})
+  const jobUuidByDisplayIdRef = useRef({})
 
   const fetchAll = useCallback(async () => {
     if (!user) {
@@ -100,6 +101,7 @@ export function AppProvider({ children }) {
     const siteDisplayIdByUuid = Object.fromEntries(siteRows.map((s) => [s.id, s.display_id]))
     clientUuidByDisplayIdRef.current = Object.fromEntries(clientRows.map((c) => [c.display_id, c.id]))
     siteUuidByDisplayIdRef.current = Object.fromEntries(siteRows.map((s) => [s.display_id, s.id]))
+    jobUuidByDisplayIdRef.current = Object.fromEntries(jobRows.map((j) => [j.display_id, j.id]))
 
     const photosByJobUuid = {}
     photoRows.forEach((p) => {
@@ -200,6 +202,19 @@ export function AppProvider({ children }) {
         'Unable to complete': 'Missing Evidence',
       }
 
+      // Evidence is written first, then the job is sealed. Once the status
+      // is Completed & Evidenced the database stops accepting photo changes
+      // for that job, so doing this the other way round would seal the job
+      // and then have its own evidence write rejected.
+      const jobUuid = jobUuidByDisplayIdRef.current[jobId]
+      await supabase.from('job_photos').delete().eq('job_id', jobUuid)
+      if (photos.length) {
+        const { error: photoError } = await supabase
+          .from('job_photos')
+          .insert(photos.map((p) => ({ job_id: jobUuid, storage_url: p.dataUrl, captured_at: p.capturedAt })))
+        if (photoError) throw new Error(photoError.message)
+      }
+
       const { data, error } = await supabase
         .from('jobs')
         .update({
@@ -209,16 +224,11 @@ export function AppProvider({ children }) {
         })
         .eq('display_id', jobId)
         .select()
-        .single()
       if (error) throw new Error(error.message)
+      // An empty result means RLS refused the write (someone else's job, or
+      // one already sealed) rather than the row simply being unchanged.
+      if (!data?.length) throw new Error('This job can no longer be updated.')
 
-      await supabase.from('job_photos').delete().eq('job_id', data.id)
-      if (photos.length) {
-        const { error: photoError } = await supabase
-          .from('job_photos')
-          .insert(photos.map((p) => ({ job_id: data.id, storage_url: p.dataUrl, captured_at: p.capturedAt })))
-        if (photoError) throw new Error(photoError.message)
-      }
       await fetchAll()
     },
     [state.jobs, fetchAll]
