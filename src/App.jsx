@@ -7,6 +7,7 @@ import Clients from './pages/Clients'
 import Report from './pages/Report'
 import Submit from './pages/Submit'
 import SetPassword from './pages/SetPassword'
+import SuperAdmin from './pages/SuperAdmin'
 import RequireAuth from './components/RequireAuth'
 
 export default function App() {
@@ -14,6 +15,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/superadmin" element={<SuperAdmin />} />
 
       <Route element={<RequireAuth roles={['admin']} />}>
         <Route path="/dashboard" element={<Dashboard />} />
