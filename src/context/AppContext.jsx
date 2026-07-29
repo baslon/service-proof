@@ -172,13 +172,13 @@ export function AppProvider({ children }) {
       if ('instructions' in rest) columnPatch.instructions = rest.instructions
       if ('notes' in rest) columnPatch.notes = rest.notes
 
-      const { data, error } = await supabase
-        .from('jobs')
-        .update(columnPatch)
-        .eq('display_id', id)
-        .select()
-        .single()
-      if (error) throw new Error(error.message)
+      // Evidence is written before the job row, for two reasons that both
+      // point the same way: sealing a job blocks any further photo writes,
+      // and the database's evidence check counts the photos already stored
+      // when the seal happens. Saving the row first would seal the job and
+      // then have its own evidence rejected.
+      const jobUuid = jobUuidByDisplayIdRef.current[id]
+      let discarded = []
 
       if (photos) {
         // Read the stored set before replacing it. Rows are deleted and
@@ -188,19 +188,25 @@ export function AppProvider({ children }) {
         const { data: storedPhotos } = await supabase
           .from('job_photos')
           .select('storage_url')
-          .eq('job_id', data.id)
+          .eq('job_id', jobUuid)
 
-        await supabase.from('job_photos').delete().eq('job_id', data.id)
+        await supabase.from('job_photos').delete().eq('job_id', jobUuid)
         if (photos.length) {
           const { error: photoError } = await supabase
             .from('job_photos')
-            .insert(photos.map((p) => ({ job_id: data.id, storage_url: p.dataUrl, captured_at: p.capturedAt })))
+            .insert(photos.map((p) => ({ job_id: jobUuid, storage_url: p.dataUrl, captured_at: p.capturedAt })))
           if (photoError) throw new Error(photoError.message)
         }
 
         const kept = new Set(photos.map((p) => p.dataUrl))
-        await removePhotoObjects((storedPhotos || []).map((r) => r.storage_url).filter((u) => !kept.has(u)))
+        discarded = (storedPhotos || []).map((r) => r.storage_url).filter((u) => !kept.has(u))
       }
+
+      const { data, error } = await supabase.from('jobs').update(columnPatch).eq('display_id', id).select()
+      if (error) throw new Error(error.message)
+      if (!data?.length) throw new Error('This job can no longer be updated.')
+
+      await removePhotoObjects(discarded)
       await fetchAll()
     },
     [fetchAll]
