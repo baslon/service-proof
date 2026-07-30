@@ -7,8 +7,6 @@ export const COMPANY = {
   registrationNumber: '5759884',
   registeredIn: 'England',
   vatNumber: '411 8537 11',
-  // Legally required, and deliberately blank rather than a placeholder so
-  // nothing half-written ships. Fill this in and it renders automatically.
-  registeredOffice: '',
+  registeredOffice: '3b Lockheed Court, Preston Farm, Stockton-on-Tees, England, TS18 3SH',
   contactEmail: 'contact@baslondigital.com',
 }
