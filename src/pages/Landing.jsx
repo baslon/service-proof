@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import BookPilotModal from '../components/modals/BookPilotModal'
+import { COMPANY } from '../lib/company'
 
 const PROBLEMS = [
   {
@@ -229,7 +230,26 @@ export default function Landing() {
 
       <footer className="border-t border-slate-100 py-8">
         <div className="mx-auto max-w-7xl px-6 text-center text-sm text-slate-400">
-          &copy; 2026 Provaserve.
+          <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <span>&copy; {new Date().getFullYear()} {COMPANY.product}</span>
+            <span aria-hidden="true">&middot;</span>
+            <Link to="/privacy" className="transition hover:text-slate-600">
+              Privacy
+            </Link>
+            <span aria-hidden="true">&middot;</span>
+            <Link to="/terms" className="transition hover:text-slate-600">
+              Terms
+            </Link>
+            <span aria-hidden="true">&middot;</span>
+            <a href={`mailto:${COMPANY.contactEmail}`} className="transition hover:text-slate-600">
+              Contact
+            </a>
+          </p>
+          <p className="mt-2 text-xs">
+            {COMPANY.legalName}, registered in {COMPANY.registeredIn} no. {COMPANY.registrationNumber}. VAT{' '}
+            {COMPANY.vatNumber}.
+          </p>
+          {COMPANY.registeredOffice && <p className="mt-1 text-xs">Registered office: {COMPANY.registeredOffice}</p>}
         </div>
       </footer>
 
