@@ -229,7 +229,7 @@ export default function Landing() {
 
       <footer className="border-t border-slate-100 py-8">
         <div className="mx-auto max-w-7xl px-6 text-center text-sm text-slate-400">
-          &copy; 2026 Provaserve. Demo prototype &mdash; not a real product.
+          &copy; 2026 Provaserve.
         </div>
       </footer>
 
