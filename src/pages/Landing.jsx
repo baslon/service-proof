@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import BookPilotModal from '../components/modals/BookPilotModal'
+import DashboardPreview from '../components/DashboardPreview'
 import { COMPANY } from '../lib/company'
 
 const PROBLEMS = [
@@ -148,30 +149,44 @@ export default function Landing() {
       </header>
 
       <section className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-600 to-slate-900">
-        <div className="mx-auto max-w-7xl px-6 py-28 text-center">
-          <p className="mb-4 text-xs font-medium text-indigo-100">
-            Proof-of-service for commercial cleaning
-          </p>
-          <h1 className="mx-auto max-w-3xl text-4xl font-bold leading-snug tracking-tight text-white sm:text-5xl sm:leading-snug">
-            Stop guessing whether the clean actually happened.
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-indigo-100">
-            Provaserve turns every cleaning job into evidence: timestamped photos, completion status, and a
-            report your client can trust &mdash; without a single extra spreadsheet.
-          </p>
-          <div className="mt-10 flex justify-center gap-4">
-            <Link
-              to="/dashboard"
-              className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
-            >
-              See it in action
-            </Link>
-            <button
-              onClick={() => setBookingPilot(true)}
-              className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            >
-              Book a pilot
-            </button>
+        {/* Faint grid texture — CSS-only depth for the flat gradient. */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+          }}
+        />
+
+        <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
+          <div className="text-center lg:text-left">
+            <p className="mb-4 text-xs font-medium text-indigo-100">Proof-of-service for commercial cleaning</p>
+            <h1 className="mx-auto max-w-xl text-4xl font-bold leading-snug tracking-tight text-white sm:text-5xl sm:leading-snug lg:mx-0">
+              Stop guessing whether the clean actually happened.
+            </h1>
+            <p className="mx-auto mt-6 max-w-xl text-lg text-indigo-100 lg:mx-0">
+              Provaserve turns every cleaning job into evidence: timestamped photos, completion status, and a
+              report your client can trust &mdash; without a single extra spreadsheet.
+            </p>
+            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
+              <Link
+                to="/dashboard"
+                className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
+              >
+                See it in action
+              </Link>
+              <button
+                onClick={() => setBookingPilot(true)}
+                className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Book a pilot
+              </button>
+            </div>
+          </div>
+
+          <div className="mx-auto w-full min-w-0 max-w-md lg:mx-0 lg:max-w-none">
+            <DashboardPreview />
           </div>
         </div>
       </section>
