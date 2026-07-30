@@ -48,6 +48,15 @@ const PERSONAS = [
   { role: 'Client Contact', need: 'Wants confidence the contract is being delivered without micromanaging it.' },
 ]
 
+// Shared by the desktop header and the mobile menu so the two can't drift.
+// Sign in stays out of the list: it's a router Link rather than an anchor,
+// and it belongs last in both.
+const NAV_LINKS = [
+  { label: 'How it works', href: '#how-it-works' },
+  { label: 'Pricing', href: '#pricing' },
+  { label: 'Contact', href: `mailto:${COMPANY.contactEmail}` },
+]
+
 export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [bookingPilot, setBookingPilot] = useState(false)
@@ -58,8 +67,24 @@ export default function Landing() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">P</div>
-            <span className="text-base font-semibold text-slate-900">Provaserve</span>
+            <span className="text-base font-semibold text-slate-900">{COMPANY.product}</span>
           </div>
+
+          <nav className="hidden items-center gap-7 sm:flex">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+              >
+                {link.label}
+              </a>
+            ))}
+            <Link to="/login" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+              Sign in
+            </Link>
+          </nav>
+
           <div className="flex items-center gap-2">
             <Link
               to="/dashboard"
@@ -101,20 +126,16 @@ export default function Landing() {
 
         {menuOpen && (
           <nav className="flex flex-col gap-1 border-t border-slate-100 px-6 py-4 sm:hidden">
-            <a
-              href="#how-it-works"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              How it works
-            </a>
-            <a
-              href="#pricing"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              Pricing
-            </a>
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              >
+                {link.label}
+              </a>
+            ))}
             <Link
               to="/login"
               onClick={() => setMenuOpen(false)}
