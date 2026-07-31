@@ -10,7 +10,7 @@ async function loadProfile(authUser) {
   if (!authUser) return null
   const { data, error } = await supabase
     .from('profiles')
-    .select('organization_id, role, name, operative_id')
+    .select('organization_id, role, name, operative_id, organizations(name)')
     .eq('id', authUser.id)
     .single()
   if (error || !data) return null
@@ -20,6 +20,7 @@ async function loadProfile(authUser) {
     role: data.role,
     operativeId: data.operative_id,
     organizationId: data.organization_id,
+    organizationName: data.organizations?.name || '',
   }
 }
 
