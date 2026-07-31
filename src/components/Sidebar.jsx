@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { to: '/dashboard', label: 'Dashboard', icon: 'grid' },
   { to: '/sites', label: 'Sites', icon: 'building' },
   { to: '/clients', label: 'Clients', icon: 'users' },
+  { to: '/operatives', label: 'Operatives', icon: 'badge' },
   { to: '/report', label: 'Client report', icon: 'doc' },
 ]
 
@@ -24,6 +25,7 @@ function Icon({ name, className }) {
     building: 'M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1',
     users: 'M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m5-5.13a4 4 0 100-8 4 4 0 000 8zm6 3.13a4 4 0 010 6.74M7 10.13a4 4 0 010 6.74',
     doc: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    badge: 'M12 3l2.09 4.26 4.7.68-3.4 3.32.8 4.68L12 13.77l-4.19 2.17.8-4.68-3.4-3.32 4.7-.68L12 3z',
   }
   return (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

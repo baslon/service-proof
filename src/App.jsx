@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Sites from './pages/Sites'
 import Clients from './pages/Clients'
+import Operatives from './pages/Operatives'
 import Report from './pages/Report'
 import Submit from './pages/Submit'
 import SetPassword from './pages/SetPassword'
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/sites" element={<Sites />} />
         <Route path="/clients" element={<Clients />} />
+        <Route path="/operatives" element={<Operatives />} />
         <Route path="/report" element={<Report />} />
       </Route>
 

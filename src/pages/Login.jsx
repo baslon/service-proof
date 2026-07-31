@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { homeFor } from '../lib/roleHome'
 import { inputClass } from '../components/FormField'
 
-const ADMIN_ONLY_PATHS = ['/dashboard', '/sites', '/clients', '/report']
+const ADMIN_ONLY_PATHS = ['/dashboard', '/sites', '/clients', '/operatives', '/report']
 
 // A "come back here after signing in" path can be left over in browser
 // history from a different session (e.g. a shared device). Only honor it if
