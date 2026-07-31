@@ -6,6 +6,7 @@ import EditJobModal from '../components/modals/EditJobModal'
 import ScheduleJobModal from '../components/modals/ScheduleJobModal'
 import AddOperativeModal from '../components/modals/AddOperativeModal'
 import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
 import { STATUS_TEXT_COLOR, isPendingStatus } from '../context/statusStyles'
 
 const SUMMARY_CARDS = [
@@ -17,6 +18,7 @@ const SUMMARY_CARDS = [
 
 export default function Dashboard() {
   const { clients, sites, jobs, operatives } = useApp()
+  const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [clientFilter, setClientFilter] = useState(searchParams.get('client') || '')
   const [siteFilter, setSiteFilter] = useState(searchParams.get('site') || '')
@@ -55,7 +57,18 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+            {/* The sidebar already shows this, but it scrolls out of view on a
+                long job list, and the whole point is to catch "which tenant
+                am I looking at" at a glance — right by the page title is
+                where that glance lands. */}
+            {user?.organizationName && (
+              <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20">
+                {user.organizationName}
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-slate-500">Live evidence status across every client and site.</p>
         </div>
         <div className="flex gap-2">
