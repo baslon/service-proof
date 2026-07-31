@@ -39,8 +39,15 @@ function mapSite(row, clientDisplayIdByUuid) {
   }
 }
 
-function mapOperative(row) {
-  return { id: row.id, name: row.name }
+function mapOperative(row, clientIdsByOperativeId) {
+  return {
+    id: row.id,
+    name: row.name,
+    active: row.active,
+    // Empty means unrestricted — available for every client — rather than
+    // "available for none". Only a non-empty list narrows an operative down.
+    clientIds: clientIdsByOperativeId[row.id] || [],
+  }
 }
 
 function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid) {
@@ -82,11 +89,12 @@ export function AppProvider({ children }) {
     }
     setLoading(true)
 
-    const [clientsRes, sitesRes, jobsRes, operativesRes] = await Promise.all([
+    const [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes] = await Promise.all([
       supabase.from('clients').select('*'),
       supabase.from('sites').select('*'),
       supabase.from('jobs').select('*').order('display_id', { ascending: false }),
       supabase.from('operatives').select('*'),
+      supabase.from('operative_clients').select('*'),
     ])
 
     const jobUuids = (jobsRes.data || []).map((j) => j.id)
@@ -98,7 +106,7 @@ export function AppProvider({ children }) {
     // perfectly normal empty account - the most alarming possible way to
     // report a network blip to someone who had data a minute ago. Bail out
     // instead, leaving whatever was last loaded on screen.
-    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, photosRes].find((r) => r.error)
+    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, photosRes].find((r) => r.error)
     if (failure) {
       setError(failure.error.message || 'Could not load your data.')
       setLoading(false)
@@ -110,6 +118,7 @@ export function AppProvider({ children }) {
     const siteRows = sitesRes.data || []
     const jobRows = jobsRes.data || []
     const operativeRows = operativesRes.data || []
+    const operativeClientRows = operativeClientsRes.data || []
     const photoRows = photosRes.data || []
 
     const clientDisplayIdByUuid = Object.fromEntries(clientRows.map((c) => [c.id, c.display_id]))
@@ -124,11 +133,17 @@ export function AppProvider({ children }) {
     })
     Object.values(photosByJobUuid).forEach((arr) => arr.sort((a, b) => (a.capturedAt < b.capturedAt ? -1 : 1)))
 
+    const clientIdsByOperativeId = {}
+    operativeClientRows.forEach((r) => {
+      const displayId = clientDisplayIdByUuid[r.client_id]
+      if (displayId) (clientIdsByOperativeId[r.operative_id] ||= []).push(displayId)
+    })
+
     setState({
       clients: clientRows.map(mapClient),
       sites: siteRows.map((s) => mapSite(s, clientDisplayIdByUuid)),
       jobs: jobRows.map((j) => mapJob(j, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid)),
-      operatives: operativeRows.map(mapOperative),
+      operatives: operativeRows.map((r) => mapOperative(r, clientIdsByOperativeId)),
     })
     setLoading(false)
   }, [user])
@@ -365,6 +380,52 @@ export function AppProvider({ children }) {
     [fetchAll]
   )
 
+  // Deactivating bans the linked login as well as flipping the flag, which
+  // needs the service_role key — the same reason inviteOperative can't be a
+  // direct Supabase call either.
+  const setOperativeActive = useCallback(
+    async (operativeId, active) => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const res = await fetch('/api/set-operative-active', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token || ''}`,
+        },
+        body: JSON.stringify({ operativeId, active }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to update operative status')
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
+  // Unlike operative status, this is a plain data write with no auth
+  // entanglement, so it goes straight to Supabase under ordinary RLS rather
+  // than through a serverless endpoint. Replaces the whole set rather than
+  // diffing added/removed clients — the list is small, and it mirrors the
+  // same delete-then-insert shape already used for a job's photos.
+  const setOperativeClients = useCallback(
+    async (operativeId, clientDisplayIds) => {
+      const clientUuids = clientDisplayIds.map((id) => clientUuidByDisplayIdRef.current[id]).filter(Boolean)
+
+      const { error: deleteError } = await supabase.from('operative_clients').delete().eq('operative_id', operativeId)
+      if (deleteError) throw new Error(deleteError.message)
+
+      if (clientUuids.length) {
+        const { error: insertError } = await supabase
+          .from('operative_clients')
+          .insert(clientUuids.map((client_id) => ({ operative_id: operativeId, client_id })))
+        if (insertError) throw new Error(insertError.message)
+      }
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
   const value = useMemo(
     () => ({
       ...state,
@@ -379,6 +440,8 @@ export function AppProvider({ children }) {
       addClient,
       deleteClient,
       inviteOperative,
+      setOperativeActive,
+      setOperativeClients,
       refreshData: fetchAll,
     }),
     [
@@ -394,6 +457,8 @@ export function AppProvider({ children }) {
       addClient,
       deleteClient,
       inviteOperative,
+      setOperativeActive,
+      setOperativeClients,
       fetchAll,
     ]
   )

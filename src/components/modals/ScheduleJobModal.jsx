@@ -3,15 +3,17 @@ import Modal from '../Modal'
 import FormField, { inputClass } from '../FormField'
 import { useApp } from '../../context/AppContext'
 import { TASK_TYPES, RECURRENCE_OPTIONS } from '../../context/mockData'
+import { isOperativeEligibleFor as isEligibleFor } from '../../lib/operativeEligibility'
 
 export default function ScheduleJobModal({ onClose }) {
   const { clients, sites, operatives, addJob } = useApp()
+  const initialClientId = clients[0]?.id || ''
   const [form, setForm] = useState({
-    clientId: clients[0]?.id || '',
+    clientId: initialClientId,
     siteId: '',
     taskType: TASK_TYPES[0],
     recurrence: 'Daily',
-    operativeId: operatives[0]?.id || '',
+    operativeId: operatives.find((o) => isEligibleFor(o, initialClientId))?.id || '',
     area: '',
     scheduledTime: '',
     photosRequired: 6,
@@ -22,6 +24,10 @@ export default function ScheduleJobModal({ onClose }) {
   const [submitting, setSubmitting] = useState(false)
 
   const sitesForClient = useMemo(() => sites.filter((s) => s.clientId === form.clientId), [sites, form.clientId])
+  const eligibleOperatives = useMemo(
+    () => operatives.filter((o) => isEligibleFor(o, form.clientId)),
+    [operatives, form.clientId]
+  )
 
   const set = (key) => (e) =>
     setForm((f) => {
@@ -29,6 +35,12 @@ export default function ScheduleJobModal({ onClose }) {
       if (key === 'clientId') {
         const firstSite = sites.find((s) => s.clientId === e.target.value)
         next.siteId = firstSite ? firstSite.id : ''
+        // The previously chosen operative may not work for the new client -
+        // fall back to the first one who does, rather than silently keeping
+        // an assignee who was never offered for this client.
+        if (!operatives.find((o) => o.id === f.operativeId && isEligibleFor(o, e.target.value))) {
+          next.operativeId = operatives.find((o) => isEligibleFor(o, e.target.value))?.id || ''
+        }
       }
       return next
     })
@@ -107,11 +119,17 @@ export default function ScheduleJobModal({ onClose }) {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField label="Operative">
             <select className={inputClass} value={form.operativeId} onChange={set('operativeId')}>
-              {operatives.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
+              {eligibleOperatives.length === 0 ? (
+                <option value="" disabled>
+                  No operative available for this client
                 </option>
-              ))}
+              ) : (
+                eligibleOperatives.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))
+              )}
             </select>
           </FormField>
 

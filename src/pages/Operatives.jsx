@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import AddOperativeModal from '../components/modals/AddOperativeModal'
+import EditOperativeModal from '../components/modals/EditOperativeModal'
+import { useApp } from '../context/AppContext'
 import { supabase } from '../lib/supabaseClient'
 
 function formatDateTime(value) {
@@ -8,7 +10,7 @@ function formatDateTime(value) {
   return new Date(value).toLocaleString([], { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-const STATUS_STYLE = {
+const ACCOUNT_STATUS_STYLE = {
   active: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   invited: 'bg-amber-50 text-amber-700 ring-amber-600/20',
   not_invited: 'bg-slate-100 text-slate-500 ring-slate-500/10',
@@ -49,10 +51,17 @@ function ResendButton({ operativeId, onResend }) {
 }
 
 export default function Operatives() {
-  const [operatives, setOperatives] = useState([])
+  // "Account" (inviteStatus/invitedAt/email) only exists via the Admin API, so
+  // it comes from a dedicated endpoint. "Active" and client scoping are plain
+  // org-scoped rows already flowing through AppContext under RLS - merging
+  // the two here avoids fetching the same operative twice from two sources
+  // of truth for the fields both could technically provide.
+  const { clients, operatives: contextOperatives } = useApp()
+  const [roster, setRoster] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState(null)
 
   const callApi = useCallback(async (path, { method = 'GET', body } = {}) => {
     const {
@@ -75,8 +84,8 @@ export default function Operatives() {
     setLoading(true)
     setError('')
     try {
-      const { operatives: roster } = await callApi('/api/list-operatives')
-      setOperatives(roster)
+      const { operatives: accountRows } = await callApi('/api/list-operatives')
+      setRoster(accountRows)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -87,6 +96,18 @@ export default function Operatives() {
   useEffect(() => {
     loadRoster()
   }, [loadRoster])
+
+  const operatives = useMemo(() => {
+    const contextById = Object.fromEntries(contextOperatives.map((o) => [o.id, o]))
+    return roster.map((op) => ({
+      ...op,
+      active: contextById[op.id]?.active ?? true,
+      clientIds: contextById[op.id]?.clientIds ?? [],
+    }))
+  }, [roster, contextOperatives])
+
+  const clientNames = (clientIds) =>
+    clientIds.length === 0 ? 'All clients' : clientIds.map((id) => clients.find((c) => c.id === id)?.name || id).join(', ')
 
   const handleResend = async (operativeId) => {
     await callApi('/api/resend-operative-invite', { method: 'POST', body: { operativeId } })
@@ -121,7 +142,7 @@ export default function Operatives() {
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                {['Name', 'Email', 'Status', 'Invited', ''].map((h) => (
+                {['Name', 'Email', 'Employment', 'Account', 'Clients', 'Invited', ''].map((h) => (
                   <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                     {h}
                   </th>
@@ -131,13 +152,13 @@ export default function Operatives() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-400">
                     Loading…
                   </td>
                 </tr>
               ) : operatives.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-400">
                     No operatives yet — invite your first one above.
                   </td>
                 </tr>
@@ -147,13 +168,30 @@ export default function Operatives() {
                     <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{op.name}</td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{op.email || '—'}</td>
                     <td className="whitespace-nowrap px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${STATUS_STYLE[op.inviteStatus] || STATUS_STYLE.not_invited}`}>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
+                          op.active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-500 ring-slate-500/10'
+                        }`}
+                      >
+                        {op.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${ACCOUNT_STATUS_STYLE[op.inviteStatus] || ACCOUNT_STATUS_STYLE.not_invited}`}>
                         {op.inviteStatus.replace('_', ' ')}
                       </span>
                     </td>
+                    <td className="max-w-xs truncate px-4 py-3 text-sm text-slate-600" title={clientNames(op.clientIds)}>
+                      {clientNames(op.clientIds)}
+                    </td>
                     <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{formatDateTime(op.invitedAt)}</td>
                     <td className="whitespace-nowrap px-4 py-3">
-                      <ResendButton operativeId={op.id} onResend={handleResend} />
+                      <div className="flex items-center justify-end gap-3">
+                        <button onClick={() => setEditing(op)} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+                          Edit
+                        </button>
+                        <ResendButton operativeId={op.id} onResend={handleResend} />
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -163,15 +201,17 @@ export default function Operatives() {
         </div>
       </div>
 
-      {/* "Active" is set the moment the account is created, not once someone has
-          actually logged in - so it can't be read as "this person is up and
-          running", only as "this account exists and can receive an invite link." */}
+      {/* "Account" is set to active the moment the login is created, not once
+          someone has actually signed in - so it can't be read as "this person
+          is up and running", only as "this account exists". "Employment" is
+          the separate flag that actually controls new assignments and login. */}
       <p className="mt-3 text-xs text-slate-400">
-        Status reflects whether an account exists, not whether the operative has signed in yet. If someone says their
-        invite link isn&apos;t working, use Resend invite to send a fresh one.
+        Account reflects whether a login exists, not whether the operative has signed in yet — use Resend invite if
+        their link stopped working. Employment controls whether they can be assigned new jobs and sign in at all.
       </p>
 
       {adding && <AddOperativeModal onClose={() => { setAdding(false); loadRoster() }} />}
+      {editing && <EditOperativeModal operative={editing} onClose={() => setEditing(null)} />}
     </DashboardLayout>
   )
 }

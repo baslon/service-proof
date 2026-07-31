@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Modal from '../Modal'
 import ConfirmDialog from '../ConfirmDialog'
 import FormField, { inputClass } from '../FormField'
@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import { JOB_STATUSES } from '../../context/mockData'
 import { formatTime, formatDateTime } from '../../utils/time'
 import { uploadPhoto } from '../../lib/uploadPhoto'
+import { isOperativeEligibleFor } from '../../lib/operativeEligibility'
 
 const initialFormFor = (job) => ({
   status: job.status,
@@ -29,6 +30,18 @@ export default function EditJobModal({ job, onClose }) {
   const [saving, setSaving] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const fileInputRef = useRef(null)
+
+  // The job's current assignee always stays selectable, even if they've
+  // since gone inactive or been narrowed to other clients — reassigning to
+  // someone new only offers people who'd actually qualify today.
+  const assignableOperatives = useMemo(() => {
+    const eligible = operatives.filter((o) => isOperativeEligibleFor(o, job.clientId))
+    if (job.operativeId && !eligible.some((o) => o.id === job.operativeId)) {
+      const current = operatives.find((o) => o.id === job.operativeId)
+      if (current) return [current, ...eligible]
+    }
+    return eligible
+  }, [operatives, job.clientId, job.operativeId])
 
   // An evidenced job is sealed: its status can't be moved back and it can't
   // be deleted. The database enforces both, so these controls could only
@@ -197,9 +210,10 @@ export default function EditJobModal({ job, onClose }) {
 
         <FormField label="Operative">
           <select className={inputClass} value={form.operativeId} onChange={set('operativeId')} disabled={isSealed}>
-            {operatives.map((o) => (
+            {assignableOperatives.map((o) => (
               <option key={o.id} value={o.id}>
                 {o.name}
+                {!o.active ? ' (inactive)' : ''}
               </option>
             ))}
           </select>
