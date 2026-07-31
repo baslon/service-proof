@@ -18,11 +18,12 @@ const DEFAULT_COMPLETION_STATUS = {
   'At Risk': 'Completed with issue',
 }
 
-function JobList({ jobs, sites, onSelect, unreliable }) {
+function JobList({ jobs, sites, clients, onSelect, unreliable }) {
   return (
     <div className="space-y-3 px-4 py-4">
       {jobs.map((job) => {
         const site = sites.find((s) => s.id === job.siteId)
+        const clientName = clients.find((c) => c.id === job.clientId)?.name
         return (
           <button
             key={job.id}
@@ -30,7 +31,10 @@ function JobList({ jobs, sites, onSelect, unreliable }) {
             className="block w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-semibold text-slate-900">{job.id}</span>
+              <span className="text-sm font-semibold text-slate-900">
+                {job.id}
+                {clientName ? ` — ${clientName}` : ''}
+              </span>
               <StatusBadge
                 status={job.status}
                 label={job.status === 'Incomplete' ? 'Assigned' : undefined}
@@ -57,7 +61,7 @@ function JobList({ jobs, sites, onSelect, unreliable }) {
   )
 }
 
-const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel, onSubmit }, ref) {
+const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientName, onCancel, onSubmit }, ref) {
   // Fresh (Assigned) jobs start with no outcome pre-selected — the operative
   // must actively answer "how did this job go?" rather than the app assuming.
   // Re-entries into already-flagged jobs still carry their previous outcome
@@ -181,7 +185,10 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
   return (
     <div className="px-4 py-4">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{job.id}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          {job.id}
+          {clientName ? ` — ${clientName}` : ''}
+        </p>
         <h2 className="mt-1 text-lg font-semibold text-slate-900">{job.taskType}</h2>
         <p className="text-sm text-slate-500">{site?.name}</p>
         <p className="text-sm text-slate-500">{job.area}</p>
@@ -353,7 +360,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, onCancel,
 })
 
 export default function Submit() {
-  const { jobs, sites, submitProof, loading, error } = useApp()
+  const { jobs, sites, clients, submitProof, loading, error } = useApp()
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const [selectedJobId, setSelectedJobId] = useState(null)
@@ -365,6 +372,7 @@ export default function Submit() {
   )
   const selectedJob = jobs.find((j) => j.id === selectedJobId) || null
   const selectedSite = selectedJob ? sites.find((s) => s.id === selectedJob.siteId) : null
+  const selectedClientName = selectedJob ? clients.find((c) => c.id === selectedJob.clientId)?.name : null
 
   // Deliberately not caught here: SubmissionForm awaits this and shows the
   // error itself, and letting it throw means the job stays selected with the
@@ -432,6 +440,7 @@ export default function Submit() {
               ref={formRef}
               job={selectedJob}
               site={selectedSite}
+              clientName={selectedClientName}
               onCancel={() => setSelectedJobId(null)}
               onSubmit={handleSubmit}
             />
@@ -444,6 +453,7 @@ export default function Submit() {
               <JobList
                 jobs={myJobs}
                 sites={sites}
+                clients={clients}
                 onSelect={(j) => setSelectedJobId(j.id)}
                 unreliable={loading || !!error}
               />
