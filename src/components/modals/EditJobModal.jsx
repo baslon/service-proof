@@ -18,8 +18,9 @@ const initialFormFor = (job) => ({
 })
 
 export default function EditJobModal({ job, onClose }) {
-  const { operatives, updateJob, deleteJob } = useApp()
+  const { clients, operatives, updateJob, deleteJob } = useApp()
   const { user } = useAuth()
+  const clientName = clients.find((c) => c.id === job.clientId)?.name || 'Unknown client'
   const initialForm = initialFormFor(job)
   const initialPhotoIds = (job.photos || []).map((p) => p.id).join(',')
   const [form, setForm] = useState(initialForm)
@@ -125,7 +126,11 @@ export default function EditJobModal({ job, onClose }) {
   }
 
   return (
-    <Modal open onClose={attemptClose} title={isSealed ? `Job ${job.id}` : `Edit job ${job.id}`}>
+    <Modal
+      open
+      onClose={attemptClose}
+      title={isSealed ? `Job ${job.id} — ${clientName}` : `Edit job ${job.id} — ${clientName}`}
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-slate-500">
           {job.taskType} &middot; {job.area}
