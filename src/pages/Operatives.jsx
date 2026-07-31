@@ -137,7 +137,66 @@ export default function Operatives() {
         </div>
       )}
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white">
+      {/* Mobile: card list. The table below needs six columns' worth of width
+          no matter how it's dressed up, so on a phone it's a second list
+          shaped for a narrow screen rather than the same table squeezed or
+          left to scroll sideways. */}
+      <div className="mt-6 space-y-3 md:hidden">
+        {loading ? (
+          <p className="rounded-xl border border-dashed border-slate-300 py-8 text-center text-sm text-slate-400">
+            Loading…
+          </p>
+        ) : operatives.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-slate-300 py-8 text-center text-sm text-slate-400">
+            No operatives yet — invite your first one above.
+          </p>
+        ) : (
+          operatives.map((op) => (
+            <div key={op.id} className="rounded-xl border border-slate-200 bg-white p-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-semibold text-slate-900">{op.name}</span>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
+                    op.active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-500 ring-slate-500/10'
+                  }`}
+                >
+                  {op.active ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+              <p className="mt-1 truncate text-xs text-slate-500">{op.email || '—'}</p>
+
+              <dl className="mt-3 space-y-1.5 text-sm">
+                <div className="flex items-center justify-between">
+                  <dt className="text-slate-400">Account</dt>
+                  <dd>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${ACCOUNT_STATUS_STYLE[op.inviteStatus] || ACCOUNT_STATUS_STYLE.not_invited}`}>
+                      {op.inviteStatus.replace('_', ' ')}
+                    </span>
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="shrink-0 text-slate-400">Clients</dt>
+                  <dd className="truncate text-right text-slate-700">{clientNames(op.clientIds)}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-slate-400">Invited</dt>
+                  <dd className="text-slate-700">{formatDateTime(op.invitedAt)}</dd>
+                </div>
+              </dl>
+
+              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                <button onClick={() => setEditing(op)} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+                  Edit
+                </button>
+                <ResendButton operativeId={op.id} onResend={handleResend} />
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="mt-6 hidden rounded-xl border border-slate-200 bg-white md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
