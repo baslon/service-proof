@@ -183,7 +183,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
   }
 
   return (
-    <div className="px-4 py-4">
+    <div className="px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4">
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
           {job.id}
