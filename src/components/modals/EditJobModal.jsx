@@ -116,6 +116,10 @@ export default function EditJobModal({ job, onClose }) {
       )
       return
     }
+    if (form.status === 'At Risk' && photos.length < 1) {
+      setError('Cannot mark as At Risk without at least one photo of evidence.')
+      return
+    }
     setError('')
     setSaving(true)
     try {

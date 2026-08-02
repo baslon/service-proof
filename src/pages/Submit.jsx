@@ -150,6 +150,10 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
       )
       return
     }
+    if (completionStatus === 'Completed with issue' && photos.length < 1) {
+      setError('Add at least one photo showing the issue before submitting.')
+      return
+    }
     if (!notes.trim()) {
       setError(
         completionStatus === 'Completed'
