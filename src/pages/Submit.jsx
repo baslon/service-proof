@@ -368,7 +368,10 @@ export default function Submit() {
   const formRef = useRef(null)
 
   const myJobs = jobs.filter(
-    (j) => ACTIONABLE_STATUSES.includes(j.status) && (user?.role === 'admin' || j.operativeId === user?.operativeId)
+    (j) =>
+      ACTIONABLE_STATUSES.includes(j.status) &&
+      !j.resolvedAt &&
+      (user?.role === 'admin' || j.operativeId === user?.operativeId)
   )
   const selectedJob = jobs.find((j) => j.id === selectedJobId) || null
   const selectedSite = selectedJob ? sites.find((s) => s.id === selectedJob.siteId) : null

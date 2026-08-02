@@ -17,8 +17,12 @@ const initialFormFor = (job) => ({
   notes: job.notes || '',
 })
 
+// Outcomes worth calling out — "Completed" needing no resolution isn't
+// interesting to show or ever needs a "Mark resolved" action.
+const PROBLEM_OUTCOMES = ['Completed with issue', 'Unable to complete']
+
 export default function EditJobModal({ job, onClose }) {
-  const { clients, operatives, updateJob, deleteJob } = useApp()
+  const { clients, operatives, updateJob, deleteJob, resolveJob } = useApp()
   const { user } = useAuth()
   const clientName = clients.find((c) => c.id === job.clientId)?.name || 'Unknown client'
   const initialForm = initialFormFor(job)
@@ -30,7 +34,14 @@ export default function EditJobModal({ job, onClose }) {
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+  const [resolving, setResolving] = useState(false)
+  const [resolutionNoteInput, setResolutionNoteInput] = useState('')
+  const [resolvingError, setResolvingError] = useState('')
+  const [resolvingSubmitting, setResolvingSubmitting] = useState(false)
   const fileInputRef = useRef(null)
+
+  const isProblemOutcome = PROBLEM_OUTCOMES.includes(job.originalOutcome)
+  const needsResolution = isProblemOutcome && !job.resolvedAt
 
   // The job's current assignee always stays selectable, even if they've
   // since gone inactive or been narrowed to other clients — reassigning to
@@ -131,6 +142,19 @@ export default function EditJobModal({ job, onClose }) {
     }
   }
 
+  const handleResolve = async () => {
+    setResolvingError('')
+    setResolvingSubmitting(true)
+    try {
+      await resolveJob(job.id, resolutionNoteInput.trim())
+      onClose()
+    } catch (err) {
+      setResolvingError(err.message)
+    } finally {
+      setResolvingSubmitting(false)
+    }
+  }
+
   return (
     <Modal open onClose={attemptClose} title={isSealed ? `Job ${job.id}` : `Edit job ${job.id}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -147,6 +171,72 @@ export default function EditJobModal({ job, onClose }) {
             <p className="mt-0.5 text-xs text-emerald-700">
               This record is evidence and can no longer be changed &mdash; by anyone.
             </p>
+          </div>
+        )}
+
+        {isProblemOutcome && (
+          <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
+            <p className="font-medium">Originally reported: {job.originalOutcome}</p>
+            <p className="mt-0.5 text-xs text-amber-700">
+              What the operative first submitted &mdash; this stays on record even if the job is later finished.
+            </p>
+          </div>
+        )}
+
+        {job.resolvedAt && (
+          <div className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
+            <p className="font-medium">Resolved {formatDateTime(job.resolvedAt)}</p>
+            {job.resolutionNotes && <p className="mt-0.5 text-xs text-emerald-700">{job.resolutionNotes}</p>}
+          </div>
+        )}
+
+        {needsResolution && (
+          <div className="rounded-lg border border-slate-200 p-3">
+            {!resolving ? (
+              <button
+                type="button"
+                onClick={() => setResolving(true)}
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+              >
+                Mark resolved
+              </button>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-slate-700">How was this resolved?</p>
+                <textarea
+                  rows={2}
+                  value={resolutionNoteInput}
+                  onChange={(e) => {
+                    setResolutionNoteInput(e.target.value)
+                    setResolvingError('')
+                  }}
+                  placeholder="e.g. Client informed, no revisit needed"
+                  className={inputClass}
+                />
+                {resolvingError && <p className="text-sm text-red-600">{resolvingError}</p>}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResolving(false)
+                      setResolutionNoteInput('')
+                      setResolvingError('')
+                    }}
+                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleResolve}
+                    disabled={resolvingSubmitting || !resolutionNoteInput.trim()}
+                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {resolvingSubmitting ? 'Saving…' : 'Confirm resolved'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

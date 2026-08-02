@@ -68,6 +68,12 @@ function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid
     submittedTime: row.submitted_time ? row.submitted_time.slice(0, 16) : null,
     status: row.status,
     notes: row.notes || '',
+    // What the operative first reported, permanent regardless of what
+    // status becomes afterwards. Null until the first submission.
+    originalOutcome: row.original_outcome,
+    resolvedAt: row.resolved_at,
+    resolvedBy: row.resolved_by,
+    resolutionNotes: row.resolution_notes || '',
   }
 }
 
@@ -284,15 +290,21 @@ export function AppProvider({ children }) {
         if (photoError) throw new Error(photoError.message)
       }
 
-      const { data, error } = await supabase
-        .from('jobs')
-        .update({
-          status: statusMap[completionStatus] || target.status,
-          notes,
-          submitted_time: toLocalTimestamp(),
-        })
-        .eq('display_id', jobId)
-        .select()
+      const columnPatch = {
+        status: statusMap[completionStatus] || target.status,
+        notes,
+        submitted_time: toLocalTimestamp(),
+      }
+      // Permanent, so only ever set on the very first submission. A trigger
+      // enforces this at the database level too, but skipping it here means
+      // a genuine resubmission with a different outcome (e.g. going back
+      // and finishing a job first reported as "Unable to complete") never
+      // even attempts a change the trigger would reject.
+      if (!target.originalOutcome) {
+        columnPatch.original_outcome = completionStatus
+      }
+
+      const { data, error } = await supabase.from('jobs').update(columnPatch).eq('display_id', jobId).select()
       if (error) throw new Error(error.message)
       // An empty result means RLS refused the write (someone else's job, or
       // one already sealed) rather than the row simply being unchanged.
@@ -306,6 +318,25 @@ export function AppProvider({ children }) {
       await fetchAll()
     },
     [state.jobs, fetchAll]
+  )
+
+  // A plain data write like updateJob — no auth entanglement — but a
+  // distinct action from it because the database only allows resolved_by
+  // and resolution_notes to be set together, once, by an admin, never
+  // alongside other job edits. resolved_at is stamped by the database
+  // itself, not sent from here.
+  const resolveJob = useCallback(
+    async (id, resolutionNotes) => {
+      const { data, error } = await supabase
+        .from('jobs')
+        .update({ resolved_by: user.id, resolution_notes: resolutionNotes })
+        .eq('display_id', id)
+        .select()
+      if (error) throw new Error(error.message)
+      if (!data?.length) throw new Error('This job could not be marked resolved.')
+      await fetchAll()
+    },
+    [user, fetchAll]
   )
 
   const addSite = useCallback(
@@ -440,6 +471,7 @@ export function AppProvider({ children }) {
       updateJob,
       deleteJob,
       submitProof,
+      resolveJob,
       addSite,
       deleteSite,
       addClient,
@@ -457,6 +489,7 @@ export function AppProvider({ children }) {
       updateJob,
       deleteJob,
       submitProof,
+      resolveJob,
       addSite,
       deleteSite,
       addClient,
