@@ -126,15 +126,14 @@ export default function EditJobModal({ job, onClose }) {
   }
 
   return (
-    <Modal
-      open
-      onClose={attemptClose}
-      title={isSealed ? `Job ${job.id} — ${clientName}` : `Edit job ${job.id} — ${clientName}`}
-    >
+    <Modal open onClose={attemptClose} title={isSealed ? `Job ${job.id}` : `Edit job ${job.id}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <p className="text-sm text-slate-500">
-          {job.taskType} &middot; {job.area}
-        </p>
+        <div>
+          <p className="text-xs font-medium text-slate-400">{clientName}</p>
+          <p className="text-sm text-slate-500">
+            {job.taskType} &middot; {job.area}
+          </p>
+        </div>
 
         {isSealed && (
           <div className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
