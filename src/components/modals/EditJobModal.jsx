@@ -39,6 +39,7 @@ export default function EditJobModal({ job, onClose }) {
   const [resolvingError, setResolvingError] = useState('')
   const [resolvingSubmitting, setResolvingSubmitting] = useState(false)
   const [reopening, setReopening] = useState(false)
+  const [reopenError, setReopenError] = useState('')
   const fileInputRef = useRef(null)
 
   const isProblemOutcome = PROBLEM_OUTCOMES.includes(job.originalOutcome)
@@ -162,13 +163,13 @@ export default function EditJobModal({ job, onClose }) {
 
   const handleReopen = async () => {
     if (!confirm(`Reopen job ${job.id}? It will go back onto the operative's active list.`)) return
-    setError('')
+    setReopenError('')
     setReopening(true)
     try {
       await reopenJob(job.id)
       onClose()
     } catch (err) {
-      setError(err.message)
+      setReopenError(err.message)
     } finally {
       setReopening(false)
     }
@@ -207,14 +208,17 @@ export default function EditJobModal({ job, onClose }) {
             <p className="font-medium">Resolved {formatDateTime(job.resolvedAt)}</p>
             {job.resolutionNotes && <p className="mt-0.5 text-xs text-emerald-700">{job.resolutionNotes}</p>}
             {!isSealed && (
-              <button
-                type="button"
-                onClick={handleReopen}
-                disabled={reopening}
-                className="mt-2 text-xs font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900 disabled:opacity-60"
-              >
-                {reopening ? 'Reopening…' : 'Reopen'}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={handleReopen}
+                  disabled={reopening}
+                  className="mt-2 text-xs font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900 disabled:opacity-60"
+                >
+                  {reopening ? 'Reopening…' : 'Reopen'}
+                </button>
+                {reopenError && <p className="mt-1.5 text-xs font-medium text-red-600">{reopenError}</p>}
+              </>
             )}
           </div>
         )}
