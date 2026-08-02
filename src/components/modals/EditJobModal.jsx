@@ -49,6 +49,12 @@ export default function EditJobModal({ job, onClose }) {
   // ever have produced an error — better not to offer them at all.
   const isSealed = job.status === 'Completed & Evidenced'
 
+  // Deletion is blocked more broadly than editing: once a job has been
+  // submitted at all — At Risk or Missing Evidence, not just sealed — it's a
+  // record of an incident, not a schedule slot, and the database now
+  // refuses to delete it. Editing an unsealed job stays open regardless.
+  const canDelete = !isSealed && !job.submittedTime
+
   const isDirty =
     Object.keys(initialForm).some((key) => form[key] !== initialForm[key]) ||
     photos.map((p) => p.id).join(',') !== initialPhotoIds
@@ -252,9 +258,11 @@ export default function EditJobModal({ job, onClose }) {
 
         {/* Nothing on a sealed job can be saved or deleted, so the only
             action left is to close it. Offering Save and Delete anyway would
-            just be two buttons that always fail. */}
+            just be two buttons that always fail. Delete is gated separately
+            from editing — an unsealed job that's already been submitted can
+            still be saved, but not deleted. */}
         <div className="flex items-center justify-end gap-2 pt-2">
-          {!isSealed && (
+          {canDelete && (
             <button
               type="button"
               onClick={handleDelete}

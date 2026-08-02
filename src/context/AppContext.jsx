@@ -235,8 +235,13 @@ export function AppProvider({ children }) {
         .select('storage_url')
         .eq('job_id', jobUuid)
 
-      const { error } = await supabase.from('jobs').delete().eq('display_id', id)
+      const { data, error } = await supabase.from('jobs').delete().eq('display_id', id).select()
       if (error) throw new Error(error.message)
+      // An empty result means RLS refused the delete (already submitted, or
+      // sealed) rather than the row simply not existing. Stop here — a
+      // silently blocked delete must not fall through to removing photo
+      // files for a job that's still on record.
+      if (!data?.length) throw new Error('This job can no longer be deleted.')
 
       // The job_photos rows went with the job via cascade, but a cascade
       // can't reach into Storage — without this the files outlive the job
