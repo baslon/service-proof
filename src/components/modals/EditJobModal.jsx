@@ -22,7 +22,7 @@ const initialFormFor = (job) => ({
 const PROBLEM_OUTCOMES = ['Completed with issue', 'Unable to complete']
 
 export default function EditJobModal({ job, onClose }) {
-  const { clients, operatives, updateJob, deleteJob, resolveJob } = useApp()
+  const { clients, operatives, updateJob, deleteJob, resolveJob, reopenJob } = useApp()
   const { user } = useAuth()
   const clientName = clients.find((c) => c.id === job.clientId)?.name || 'Unknown client'
   const initialForm = initialFormFor(job)
@@ -38,6 +38,7 @@ export default function EditJobModal({ job, onClose }) {
   const [resolutionNoteInput, setResolutionNoteInput] = useState('')
   const [resolvingError, setResolvingError] = useState('')
   const [resolvingSubmitting, setResolvingSubmitting] = useState(false)
+  const [reopening, setReopening] = useState(false)
   const fileInputRef = useRef(null)
 
   const isProblemOutcome = PROBLEM_OUTCOMES.includes(job.originalOutcome)
@@ -159,6 +160,20 @@ export default function EditJobModal({ job, onClose }) {
     }
   }
 
+  const handleReopen = async () => {
+    if (!confirm(`Reopen job ${job.id}? It will go back onto the operative's active list.`)) return
+    setError('')
+    setReopening(true)
+    try {
+      await reopenJob(job.id)
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setReopening(false)
+    }
+  }
+
   return (
     <Modal open onClose={attemptClose} title={isSealed ? `Job ${job.id}` : `Edit job ${job.id}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -191,6 +206,16 @@ export default function EditJobModal({ job, onClose }) {
           <div className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800 ring-1 ring-inset ring-emerald-600/20">
             <p className="font-medium">Resolved {formatDateTime(job.resolvedAt)}</p>
             {job.resolutionNotes && <p className="mt-0.5 text-xs text-emerald-700">{job.resolutionNotes}</p>}
+            {!isSealed && (
+              <button
+                type="button"
+                onClick={handleReopen}
+                disabled={reopening}
+                className="mt-2 text-xs font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-900 disabled:opacity-60"
+              >
+                {reopening ? 'Reopening…' : 'Reopen'}
+              </button>
+            )}
           </div>
         )}
 

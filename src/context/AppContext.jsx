@@ -339,6 +339,25 @@ export function AppProvider({ children }) {
     [user, fetchAll]
   )
 
+  // The other half of resolveJob: clears resolved_by and resolution_notes
+  // together, which the database reads as "put this back in front of the
+  // operative" and clears resolved_at itself in response. There's no
+  // history kept of the resolution being undone - reopening is a fresh
+  // start for the job, not an edit to the old resolution record.
+  const reopenJob = useCallback(
+    async (id) => {
+      const { data, error } = await supabase
+        .from('jobs')
+        .update({ resolved_by: null, resolution_notes: null })
+        .eq('display_id', id)
+        .select()
+      if (error) throw new Error(error.message)
+      if (!data?.length) throw new Error('This job could not be reopened.')
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
   const addSite = useCallback(
     async (payload) => {
       const { error } = await supabase.rpc('create_site', {
@@ -472,6 +491,7 @@ export function AppProvider({ children }) {
       deleteJob,
       submitProof,
       resolveJob,
+      reopenJob,
       addSite,
       deleteSite,
       addClient,
@@ -490,6 +510,7 @@ export function AppProvider({ children }) {
       deleteJob,
       submitProof,
       resolveJob,
+      reopenJob,
       addSite,
       deleteSite,
       addClient,
