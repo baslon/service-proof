@@ -5,9 +5,9 @@ export const TASK_TYPES = [
   'Clinical Area Sanitation',
   'Window & Glass Clean',
   'Carpet & Floor Care',
-  'Kitchen clean',
-  'Living room clean',
-  'Bedroom clean',
+  'Kitchen Clean',
+  'Living room Clean',
+  'Bedroom Clean',
 ]
 
 export const RECURRENCE_OPTIONS = ['One-off', 'Daily', 'Twice daily', 'Weekly', 'Monthly']
