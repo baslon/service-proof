@@ -192,7 +192,10 @@ function InvitePersonForm({ title, actionPath, submitLabel, organizations }) {
 // admin on it, not a separate allowance per person - so it lives on the
 // organization itself, not per-admin. Blank means unlimited.
 function OrganizationRow({ org, onUpdated }) {
-  const initialValue = org.site_limit ?? ''
+  // The input's value is always a string; site_limit comes back from the
+  // API as a number (or null). Comparing them directly for dirty-checking
+  // would never settle back to false after a save - "5" !== 5 forever.
+  const initialValue = org.site_limit != null ? String(org.site_limit) : ''
   const [value, setValue] = useState(initialValue)
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
