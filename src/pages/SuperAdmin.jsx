@@ -188,6 +188,66 @@ function InvitePersonForm({ title, actionPath, submitLabel, organizations }) {
   )
 }
 
+// Site limit is a total for the whole organization - shared across every
+// admin on it, not a separate allowance per person - so it lives on the
+// organization itself, not per-admin. Blank means unlimited.
+function OrganizationRow({ org, onUpdated }) {
+  const initialValue = org.site_limit ?? ''
+  const [value, setValue] = useState(initialValue)
+  const [error, setError] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const isDirty = value !== initialValue
+
+  const handleSave = async () => {
+    setError('')
+    setSaving(true)
+    try {
+      const { siteLimit } = await callApi('set-site-limit', {
+        method: 'POST',
+        body: { organizationId: org.id, siteLimit: value === '' ? null : value },
+      })
+      onUpdated(org.id, siteLimit)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <li className="py-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-slate-700">{org.name}</span>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            min="0"
+            placeholder="Unlimited"
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value)
+              setError('')
+            }}
+            className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
+          {isDirty && (
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving}
+              className="rounded-lg bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+          )}
+        </div>
+      </div>
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+    </li>
+  )
+}
+
 function Dashboard({ onSignOut }) {
   const [organizations, setOrganizations] = useState([])
   const [error, setError] = useState('')
@@ -204,6 +264,10 @@ function Dashboard({ onSignOut }) {
   useEffect(() => {
     loadOrganizations()
   }, [loadOrganizations])
+
+  const handleSiteLimitUpdated = (orgId, siteLimit) => {
+    setOrganizations((prev) => prev.map((o) => (o.id === orgId ? { ...o, site_limit: siteLimit } : o)))
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">
@@ -241,10 +305,14 @@ function Dashboard({ onSignOut }) {
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-3 text-base font-semibold text-slate-900">Organizations ({organizations.length})</h2>
-          <ul className="space-y-1 text-sm text-slate-600">
+          <h2 className="text-base font-semibold text-slate-900">Organizations ({organizations.length})</h2>
+          <p className="mt-1 text-xs text-slate-400">
+            Site limit is a total for the whole organization, shared across every admin on it. Leave blank for
+            unlimited.
+          </p>
+          <ul className="mt-3 divide-y divide-slate-100 text-sm text-slate-600">
             {organizations.map((org) => (
-              <li key={org.id}>{org.name}</li>
+              <OrganizationRow key={org.id} org={org} onUpdated={handleSiteLimitUpdated} />
             ))}
           </ul>
         </section>
