@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext'
 import { JOB_STATUSES } from '../../context/mockData'
 import { formatTime, formatDateTime } from '../../utils/time'
 import { uploadPhoto } from '../../lib/uploadPhoto'
+import { uploadVideo } from '../../lib/uploadVideo'
 import { isOperativeEligibleFor } from '../../lib/operativeEligibility'
 
 const initialFormFor = (job) => ({
@@ -27,11 +28,16 @@ export default function EditJobModal({ job, onClose }) {
   const clientName = clients.find((c) => c.id === job.clientId)?.name || 'Unknown client'
   const initialForm = initialFormFor(job)
   const initialPhotoIds = (job.photos || []).map((p) => p.id).join(',')
+  const initialVideoIds = (job.videos || []).map((v) => v.id).join(',')
   const [form, setForm] = useState(initialForm)
   const [photos, setPhotos] = useState(job.photos || [])
+  const [videos, setVideos] = useState(job.videos || [])
   const [viewingPhoto, setViewingPhoto] = useState(null)
+  const [viewingVideo, setViewingVideo] = useState(null)
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [videoError, setVideoError] = useState('')
   const [saving, setSaving] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [resolving, setResolving] = useState(false)
@@ -41,6 +47,7 @@ export default function EditJobModal({ job, onClose }) {
   const [reopening, setReopening] = useState(false)
   const [reopenError, setReopenError] = useState('')
   const fileInputRef = useRef(null)
+  const videoInputRef = useRef(null)
 
   const isProblemOutcome = PROBLEM_OUTCOMES.includes(job.originalOutcome)
   const needsResolution = isProblemOutcome && !job.resolvedAt
@@ -70,7 +77,8 @@ export default function EditJobModal({ job, onClose }) {
 
   const isDirty =
     Object.keys(initialForm).some((key) => form[key] !== initialForm[key]) ||
-    photos.map((p) => p.id).join(',') !== initialPhotoIds
+    photos.map((p) => p.id).join(',') !== initialPhotoIds ||
+    videos.map((v) => v.id).join(',') !== initialVideoIds
 
   const attemptClose = () => {
     if (isDirty) {
@@ -110,6 +118,31 @@ export default function EditJobModal({ job, onClose }) {
     }
   }
 
+  const removeVideo = (videoId) => {
+    setVideos((prev) => prev.filter((v) => v.id !== videoId))
+    setVideoError('')
+  }
+
+  const addVideos = async (e) => {
+    const files = Array.from(e.target.files)
+    e.target.value = ''
+    setVideoError('')
+    setUploadingVideo(true)
+    try {
+      for (const file of files) {
+        const url = await uploadVideo(file, user.organizationId)
+        setVideos((prev) => [
+          ...prev,
+          { id: `${Date.now()}-${Math.random()}`, dataUrl: url, capturedAt: new Date().toISOString() },
+        ])
+      }
+    } catch (err) {
+      setVideoError(err.message)
+    } finally {
+      setUploadingVideo(false)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (form.status === 'Completed & Evidenced' && photos.length < job.photosRequired) {
@@ -125,7 +158,7 @@ export default function EditJobModal({ job, onClose }) {
     setError('')
     setSaving(true)
     try {
-      await updateJob(job.id, { ...form, photos, photosSubmitted: photos.length })
+      await updateJob(job.id, { ...form, photos, photosSubmitted: photos.length, videos })
       onClose()
     } catch (err) {
       setError(err.message)
@@ -333,6 +366,77 @@ export default function EditJobModal({ job, onClose }) {
           )}
         </div>
 
+        <div>
+          {/* Purely supplementary — never counted toward photosRequired or
+              any evidence check, so no (X / Y) here the way photos has one. */}
+          <span className="mb-1 block text-sm font-medium text-slate-700">Video (optional)</span>
+          <div className="grid grid-cols-4 gap-2">
+            {videos.map((v) => (
+              <div key={v.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setViewingVideo(v)}
+                  className="relative h-full w-full transition hover:ring-2 hover:ring-indigo-400"
+                >
+                  <video src={v.dataUrl} className="h-full w-full object-cover" muted />
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-8 w-8 text-white drop-shadow">
+                      <path d="M6.3 4.3a1 1 0 011.02-.06l8 5a1 1 0 010 1.72l-8 5A1 1 0 016 15V5a1 1 0 01.3-.7z" />
+                    </svg>
+                  </span>
+                </button>
+                {!isSealed && (
+                  <button
+                    type="button"
+                    onClick={() => removeVideo(v.id)}
+                    aria-label="Delete video"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white transition hover:bg-red-600"
+                  >
+                    &times;
+                  </button>
+                )}
+                {v.capturedAt && (
+                  <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    {formatTime(v.capturedAt)}
+                  </span>
+                )}
+              </div>
+            ))}
+            {!isSealed && (
+              <button
+                type="button"
+                onClick={() => videoInputRef.current?.click()}
+                disabled={uploadingVideo}
+                aria-label="Add video"
+                className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition hover:border-indigo-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {uploadingVideo ? (
+                  <span className="text-xs">Uploading…</span>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 4a1 1 0 011 1v4h4a1 1 0 110 2h-4v4a1 1 0 11-2 0v-4H5a1 1 0 110-2h4V5a1 1 0 011-1z" />
+                  </svg>
+                )}
+              </button>
+            )}
+          </div>
+          <input
+            ref={videoInputRef}
+            type="file"
+            accept="video/*"
+            capture="environment"
+            multiple
+            onChange={addVideos}
+            className="hidden"
+          />
+          {videoError && <p className="mt-1.5 text-xs text-red-600">{videoError}</p>}
+          {videos.length !== (job.videos?.length || 0) && (
+            <p className="mt-1.5 text-xs text-amber-600">
+              Video changes will apply when you save. Deleted videos cannot be recovered.
+            </p>
+          )}
+        </div>
+
         <FormField label="Status">
           <select className={inputClass} value={form.status} onChange={set('status')} disabled={isSealed}>
             {JOB_STATUSES.map((s) => (
@@ -405,7 +509,7 @@ export default function EditJobModal({ job, onClose }) {
           {!isSealed && (
             <button
               type="submit"
-              disabled={uploading || saving}
+              disabled={uploading || uploadingVideo || saving}
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? 'Saving…' : 'Save changes'}
@@ -426,6 +530,24 @@ export default function EditJobModal({ job, onClose }) {
           />
           {viewingPhoto.capturedAt && (
             <p className="text-sm font-medium text-white">Captured {formatDateTime(viewingPhoto.capturedAt)}</p>
+          )}
+        </div>
+      )}
+
+      {viewingVideo && (
+        <div
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-slate-900/80 p-6"
+          onClick={() => setViewingVideo(null)}
+        >
+          <video
+            src={viewingVideo.dataUrl}
+            controls
+            autoPlay
+            className="max-h-full max-w-full rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          {viewingVideo.capturedAt && (
+            <p className="text-sm font-medium text-white">Captured {formatDateTime(viewingVideo.capturedAt)}</p>
           )}
         </div>
       )}

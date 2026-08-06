@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient'
 import { useAuth } from './AuthContext'
 import { toLocalTimestamp } from '../utils/time'
 import { removePhotoObjects } from '../lib/uploadPhoto'
+import { removeVideoObjects } from '../lib/uploadVideo'
 
 const AppContext = createContext(null)
 
@@ -50,8 +51,9 @@ function mapOperative(row, clientIdsByOperativeId) {
   }
 }
 
-function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid) {
+function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid, videosByJobUuid) {
   const photos = photosByJobUuid[row.id] || []
+  const videos = videosByJobUuid[row.id] || []
   return {
     id: row.display_id,
     clientId: clientDisplayIdByUuid[row.client_id] || '',
@@ -62,9 +64,12 @@ function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid
     recurrence: row.recurrence,
     scheduledTime: row.scheduled_time ? row.scheduled_time.slice(0, 16) : '',
     operativeId: row.operative_id,
+    // Video never counts toward this — it's supplementary evidence, not a
+    // substitute for the required photos.
     photosRequired: row.photos_required,
     photosSubmitted: photos.length,
     photos,
+    videos,
     submittedTime: row.submitted_time ? row.submitted_time.slice(0, 16) : null,
     status: row.status,
     notes: row.notes || '',
@@ -104,7 +109,7 @@ export function AppProvider({ children }) {
     ])
 
     const jobUuids = (jobsRes.data || []).map((j) => j.id)
-    const photosRes = jobUuids.length
+    const mediaRes = jobUuids.length
       ? await supabase.from('job_photos').select('*').in('job_id', jobUuids)
       : { data: [] }
 
@@ -112,7 +117,7 @@ export function AppProvider({ children }) {
     // perfectly normal empty account - the most alarming possible way to
     // report a network blip to someone who had data a minute ago. Bail out
     // instead, leaving whatever was last loaded on screen.
-    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, photosRes].find((r) => r.error)
+    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, mediaRes].find((r) => r.error)
     if (failure) {
       setError(failure.error.message || 'Could not load your data.')
       setLoading(false)
@@ -125,7 +130,7 @@ export function AppProvider({ children }) {
     const jobRows = jobsRes.data || []
     const operativeRows = operativesRes.data || []
     const operativeClientRows = operativeClientsRes.data || []
-    const photoRows = photosRes.data || []
+    const mediaRows = mediaRes.data || []
 
     const clientDisplayIdByUuid = Object.fromEntries(clientRows.map((c) => [c.id, c.display_id]))
     const siteDisplayIdByUuid = Object.fromEntries(siteRows.map((s) => [s.id, s.display_id]))
@@ -134,10 +139,13 @@ export function AppProvider({ children }) {
     jobUuidByDisplayIdRef.current = Object.fromEntries(jobRows.map((j) => [j.display_id, j.id]))
 
     const photosByJobUuid = {}
-    photoRows.forEach((p) => {
-      ;(photosByJobUuid[p.job_id] ||= []).push({ id: p.id, dataUrl: p.storage_url, capturedAt: p.captured_at })
+    const videosByJobUuid = {}
+    mediaRows.forEach((p) => {
+      const byJobUuid = p.media_type === 'video' ? videosByJobUuid : photosByJobUuid
+      ;(byJobUuid[p.job_id] ||= []).push({ id: p.id, dataUrl: p.storage_url, capturedAt: p.captured_at })
     })
     Object.values(photosByJobUuid).forEach((arr) => arr.sort((a, b) => (a.capturedAt < b.capturedAt ? -1 : 1)))
+    Object.values(videosByJobUuid).forEach((arr) => arr.sort((a, b) => (a.capturedAt < b.capturedAt ? -1 : 1)))
 
     const clientIdsByOperativeId = {}
     operativeClientRows.forEach((r) => {
@@ -148,7 +156,7 @@ export function AppProvider({ children }) {
     setState({
       clients: clientRows.map(mapClient),
       sites: siteRows.map((s) => mapSite(s, clientDisplayIdByUuid)),
-      jobs: jobRows.map((j) => mapJob(j, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid)),
+      jobs: jobRows.map((j) => mapJob(j, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid, videosByJobUuid)),
       operatives: operativeRows.map((r) => mapOperative(r, clientIdsByOperativeId)),
     })
     setLoading(false)
@@ -185,7 +193,7 @@ export function AppProvider({ children }) {
 
   const updateJob = useCallback(
     async (id, patch) => {
-      const { photos, photosSubmitted, ...rest } = patch
+      const { photos, photosSubmitted, videos, ...rest } = patch
       const columnPatch = {}
       if ('status' in rest) columnPatch.status = rest.status
       if ('operativeId' in rest) columnPatch.operative_id = rest.operativeId
@@ -199,35 +207,45 @@ export function AppProvider({ children }) {
       // when the seal happens. Saving the row first would seal the job and
       // then have its own evidence rejected.
       const jobUuid = jobUuidByDisplayIdRef.current[id]
-      let discarded = []
 
-      if (photos) {
+      // Deletes and re-inserts only one media type's rows, scoped by
+      // media_type - so passing photos without videos (or vice versa)
+      // never touches the type that wasn't included. Skips entirely when
+      // that type wasn't passed at all, rather than treating "not passed"
+      // the same as "passed as empty".
+      const replaceMedia = async (items, mediaType) => {
+        if (!items) return []
         // Read the stored set before replacing it. Rows are deleted and
         // re-inserted wholesale, so "rows we deleted" isn't the same as
-        // "photos the user removed" — only the URLs missing from the
+        // "items the user removed" — only the URLs missing from the
         // incoming set are actually orphaned.
-        const { data: storedPhotos } = await supabase
+        const { data: stored } = await supabase
           .from('job_photos')
           .select('storage_url')
           .eq('job_id', jobUuid)
+          .eq('media_type', mediaType)
 
-        await supabase.from('job_photos').delete().eq('job_id', jobUuid)
-        if (photos.length) {
-          const { error: photoError } = await supabase
-            .from('job_photos')
-            .insert(photos.map((p) => ({ job_id: jobUuid, storage_url: p.dataUrl, captured_at: p.capturedAt })))
-          if (photoError) throw new Error(photoError.message)
+        await supabase.from('job_photos').delete().eq('job_id', jobUuid).eq('media_type', mediaType)
+        if (items.length) {
+          const { error: mediaError } = await supabase.from('job_photos').insert(
+            items.map((m) => ({ job_id: jobUuid, storage_url: m.dataUrl, captured_at: m.capturedAt, media_type: mediaType }))
+          )
+          if (mediaError) throw new Error(mediaError.message)
         }
 
-        const kept = new Set(photos.map((p) => p.dataUrl))
-        discarded = (storedPhotos || []).map((r) => r.storage_url).filter((u) => !kept.has(u))
+        const kept = new Set(items.map((m) => m.dataUrl))
+        return (stored || []).map((r) => r.storage_url).filter((u) => !kept.has(u))
       }
+
+      const discardedPhotos = await replaceMedia(photos, 'photo')
+      const discardedVideos = await replaceMedia(videos, 'video')
 
       const { data, error } = await supabase.from('jobs').update(columnPatch).eq('display_id', id).select()
       if (error) throw new Error(error.message)
       if (!data?.length) throw new Error('This job can no longer be updated.')
 
-      await removePhotoObjects(discarded)
+      await removePhotoObjects(discardedPhotos)
+      await removeVideoObjects(discardedVideos)
       await fetchAll()
     },
     [fetchAll]
@@ -236,30 +254,33 @@ export function AppProvider({ children }) {
   const deleteJob = useCallback(
     async (id) => {
       const jobUuid = jobUuidByDisplayIdRef.current[id]
-      const { data: storedPhotos } = await supabase
+      const { data: storedMedia } = await supabase
         .from('job_photos')
-        .select('storage_url')
+        .select('storage_url, media_type')
         .eq('job_id', jobUuid)
 
       const { data, error } = await supabase.from('jobs').delete().eq('display_id', id).select()
       if (error) throw new Error(error.message)
       // An empty result means RLS refused the delete (already submitted, or
       // sealed) rather than the row simply not existing. Stop here — a
-      // silently blocked delete must not fall through to removing photo
+      // silently blocked delete must not fall through to removing evidence
       // files for a job that's still on record.
       if (!data?.length) throw new Error('This job can no longer be deleted.')
 
       // The job_photos rows went with the job via cascade, but a cascade
       // can't reach into Storage — without this the files outlive the job
-      // they were evidence for, still readable at their public URLs.
-      await removePhotoObjects((storedPhotos || []).map((r) => r.storage_url))
+      // they were evidence for, still readable at their public URLs. Photos
+      // and videos live in separate buckets, so they're split before removal.
+      const media = storedMedia || []
+      await removePhotoObjects(media.filter((r) => r.media_type !== 'video').map((r) => r.storage_url))
+      await removeVideoObjects(media.filter((r) => r.media_type === 'video').map((r) => r.storage_url))
       await fetchAll()
     },
     [fetchAll]
   )
 
   const submitProof = useCallback(
-    async (jobId, completionStatus, photos, notes) => {
+    async (jobId, completionStatus, photos, notes, videos = []) => {
       const target = state.jobs.find((j) => j.id === jobId)
       // Once a job is Completed & Evidenced it's locked — evidence that can be
       // silently rewritten after the fact isn't proof of anything. Corrections
@@ -273,22 +294,34 @@ export function AppProvider({ children }) {
       }
 
       // Evidence is written first, then the job is sealed. Once the status
-      // is Completed & Evidenced the database stops accepting photo changes
-      // for that job, so doing this the other way round would seal the job
-      // and then have its own evidence write rejected.
+      // is Completed & Evidenced the database stops accepting evidence
+      // changes for that job, so doing this the other way round would seal
+      // the job and then have its own evidence write rejected.
       const jobUuid = jobUuidByDisplayIdRef.current[jobId]
-      const { data: storedPhotos } = await supabase
-        .from('job_photos')
-        .select('storage_url')
-        .eq('job_id', jobUuid)
 
-      await supabase.from('job_photos').delete().eq('job_id', jobUuid)
-      if (photos.length) {
-        const { error: photoError } = await supabase
+      // Same per-type replace as updateJob - kept as its own copy here
+      // since it closes over this call's jobUuid, not a shared one.
+      const replaceMedia = async (items, mediaType) => {
+        const { data: stored } = await supabase
           .from('job_photos')
-          .insert(photos.map((p) => ({ job_id: jobUuid, storage_url: p.dataUrl, captured_at: p.capturedAt })))
-        if (photoError) throw new Error(photoError.message)
+          .select('storage_url')
+          .eq('job_id', jobUuid)
+          .eq('media_type', mediaType)
+
+        await supabase.from('job_photos').delete().eq('job_id', jobUuid).eq('media_type', mediaType)
+        if (items.length) {
+          const { error: mediaError } = await supabase.from('job_photos').insert(
+            items.map((m) => ({ job_id: jobUuid, storage_url: m.dataUrl, captured_at: m.capturedAt, media_type: mediaType }))
+          )
+          if (mediaError) throw new Error(mediaError.message)
+        }
+
+        const kept = new Set(items.map((m) => m.dataUrl))
+        return (stored || []).map((r) => r.storage_url).filter((u) => !kept.has(u))
       }
+
+      const discardedPhotos = await replaceMedia(photos, 'photo')
+      const discardedVideos = await replaceMedia(videos, 'video')
 
       const columnPatch = {
         status: statusMap[completionStatus] || target.status,
@@ -312,8 +345,8 @@ export function AppProvider({ children }) {
 
       // Only once the job itself is saved — deleting the files first would
       // destroy evidence for a submission that then failed.
-      const kept = new Set(photos.map((p) => p.dataUrl))
-      await removePhotoObjects((storedPhotos || []).map((r) => r.storage_url).filter((u) => !kept.has(u)))
+      await removePhotoObjects(discardedPhotos)
+      await removeVideoObjects(discardedVideos)
 
       await fetchAll()
     },

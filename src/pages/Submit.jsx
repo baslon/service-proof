@@ -7,6 +7,7 @@ import ConfirmDialog from '../components/ConfirmDialog'
 import DataErrorBanner from '../components/DataErrorBanner'
 import { formatTime } from '../utils/time'
 import { uploadPhoto } from '../lib/uploadPhoto'
+import { uploadVideo } from '../lib/uploadVideo'
 
 const COMPLETION_OPTIONS = ['Completed', 'Completed with issue', 'Unable to complete']
 const ACTIONABLE_STATUSES = ['Incomplete', 'Missing Evidence', 'At Risk']
@@ -69,21 +70,29 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
   const initialCompletionStatus = DEFAULT_COMPLETION_STATUS[job.status] || ''
   const initialNotes = job.notes || ''
   const initialPhotosCount = (job.photos || []).length
+  const initialVideosCount = (job.videos || []).length
   const { user } = useAuth()
 
   const [completionStatus, setCompletionStatus] = useState(initialCompletionStatus)
   const [photos, setPhotos] = useState(job.photos || [])
+  const [videos, setVideos] = useState(job.videos || [])
   const [notes, setNotes] = useState(initialNotes)
   const [error, setError] = useState('')
   const [uploading, setUploading] = useState(false)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [videoError, setVideoError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
   const [showEvidenceLossConfirm, setShowEvidenceLossConfirm] = useState(false)
   const fileInputRef = useRef(null)
+  const videoInputRef = useRef(null)
 
   const isDirty =
-    notes !== initialNotes || photos.length !== initialPhotosCount || completionStatus !== initialCompletionStatus
+    notes !== initialNotes ||
+    photos.length !== initialPhotosCount ||
+    videos.length !== initialVideosCount ||
+    completionStatus !== initialCompletionStatus
 
   // Lets the parent (the top-bar Exit button) check for unsaved changes too,
   // since that action lives outside this component.
@@ -128,13 +137,35 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
 
   const removePhoto = (id) => setPhotos((prev) => prev.filter((p) => p.id !== id))
 
+  const handleVideoFiles = async (e) => {
+    const files = Array.from(e.target.files)
+    e.target.value = ''
+    setUploadingVideo(true)
+    setVideoError('')
+    try {
+      for (const file of files) {
+        const url = await uploadVideo(file, user.organizationId)
+        setVideos((prev) => [
+          ...prev,
+          { id: `${Date.now()}-${Math.random()}`, dataUrl: url, capturedAt: new Date().toISOString() },
+        ])
+      }
+    } catch (err) {
+      setVideoError(err.message)
+    } finally {
+      setUploadingVideo(false)
+    }
+  }
+
+  const removeVideo = (id) => setVideos((prev) => prev.filter((v) => v.id !== id))
+
   // Failure has to leave the form exactly as it was — an operative who loses
   // a set of photos to a dropped connection has to walk the site again.
   const runSubmit = async () => {
     setError('')
     setSubmitting(true)
     try {
-      await onSubmit({ completionStatus, photos, notes })
+      await onSubmit({ completionStatus, photos, notes, videos })
     } catch (err) {
       setError(err.message)
     } finally {
@@ -279,6 +310,55 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
         </div>
 
         <div>
+          <p className="mb-2 text-sm font-medium text-slate-700">Video (optional)</p>
+
+          {videos.length > 0 && (
+            <div className="mb-3 grid grid-cols-3 gap-2">
+              {videos.map((v) => (
+                <div key={v.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+                  <video src={v.dataUrl} className="h-full w-full object-cover" muted />
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-7 w-7 text-white drop-shadow">
+                      <path d="M6.3 4.3a1 1 0 011.02-.06l8 5a1 1 0 010 1.72l-8 5A1 1 0 016 15V5a1 1 0 01.3-.7z" />
+                    </svg>
+                  </span>
+                  <button
+                    onClick={() => removeVideo(v.id)}
+                    aria-label="Remove video"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white"
+                  >
+                    &times;
+                  </button>
+                  {v.capturedAt && (
+                    <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                      {formatTime(v.capturedAt)}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          <input
+            ref={videoInputRef}
+            type="file"
+            accept="video/*"
+            capture="environment"
+            multiple
+            onChange={handleVideoFiles}
+            className="hidden"
+          />
+          <button
+            onClick={() => videoInputRef.current?.click()}
+            disabled={uploadingVideo}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 py-6 text-sm font-medium text-slate-500 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-indigo-400 hover:text-indigo-600"
+          >
+            {uploadingVideo ? 'Uploading…' : 'Tap to record or upload a short video'}
+          </button>
+          {videoError && <p className="mt-2 text-sm text-red-600">{videoError}</p>}
+        </div>
+
+        <div>
           <p className="mb-2 text-sm font-medium text-slate-700">
             Notes<span className="text-red-500"> (required)</span>
           </p>
@@ -310,7 +390,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
         </button>
         <button
           onClick={handleSubmitClick}
-          disabled={!completionStatus || uploading || submitting}
+          disabled={!completionStatus || uploading || uploadingVideo || submitting}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 ${
             completionStatus === 'Unable to complete' ? 'bg-slate-600' : 'bg-indigo-600'
           }`}
@@ -385,8 +465,8 @@ export default function Submit() {
   // error itself, and letting it throw means the job stays selected with the
   // operative's photos and notes still on screen rather than being closed
   // as though the submission had gone through.
-  const handleSubmit = async ({ completionStatus, photos, notes }) => {
-    await submitProof(selectedJob.id, completionStatus, photos, notes)
+  const handleSubmit = async ({ completionStatus, photos, notes, videos }) => {
+    await submitProof(selectedJob.id, completionStatus, photos, notes, videos)
     setSelectedJobId(null)
   }
 
