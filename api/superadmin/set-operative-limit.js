@@ -4,7 +4,7 @@ const supabaseAdmin = createClient(process.env.VITE_SUPABASE_URL, process.env.SU
 
 export default async function handler(req, res) {
   try {
-    if (req.method !== 'GET') {
+    if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method not allowed' })
     }
 
@@ -28,16 +28,34 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Superadmin access required' })
     }
 
-    const { data: organizations, error } = await supabaseAdmin
+    const { organizationId, operativeLimit } = req.body || {}
+    if (!organizationId) {
+      return res.status(400).json({ error: 'Organization is required' })
+    }
+
+    // Blank/null clears the limit back to unlimited. Anything else must be
+    // a whole number - the database enforces >= 0 isn't needed since the
+    // trigger already treats "at or over the limit" correctly at 0, but a
+    // negative number would just make the org uninvitable-into forever,
+    // which is never what's meant by a limit.
+    let limitValue = null
+    if (operativeLimit !== null && operativeLimit !== '' && operativeLimit !== undefined) {
+      limitValue = Number(operativeLimit)
+      if (!Number.isInteger(limitValue) || limitValue < 0) {
+        return res.status(400).json({ error: 'Operative limit must be a whole number of 0 or more.' })
+      }
+    }
+
+    const { error } = await supabaseAdmin
       .from('organizations')
-      .select('id, name, created_at, site_limit, operative_limit')
-      .order('name')
+      .update({ operative_limit: limitValue })
+      .eq('id', organizationId)
 
     if (error) {
       return res.status(500).json({ error: error.message })
     }
 
-    return res.status(200).json({ organizations })
+    return res.status(200).json({ operativeLimit: limitValue })
   } catch (err) {
     return res.status(500).json({ error: err.message || 'Unexpected server error' })
   }
