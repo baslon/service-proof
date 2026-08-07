@@ -5,9 +5,11 @@ import SlideOver from '../components/SlideOver'
 import StatusBadge from '../components/StatusBadge'
 import AddSiteModal from '../components/modals/AddSiteModal'
 import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
 
 export default function Sites() {
   const { clients, sites, jobs, deleteSite } = useApp()
+  const { user } = useAuth()
   const [search, setSearch] = useState('')
   const [clientFilter, setClientFilter] = useState('')
   const [activeSite, setActiveSite] = useState(null)
@@ -35,6 +37,9 @@ export default function Sites() {
 
   const totalMissing = jobs.filter((j) => j.status === 'Missing Evidence').length
   const totalAtRisk = jobs.filter((j) => j.status === 'At Risk').length
+  // Same 80%-of-limit threshold as the Dashboard banner; null limit means
+  // unlimited, nothing to warn about.
+  const siteLimitNear = user?.siteLimit != null && sites.length / user.siteLimit >= 0.8
 
   const activeSiteJobCount = activeSite ? jobsForSite(activeSite.id).length : 0
 
@@ -73,6 +78,12 @@ export default function Sites() {
           <p className="mt-2 text-3xl font-bold text-red-600">{totalAtRisk}</p>
         </div>
       </div>
+
+      {siteLimitNear && (
+        <div className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
+          Using <strong>{sites.length}</strong> of <strong>{user.siteLimit}</strong> sites included in your plan.
+        </div>
+      )}
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <input
