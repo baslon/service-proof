@@ -10,7 +10,7 @@ async function loadProfile(authUser) {
   if (!authUser) return null
   const { data, error } = await supabase
     .from('profiles')
-    .select('organization_id, role, name, operative_id, organizations(name)')
+    .select('organization_id, role, name, operative_id, organizations(name, site_limit, operative_limit)')
     .eq('id', authUser.id)
     .single()
   if (error || !data) return null
@@ -21,6 +21,10 @@ async function loadProfile(authUser) {
     operativeId: data.operative_id,
     organizationId: data.organization_id,
     organizationName: data.organizations?.name || '',
+    // Null means unlimited - the dashboard only ever warns when a real
+    // number is set and usage is approaching it.
+    siteLimit: data.organizations?.site_limit ?? null,
+    operativeLimit: data.organizations?.operative_limit ?? null,
   }
 }
 

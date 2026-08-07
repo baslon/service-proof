@@ -35,6 +35,14 @@ export default function Dashboard() {
   const missingCount = jobs.filter((j) => j.status === 'Missing Evidence').length
   const atRiskCount = jobs.filter((j) => j.status === 'At Risk').length
 
+  // Same active-only counting the database itself uses when enforcing
+  // operative_limit, so this never disagrees with what actually gets
+  // blocked. Null limit means unlimited - nothing to warn about.
+  const activeOperativeCount = operatives.filter((o) => o.active).length
+  const isNearLimit = (count, limit) => limit != null && count / limit >= 0.8
+  const siteLimitNear = isNearLimit(sites.length, user?.siteLimit)
+  const operativeLimitNear = isNearLimit(activeOperativeCount, user?.operativeLimit)
+
   const sitesForFilter = useMemo(
     () => (clientFilter ? sites.filter((s) => s.clientId === clientFilter) : sites),
     [sites, clientFilter]
@@ -114,6 +122,17 @@ export default function Dashboard() {
           <Link to="/dashboard?status=At%20Risk" className="font-medium underline underline-offset-2">
             Review now
           </Link>
+        </div>
+      )}
+      {siteLimitNear && (
+        <div className="mt-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
+          Using <strong>{sites.length}</strong> of <strong>{user.siteLimit}</strong> sites included in your plan.
+        </div>
+      )}
+      {operativeLimitNear && (
+        <div className="mt-3 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
+          Using <strong>{activeOperativeCount}</strong> of <strong>{user.operativeLimit}</strong> operatives included
+          in your plan.
         </div>
       )}
 
