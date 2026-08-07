@@ -444,8 +444,18 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
 })
 
 export default function Submit() {
-  const { jobs, sites, clients, submitProof, loading, error } = useApp()
+  const { jobs, sites, clients, operatives, submitProof, loading, error } = useApp()
   const { user, logout } = useAuth()
+
+  // Same 80%-of-limit warning as the Dashboard/Sites/Operatives pages, but
+  // only for an admin previewing this view (via "Open mobile proof form")
+  // - an operative can't add sites or invite operatives, so showing them a
+  // plan-capacity warning would just be noise with nothing they can do
+  // about it.
+  const activeOperativeCount = operatives.filter((o) => o.active).length
+  const siteLimitNear = user?.role === 'admin' && user?.siteLimit != null && sites.length / user.siteLimit >= 0.8
+  const operativeLimitNear =
+    user?.role === 'admin' && user?.operativeLimit != null && activeOperativeCount / user.operativeLimit >= 0.8
   const navigate = useNavigate()
   const [selectedJobId, setSelectedJobId] = useState(null)
   const [showExitDiscardConfirm, setShowExitDiscardConfirm] = useState(false)
@@ -533,6 +543,18 @@ export default function Submit() {
             />
           ) : (
             <>
+              {siteLimitNear && (
+                <div className="mx-4 mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 ring-1 ring-inset ring-amber-600/20">
+                  Using <strong>{sites.length}</strong> of <strong>{user.siteLimit}</strong> sites included in your
+                  plan.
+                </div>
+              )}
+              {operativeLimitNear && (
+                <div className="mx-4 mt-4 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 ring-1 ring-inset ring-amber-600/20">
+                  Using <strong>{activeOperativeCount}</strong> of <strong>{user.operativeLimit}</strong> operatives
+                  included in your plan.
+                </div>
+              )}
               {error && <DataErrorBanner className="mx-4 mt-4" />}
               {loading && myJobs.length === 0 && (
                 <p className="px-4 py-8 text-center text-sm text-slate-400">Loading your jobs…</p>
