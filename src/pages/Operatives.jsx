@@ -3,6 +3,7 @@ import DashboardLayout from '../components/DashboardLayout'
 import AddOperativeModal from '../components/modals/AddOperativeModal'
 import EditOperativeModal from '../components/modals/EditOperativeModal'
 import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
 import { supabase } from '../lib/supabaseClient'
 
 function formatDateTime(value) {
@@ -57,6 +58,7 @@ export default function Operatives() {
   // the two here avoids fetching the same operative twice from two sources
   // of truth for the fields both could technically provide.
   const { clients, operatives: contextOperatives } = useApp()
+  const { user } = useAuth()
   const [roster, setRoster] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -106,6 +108,14 @@ export default function Operatives() {
     }))
   }, [roster, contextOperatives])
 
+  // Same active-only counting and 80%-of-limit threshold as the Dashboard
+  // banner - counted from contextOperatives (the raw AppContext data),
+  // not the roster merge above, since that's exactly what the database
+  // itself counts when enforcing operative_limit. Null limit means
+  // unlimited, nothing to warn about.
+  const activeOperativeCount = contextOperatives.filter((o) => o.active).length
+  const operativeLimitNear = user?.operativeLimit != null && activeOperativeCount / user.operativeLimit >= 0.8
+
   const clientNames = (clientIds) =>
     clientIds.length === 0 ? 'All clients' : clientIds.map((id) => clients.find((c) => c.id === id)?.name || id).join(', ')
 
@@ -127,6 +137,13 @@ export default function Operatives() {
           + Add operative
         </button>
       </div>
+
+      {operativeLimitNear && (
+        <div className="mt-6 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
+          Using <strong>{activeOperativeCount}</strong> of <strong>{user.operativeLimit}</strong> operatives included
+          in your plan.
+        </div>
+      )}
 
       {error && (
         <div className="mt-6 flex items-center justify-between rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-inset ring-red-600/20">
