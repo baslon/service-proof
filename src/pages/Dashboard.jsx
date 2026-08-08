@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import DashboardLayout from '../components/DashboardLayout'
 import StatusBadge from '../components/StatusBadge'
@@ -8,6 +8,9 @@ import AddOperativeModal from '../components/modals/AddOperativeModal'
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import { STATUS_TEXT_COLOR, isPendingStatus } from '../context/statusStyles'
+
+const PAGE_SIZE = 25
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000
 
 const SUMMARY_CARDS = [
   { label: 'Completed & Evidenced', match: (j) => j.status === 'Completed & Evidenced', color: STATUS_TEXT_COLOR['Completed & Evidenced'] },
@@ -22,6 +25,8 @@ export default function Dashboard() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [clientFilter, setClientFilter] = useState(searchParams.get('client') || '')
   const [siteFilter, setSiteFilter] = useState(searchParams.get('site') || '')
+  const [showAllTime, setShowAllTime] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const [editingJob, setEditingJob] = useState(null)
   const [scheduling, setScheduling] = useState(false)
   const [addingOperative, setAddingOperative] = useState(false)
@@ -32,8 +37,24 @@ export default function Dashboard() {
   const siteName = (id) => sites.find((s) => s.id === id)?.name || 'Unknown site'
   const operativeName = (id, operatives) => operatives.find((o) => o.id === id)?.name || 'Unassigned'
 
-  const missingCount = jobs.filter((j) => j.status === 'Missing Evidence').length
-  const atRiskCount = jobs.filter((j) => j.status === 'At Risk').length
+  // Default view is the last 30 days, not everything ever scheduled - day
+  // to day this dashboard is about what's happening now, and the full
+  // history already has a home on the Client report page. A missing
+  // scheduledTime is never hidden by this - fail open rather than silently
+  // drop a job that has no date to filter on. No upper bound, so
+  // future-scheduled jobs are always visible regardless of this filter.
+  const dateFilteredJobs = useMemo(() => {
+    if (showAllTime) return jobs
+    const cutoff = Date.now() - THIRTY_DAYS_MS
+    return jobs.filter((j) => !j.scheduledTime || new Date(j.scheduledTime).getTime() >= cutoff)
+  }, [jobs, showAllTime])
+
+  // Every count and card on this page reflects the same date scope as the
+  // table below it - otherwise the cards would say "50 completed" while
+  // the table (and its pagination) only shows 10, which would just look
+  // broken rather than intentional.
+  const missingCount = dateFilteredJobs.filter((j) => j.status === 'Missing Evidence').length
+  const atRiskCount = dateFilteredJobs.filter((j) => j.status === 'At Risk').length
 
   // Same active-only counting the database itself uses when enforcing
   // operative_limit, so this never disagrees with what actually gets
@@ -54,12 +75,22 @@ export default function Dashboard() {
     return card ? card.match(job) : job.status === statusFilter
   }
 
-  const filteredJobs = jobs.filter((j) => {
+  const filteredJobs = dateFilteredJobs.filter((j) => {
     if (!matchesStatus(j)) return false
     if (clientFilter && j.clientId !== clientFilter) return false
     if (siteFilter && j.siteId !== siteFilter) return false
     return true
   })
+
+  // Resets to page 1 whenever any filter narrows or widens the result set -
+  // otherwise switching filters could strand the view on a now-empty page
+  // 4 of a 1-page result.
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [statusFilter, clientFilter, siteFilter, showAllTime])
+
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE))
+  const pagedJobs = filteredJobs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
 
   return (
     <DashboardLayout>
@@ -99,7 +130,7 @@ export default function Dashboard() {
         {SUMMARY_CARDS.map((card) => (
           <div key={card.label} className="rounded-xl border border-slate-200 bg-white p-5">
             <p className="text-sm font-medium text-slate-500">{card.label}</p>
-            <p className={`mt-2 text-3xl font-bold ${card.color}`}>{jobs.filter(card.match).length}</p>
+            <p className={`mt-2 text-3xl font-bold ${card.color}`}>{dateFilteredJobs.filter(card.match).length}</p>
           </div>
         ))}
       </div>
@@ -174,11 +205,28 @@ export default function Dashboard() {
             Clear status filter: {statusFilter} &times;
           </button>
         )}
+
+        <label className="flex w-full items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm sm:w-auto">
+          <input
+            type="checkbox"
+            checked={showAllTime}
+            onChange={(e) => setShowAllTime(e.target.checked)}
+            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+          />
+          Show all time
+        </label>
+
+        {!showAllTime && jobs.length > dateFilteredJobs.length && (
+          <p className="w-full text-xs text-slate-400 sm:w-auto">
+            {jobs.length - dateFilteredJobs.length} older job{jobs.length - dateFilteredJobs.length === 1 ? '' : 's'}{' '}
+            outside the last 30 days hidden.
+          </p>
+        )}
       </div>
 
       {/* Mobile: card list */}
       <div className="mt-4 space-y-3 md:hidden">
-        {filteredJobs.map((job) => (
+        {pagedJobs.map((job) => (
           <div key={job.id} className="rounded-xl border border-slate-200 bg-white p-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-semibold text-slate-900">{job.id}</span>
@@ -233,7 +281,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredJobs.map((job) => (
+              {pagedJobs.map((job) => (
                 <tr key={job.id} className="hover:bg-slate-50">
                   <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{job.id}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
@@ -269,6 +317,34 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+
+      {filteredJobs.length > 0 && (
+        <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+          <p className="text-sm text-slate-500">
+            Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredJobs.length)} of{' '}
+            {filteredJobs.length} job{filteredJobs.length === 1 ? '' : 's'}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-slate-500">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {editingJob && <EditJobModal job={editingJob} onClose={() => setEditingJob(null)} />}
       {scheduling && <ScheduleJobModal onClose={() => setScheduling(false)} />}
