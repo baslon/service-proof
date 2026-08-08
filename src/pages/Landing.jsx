@@ -23,7 +23,7 @@ const STEPS = [
   {
     step: '1',
     title: 'Schedule the job',
-    body: 'Set the task, site, recurrence, and required photo count in seconds.',
+    body: 'Set the task, site, and required photo count in seconds.',
   },
   {
     step: '2',
