@@ -33,6 +33,20 @@ export default function Dashboard() {
 
   const statusFilter = searchParams.get('status') || ''
 
+  // Kept URL-driven rather than local state, unlike client/site below - the
+  // At Risk/Missing Evidence banners already link to ?status=..., and
+  // statusFilter has to keep reflecting the URL live (not just on mount)
+  // for those links to still work when clicked from this same page.
+  const setStatusFilter = (value) => {
+    const next = new URLSearchParams(searchParams)
+    if (value) {
+      next.set('status', value)
+    } else {
+      next.delete('status')
+    }
+    setSearchParams(next)
+  }
+
   const clientName = (id) => clients.find((c) => c.id === id)?.name || 'Unknown client'
   const siteName = (id) => sites.find((s) => s.id === id)?.name || 'Unknown site'
   const operativeName = (id, operatives) => operatives.find((o) => o.id === id)?.name || 'Unassigned'
@@ -197,14 +211,18 @@ export default function Dashboard() {
           ))}
         </select>
 
-        {statusFilter && (
-          <button
-            onClick={() => setSearchParams({})}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-500 transition hover:bg-slate-50 sm:w-auto"
-          >
-            Clear status filter: {statusFilter} &times;
-          </button>
-        )}
+        <select
+          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="">All statuses</option>
+          {SUMMARY_CARDS.map((card) => (
+            <option key={card.label} value={card.label}>
+              {card.label}
+            </option>
+          ))}
+        </select>
 
         <label className="flex w-full items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm sm:w-auto">
           <input
