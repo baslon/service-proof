@@ -251,7 +251,7 @@ export default function Landing() {
           </p>
           <div className="mt-6 flex items-baseline justify-center gap-2">
             <span className="text-4xl font-bold text-white">&pound;0</span>
-            <span className="text-slate-400">for the pilot, then from &pound;49/site/month</span>
+            <span className="text-slate-400">for the pilot, then from &pound;79/month</span>
           </div>
           <div className="mt-8">
             <button
