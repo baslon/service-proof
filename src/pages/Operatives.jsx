@@ -86,7 +86,7 @@ export default function Operatives() {
     setLoading(true)
     setError('')
     try {
-      const { operatives: accountRows } = await callApi('/api/list-operatives')
+      const { operatives: accountRows } = await callApi('/api/operatives')
       setRoster(accountRows)
     } catch (err) {
       setError(err.message)
@@ -120,7 +120,7 @@ export default function Operatives() {
     clientIds.length === 0 ? 'All clients' : clientIds.map((id) => clients.find((c) => c.id === id)?.name || id).join(', ')
 
   const handleResend = async (operativeId) => {
-    await callApi('/api/resend-operative-invite', { method: 'POST', body: { operativeId } })
+    await callApi('/api/operatives', { method: 'POST', body: { action: 'resend', operativeId } })
   }
 
   return (

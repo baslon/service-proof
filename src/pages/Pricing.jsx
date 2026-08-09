@@ -30,10 +30,10 @@ export default function Pricing() {
     setError('')
     setCheckingOutPlanId(plan.id)
     try {
-      const res = await fetch('/api/create-checkout-session', {
+      const res = await fetch('/api/billing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: plan.id, interval }),
+        body: JSON.stringify({ action: 'createCheckoutSession', planId: plan.id, interval }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Could not start checkout')

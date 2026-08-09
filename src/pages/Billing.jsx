@@ -70,7 +70,7 @@ export default function Billing() {
     setError('')
     setPortalLoading(true)
     try {
-      const { url } = await callBillingApi('/api/create-billing-portal-session')
+      const { url } = await callBillingApi('/api/billing', { action: 'createPortalSession' })
       window.location.href = url
     } catch (err) {
       setError(err.message)
@@ -83,7 +83,7 @@ export default function Billing() {
     setError('')
     setSwitchingPlanId(plan.id)
     try {
-      await callBillingApi('/api/update-subscription', { planId: plan.id, interval })
+      await callBillingApi('/api/billing', { action: 'updateSubscription', planId: plan.id, interval })
       await load()
     } catch (err) {
       setError(err.message)

@@ -453,13 +453,13 @@ export function AppProvider({ children }) {
       const {
         data: { session },
       } = await supabase.auth.getSession()
-      const res = await fetch('/api/invite-operative', {
+      const res = await fetch('/api/operatives', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ action: 'invite', name, email }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to invite operative')
@@ -476,13 +476,13 @@ export function AppProvider({ children }) {
       const {
         data: { session },
       } = await supabase.auth.getSession()
-      const res = await fetch('/api/set-operative-active', {
+      const res = await fetch('/api/operatives', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.access_token || ''}`,
         },
-        body: JSON.stringify({ operativeId, active }),
+        body: JSON.stringify({ action: 'setActive', operativeId, active }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to update operative status')
