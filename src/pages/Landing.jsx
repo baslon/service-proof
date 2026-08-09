@@ -54,7 +54,7 @@ const PERSONAS = [
 // and it belongs last in both.
 const NAV_LINKS = [
   { label: 'How it works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
+  { label: 'Pricing', href: '/pricing' },
   { label: 'Contact', href: `mailto:${COMPANY.contactEmail}` },
 ]
 
