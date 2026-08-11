@@ -49,7 +49,7 @@ export default function SetPassword() {
         </div>
 
         <h1 className="mt-6 text-xl font-bold text-slate-900">Set your password</h1>
-        <p className="mt-1 text-sm text-slate-500">Choose a password to finish setting up your account.</p>
+        <p className="mt-1 text-sm text-slate-500">Choose a password for your account.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <label className="block">

@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { homeFor } from '../lib/roleHome'
 import { inputClass } from '../components/FormField'
+import ForgotPasswordModal from '../components/modals/ForgotPasswordModal'
 
 const ADMIN_ONLY_PATHS = ['/dashboard', '/sites', '/clients', '/operatives', '/report']
 
@@ -26,6 +27,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [forgotPassword, setForgotPassword] = useState(false)
 
   if (loading) {
     return null
@@ -75,7 +77,16 @@ export default function Login() {
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Password</span>
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-sm font-medium text-slate-700">Password</span>
+              <button
+                type="button"
+                onClick={() => setForgotPassword(true)}
+                className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+              >
+                Forgot password?
+              </button>
+            </div>
             <input
               type="password"
               className={inputClass}
@@ -96,6 +107,8 @@ export default function Login() {
           </button>
         </form>
       </div>
+
+      {forgotPassword && <ForgotPasswordModal onClose={() => setForgotPassword(false)} />}
     </div>
   )
 }
