@@ -105,8 +105,20 @@ export default function Report() {
         <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
-                P
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <path d="M12 2.5L19 5.5V11C19 16 15.5 19.5 12 21C8.5 19.5 5 16 5 11V5.5Z" />
+                  <path d="M8.5 11.5L11 14L15.5 9" />
+                </svg>
               </div>
               <span className="text-base font-semibold text-slate-900">Provaserve</span>
             </div>
