@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import BookDemoModal from '../components/modals/BookDemoModal'
 import DashboardPreview from '../components/DashboardPreview'
 import SubmitPreview from '../components/SubmitPreview'
-import ReportPreview from '../components/ReportPreview'
 import { COMPANY } from '../lib/company'
 
 const PROBLEMS = [
@@ -247,10 +246,12 @@ export default function Landing() {
       <section className="bg-slate-50 py-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">From the job site to the client&apos;s inbox</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+              From the job site to the cleaning manager&apos;s dashboard
+            </h2>
             <p className="mt-4 text-slate-500">
-              The same job, seen from both ends: an operative capturing proof on their phone, and the report a
-              client actually receives.
+              The same job, seen from both ends: an operative capturing proof on their phone, and the dashboard a
+              cleaning manager sees on the admin dashboard.
             </p>
           </div>
           <div className="mt-14 grid gap-12 sm:grid-cols-2 sm:items-center">
@@ -261,9 +262,9 @@ export default function Landing() {
               </p>
             </div>
             <div>
-              <ReportPreview />
+              <DashboardPreview />
               <p className="mt-6 text-center text-sm text-slate-500">
-                Clients get an exportable report for every contract period.
+                Cleaning managers see every site&apos;s status live, all in one dashboard.
               </p>
             </div>
           </div>
