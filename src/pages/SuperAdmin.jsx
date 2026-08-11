@@ -193,7 +193,7 @@ function InvitePersonForm({ title, actionPath, submitLabel, organizations }) {
 // per person), so each lives on the organization itself. Blank means
 // unlimited. Generic over which endpoint/value it edits so the two limits
 // don't duplicate this dirty-tracking and save logic twice.
-function LimitField({ label, value, onSave }) {
+function LimitField({ label, value, onSave, disabled }) {
   // The input's value is always a string; the stored value comes back
   // from the API as a number (or null). Comparing them directly for
   // dirty-checking would never settle back to false after a save -
@@ -228,13 +228,18 @@ function LimitField({ label, value, onSave }) {
           min="0"
           placeholder="Unlimited"
           value={inputValue}
+          disabled={disabled}
           onChange={(e) => {
             setInputValue(e.target.value)
             setError('')
           }}
-          className="w-24 rounded-lg border border-slate-300 px-2 py-1 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className={`w-24 rounded-lg border px-2 py-1 text-sm shadow-sm focus:outline-none ${
+            disabled
+              ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400'
+              : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+          }`}
         />
-        {isDirty && (
+        {isDirty && !disabled && (
           <button
             type="button"
             onClick={handleSave}
@@ -250,14 +255,75 @@ function LimitField({ label, value, onSave }) {
   )
 }
 
+// Only rendered once an organization actually has a subscription to defer
+// to - toggling to 'plan' with nothing behind it would just mean stale
+// limits sitting there with no future sync, so an org with no subscription
+// stays implicitly manual with no toggle shown at all.
+function LimitsSourceToggle({ org, onUpdated }) {
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const isPlanControlled = org.limits_source === 'plan'
+
+  const handleToggle = async () => {
+    setError('')
+    setSaving(true)
+    try {
+      const nextSource = isPlanControlled ? 'manual' : 'plan'
+      const { limitsSource, siteLimit, operativeLimit } = await callApi('set-limits-source', {
+        method: 'POST',
+        body: { organizationId: org.id, limitsSource: nextSource },
+      })
+      onUpdated(org.id, {
+        limits_source: limitsSource,
+        ...(siteLimit !== undefined ? { site_limit: siteLimit } : {}),
+        ...(operativeLimit !== undefined ? { operative_limit: operativeLimit } : {}),
+      })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!org.stripe_subscription_id) {
+    return <p className="text-xs text-slate-400">No subscription — limits are manual.</p>
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
+          isPlanControlled ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20' : 'bg-amber-50 text-amber-700 ring-amber-600/20'
+        }`}
+      >
+        {isPlanControlled ? `Plan-controlled${org.plans?.name ? ` (${org.plans.name})` : ''}` : 'Manual override'}
+      </span>
+      <button
+        type="button"
+        onClick={handleToggle}
+        disabled={saving}
+        className="text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-60"
+      >
+        {saving ? 'Switching…' : isPlanControlled ? 'Switch to manual' : 'Return to plan'}
+      </button>
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  )
+}
+
 function OrganizationRow({ org, onUpdated }) {
+  const planControlled = org.limits_source === 'plan'
   return (
     <li className="py-3">
-      <p className="font-medium text-slate-700">{org.name}</p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-medium text-slate-700">{org.name}</p>
+        <LimitsSourceToggle org={org} onUpdated={onUpdated} />
+      </div>
       <div className="mt-2 space-y-2">
         <LimitField
           label="Site limit"
           value={org.site_limit}
+          disabled={planControlled}
           onSave={async (v) => {
             const { siteLimit } = await callApi('set-site-limit', {
               method: 'POST',
@@ -269,6 +335,7 @@ function OrganizationRow({ org, onUpdated }) {
         <LimitField
           label="Operative limit"
           value={org.operative_limit}
+          disabled={planControlled}
           onSave={async (v) => {
             const { operativeLimit } = await callApi('set-operative-limit', {
               method: 'POST',

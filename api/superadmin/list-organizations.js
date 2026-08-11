@@ -30,7 +30,7 @@ export default async function handler(req, res) {
 
     const { data: organizations, error } = await supabaseAdmin
       .from('organizations')
-      .select('id, name, created_at, site_limit, operative_limit')
+      .select('id, name, created_at, site_limit, operative_limit, limits_source, stripe_subscription_id, plan_id, plans(name)')
       .order('name')
 
     if (error) {

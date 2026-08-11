@@ -27,11 +27,13 @@ function findCompanyName(session) {
   return field?.text?.value?.trim() || 'New organization'
 }
 
-// The only place a new organization + its first admin get created outside
-// the superadmin dashboard. Mirrors create-organization.js + create-admin.js
-// exactly - same invite-by-email, same profile insert, same rollback on
-// failure - just triggered by a paid Checkout Session instead of a
-// superadmin click, and it fills in plan-derived limits along the way.
+// checkout.session.completed fires for two different flows that share a
+// Checkout Session shape but need opposite handling: a prospective
+// customer with no account yet (organization_id absent from metadata -
+// creates a new org + invites its first admin, below), and an existing,
+// already-logged-in admin subscribing their organization for the first
+// time via subscribeOrganization in api/billing.js (organization_id
+// present - updates that org in place instead).
 async function handleCheckoutCompleted(session) {
   const planId = session.metadata?.plan_id
   if (!planId) throw new Error('Checkout session has no plan_id in metadata')
@@ -44,6 +46,25 @@ async function handleCheckoutCompleted(session) {
   if (planError || !plan) throw new Error(`Plan ${planId} not found`)
 
   const subscription = await stripe.subscriptions.retrieve(session.subscription)
+
+  const organizationId = session.metadata?.organization_id
+  if (organizationId) {
+    const { error } = await supabaseAdmin
+      .from('organizations')
+      .update({
+        site_limit: plan.site_limit,
+        operative_limit: plan.operative_limit,
+        plan_id: plan.id,
+        limits_source: 'plan',
+        stripe_customer_id: session.customer,
+        stripe_subscription_id: session.subscription,
+        subscription_status: subscription.status,
+        current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+      })
+      .eq('id', organizationId)
+    if (error) throw new Error(error.message)
+    return
+  }
 
   const { data: organization, error: orgError } = await supabaseAdmin
     .from('organizations')

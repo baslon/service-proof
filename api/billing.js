@@ -24,6 +24,7 @@ export default async function handler(req, res) {
 
     const { action } = req.body || {}
     if (action === 'createCheckoutSession') return await createCheckoutSession(req, res)
+    if (action === 'subscribeOrganization') return await subscribeOrganization(req, res)
     if (action === 'createPortalSession') return await createPortalSession(req, res)
     if (action === 'updateSubscription') return await updateSubscription(req, res)
     return res.status(400).json({ error: 'Unknown action' })
@@ -41,7 +42,7 @@ async function requireAdmin(req) {
 
   const { data: callerProfile, error: profileError } = await supabaseAdmin
     .from('profiles')
-    .select('role, organizations(stripe_customer_id, stripe_subscription_id)')
+    .select('organization_id, role, organizations(stripe_customer_id, stripe_subscription_id)')
     .eq('id', userData.user.id)
     .single()
 
@@ -109,6 +110,37 @@ async function createCheckoutSession(req, res) {
         },
       ],
       metadata: { plan_id: plan.id },
+    })
+
+    return res.status(200).json({ url: session.url })
+  } catch (err) {
+    return res.status(err.status || 500).json({ error: err.message })
+  }
+}
+
+// Same as createCheckoutSession, but for an existing, authenticated
+// organization rather than a prospective signup - ties the Checkout
+// Session to this organization via metadata so the webhook updates it in
+// place instead of running the new-organization signup path.
+async function subscribeOrganization(req, res) {
+  try {
+    const callerProfile = await requireAdmin(req)
+    if (callerProfile.organizations?.stripe_subscription_id) {
+      return res.status(400).json({ error: 'This organization already has a subscription - use Change plan instead.' })
+    }
+
+    const { planId, interval } = req.body || {}
+    const { plan, priceId } = await resolvePlanPrice(planId, interval)
+
+    const origin = req.headers.origin || `https://${req.headers.host}`
+    const session = await stripe.checkout.sessions.create({
+      mode: 'subscription',
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${origin}/billing`,
+      cancel_url: `${origin}/billing`,
+      automatic_tax: { enabled: true },
+      billing_address_collection: 'required',
+      metadata: { plan_id: plan.id, organization_id: callerProfile.organization_id },
     })
 
     return res.status(200).json({ url: session.url })
