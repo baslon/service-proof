@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import BookDemoModal from '../components/modals/BookDemoModal'
 import DashboardPreview from '../components/DashboardPreview'
+import SubmitPreview from '../components/SubmitPreview'
+import ReportPreview from '../components/ReportPreview'
 import { COMPANY } from '../lib/company'
 
 const PROBLEMS = [
@@ -239,6 +241,32 @@ export default function Landing() {
               <p className="mt-2 text-sm text-slate-500">{p.need}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">From the job site to the client&apos;s inbox</h2>
+            <p className="mt-4 text-slate-500">
+              The same job, seen from both ends: an operative capturing proof on their phone, and the report a
+              client actually receives.
+            </p>
+          </div>
+          <div className="mt-14 grid gap-12 sm:grid-cols-2 sm:items-center">
+            <div>
+              <SubmitPreview />
+              <p className="mt-6 text-center text-sm text-slate-500">
+                Operatives submit proof from the job site &mdash; no separate app to install.
+              </p>
+            </div>
+            <div>
+              <ReportPreview />
+              <p className="mt-6 text-center text-sm text-slate-500">
+                Clients get an exportable report for every contract period.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
