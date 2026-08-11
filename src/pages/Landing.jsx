@@ -50,6 +50,65 @@ const PERSONAS = [
   { role: 'Client Contact', need: 'Wants confidence the contract is being delivered without micromanaging it.' },
 ]
 
+const FAQS = [
+  {
+    q: 'Do operatives need to install a separate app?',
+    a: "No — operatives submit proof from their phone's browser. Nothing to install, nothing to update.",
+  },
+  {
+    q: 'What counts as evidence?',
+    a: 'Photos (the number required is set per job), an optional short video, a completion status, and notes from the operative.',
+  },
+  {
+    q: 'Can I control how many photos are required per job?',
+    a: 'Yes — the required photo count is set when a job is scheduled, and can be different for every job.',
+  },
+  {
+    q: 'Is there a free trial?',
+    a: "No. Book a demo instead and we'll walk you through Provaserve on your own sites before you subscribe.",
+  },
+  {
+    q: 'Are the prices shown inclusive of VAT?',
+    a: 'No — prices are exclusive of VAT, which is calculated and added at checkout based on your billing address.',
+  },
+  {
+    q: 'Can I change plans later?',
+    a: 'Yes. Upgrades and downgrades take effect immediately and are prorated automatically for the rest of your billing period.',
+  },
+  {
+    q: "Can operatives from one client or site see another's data?",
+    a: "No — every organization's data is fully separated. Operatives and admins only ever see the sites and jobs they're scoped to.",
+  },
+]
+
+function FaqItem({ q, a }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="border-b border-slate-200 py-4">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-4 text-left"
+      >
+        <span className="text-sm font-semibold text-slate-900">{q}</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          className={`h-5 w-5 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </button>
+      {open && <p className="mt-2 text-sm text-slate-500">{a}</p>}
+    </div>
+  )
+}
+
 // Shared by the desktop header and the mobile menu so the two can't drift.
 // Sign in stays out of the list: it's a router Link rather than an anchor,
 // and it belongs last in both.
@@ -268,6 +327,17 @@ export default function Landing() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-3xl px-6 py-24">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Frequently asked questions</h2>
+        </div>
+        <div className="mt-10">
+          {FAQS.map((item) => (
+            <FaqItem key={item.q} {...item} />
+          ))}
         </div>
       </section>
 
