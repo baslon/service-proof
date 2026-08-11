@@ -313,14 +313,14 @@ export default function Landing() {
               cleaning manager sees on the admin dashboard.
             </p>
           </div>
-          <div className="mt-14 grid gap-12 sm:grid-cols-2 sm:items-center">
-            <div>
+          <div className="mt-14 grid min-w-0 gap-12 sm:grid-cols-2 sm:items-center">
+            <div className="min-w-0">
               <SubmitPreview />
               <p className="mt-6 text-center text-sm text-slate-500">
                 Operatives submit proof from the job site &mdash; no separate app to install.
               </p>
             </div>
-            <div>
+            <div className="min-w-0">
               <DashboardPreview />
               <p className="mt-6 text-center text-sm text-slate-500">
                 Cleaning managers see every site&apos;s status live, all in one dashboard.
