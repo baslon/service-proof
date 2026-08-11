@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import BookPilotModal from '../components/modals/BookPilotModal'
+import BookDemoModal from '../components/modals/BookDemoModal'
 import DashboardPreview from '../components/DashboardPreview'
 import { COMPANY } from '../lib/company'
 
@@ -60,7 +60,7 @@ const NAV_LINKS = [
 
 export default function Landing() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [bookingPilot, setBookingPilot] = useState(false)
+  const [bookingDemo, setBookingDemo] = useState(false)
 
   return (
     <div className="bg-white">
@@ -87,12 +87,12 @@ export default function Landing() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link
-              to="/dashboard"
+            <a
+              href="#book-demo"
               className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
             >
-              View dashboard
-            </Link>
+              Book a demo
+            </a>
             <button
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Open menu"
@@ -177,10 +177,10 @@ export default function Landing() {
                 See it in action
               </Link>
               <button
-                onClick={() => setBookingPilot(true)}
+                onClick={() => setBookingDemo(true)}
                 className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                Book a pilot
+                Book a demo
               </button>
             </div>
           </div>
@@ -242,24 +242,26 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="pricing" className="bg-slate-900 py-24">
+      <section id="book-demo" className="bg-slate-900 py-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white">Run a 4-week pilot on us</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-white">See Provaserve on your own sites</h2>
           <p className="mt-4 text-slate-300">
-            Pick two sites. We'll get your operatives submitting evidence within a day, and your first client
-            report out within a week. No contract required to trial it.
+            Book a live walkthrough and we'll show you exactly how it'd work for your team, using your sites
+            and your reporting needs.
           </p>
-          <div className="mt-6 flex items-baseline justify-center gap-2">
-            <span className="text-4xl font-bold text-white">&pound;0</span>
-            <span className="text-slate-400">for the pilot, then from &pound;79/month</span>
-          </div>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <button
-              onClick={() => setBookingPilot(true)}
+              onClick={() => setBookingDemo(true)}
               className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-500"
             >
-              Start the pilot
+              Book a demo
             </button>
+            <Link
+              to="/pricing"
+              className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+            >
+              View plans &amp; pricing
+            </Link>
           </div>
         </div>
       </section>
@@ -289,7 +291,7 @@ export default function Landing() {
         </div>
       </footer>
 
-      {bookingPilot && <BookPilotModal onClose={() => setBookingPilot(false)} />}
+      {bookingDemo && <BookDemoModal onClose={() => setBookingDemo(false)} />}
     </div>
   )
 }

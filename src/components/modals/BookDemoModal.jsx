@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Modal from '../Modal'
 import FormField, { inputClass } from '../FormField'
 
-export default function BookPilotModal({ onClose }) {
+export default function BookDemoModal({ onClose }) {
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -33,9 +33,9 @@ export default function BookPilotModal({ onClose }) {
             </svg>
           </div>
           <p className="text-sm text-slate-600">
-            Thanks{form.name ? `, ${form.name.split(' ')[0]}` : ''} — we've got your pilot request for{' '}
+            Thanks{form.name ? `, ${form.name.split(' ')[0]}` : ''} — we've got your demo request for{' '}
             <strong className="text-slate-900">{form.company || 'your organisation'}</strong>. Someone from our team
-            will reach out within one business day to get your pilot sites set up.
+            will reach out within one business day to find a time.
           </p>
           <button
             onClick={onClose}
@@ -49,10 +49,10 @@ export default function BookPilotModal({ onClose }) {
   }
 
   return (
-    <Modal open onClose={onClose} title="Book a pilot" centered>
+    <Modal open onClose={onClose} title="Book a demo" centered>
       <form onSubmit={handleSubmit} className="space-y-4">
         <p className="text-sm text-slate-500">
-          Tell us a bit about your team and we'll set up a free 4-week pilot on two sites.
+          Tell us a bit about your team and we'll set up a live walkthrough of Provaserve for your sites.
         </p>
 
         <FormField label="Full name">
@@ -94,7 +94,7 @@ export default function BookPilotModal({ onClose }) {
             type="submit"
             className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
           >
-            Request pilot
+            Request demo
           </button>
         </div>
       </form>
