@@ -19,6 +19,51 @@ const DEFAULT_COMPLETION_STATUS = {
   'At Risk': 'Completed with issue',
 }
 
+function ClockControl() {
+  const { attendanceEvents, clockIn, clockOut } = useApp()
+  const { user } = useAuth()
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const myEvents = attendanceEvents.filter((e) => e.operativeId === user?.operativeId)
+  const clockedIn = myEvents[0]?.eventType === 'clock_in'
+
+  const handleClick = async () => {
+    setError('')
+    setSubmitting(true)
+    try {
+      await (clockedIn ? clockOut() : clockIn())
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0">
+          <p className="text-[11px] text-slate-400">Shift status</p>
+          <p className={`truncate text-sm font-medium ${clockedIn ? 'text-emerald-600' : 'text-slate-500'}`}>
+            {clockedIn ? `Clocked in since ${formatTime(myEvents[0].occurredAt)}` : 'Not clocked in'}
+          </p>
+        </div>
+        <button
+          onClick={handleClick}
+          disabled={submitting}
+          className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
+            clockedIn ? 'bg-slate-600' : 'bg-indigo-600'
+          }`}
+        >
+          {submitting ? 'Saving…' : clockedIn ? 'Clock out' : 'Clock in'}
+        </button>
+      </div>
+      {error && <p className="mt-1.5 text-xs text-red-600">{error}</p>}
+    </div>
+  )
+}
+
 function JobList({ jobs, sites, clients, onSelect, unreliable }) {
   return (
     <div className="space-y-3 px-4 py-4">
@@ -524,6 +569,8 @@ export default function Submit() {
           </div>
           {user?.organizationName && <span className="text-xs text-slate-400">{user.organizationName}</span>}
         </div>
+
+        {user?.role === 'operative' && <ClockControl />}
 
         <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
           <h1 className="text-base font-semibold text-slate-900">

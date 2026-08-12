@@ -51,6 +51,16 @@ function mapOperative(row, clientIdsByOperativeId) {
   }
 }
 
+function mapAttendanceEvent(row, operativeNameById) {
+  return {
+    id: row.id,
+    operativeId: row.operative_id,
+    operativeName: operativeNameById[row.operative_id] || 'Unknown',
+    eventType: row.event_type,
+    occurredAt: row.occurred_at,
+  }
+}
+
 function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid, videosByJobUuid) {
   const photos = photosByJobUuid[row.id] || []
   const videos = videosByJobUuid[row.id] || []
@@ -84,7 +94,7 @@ function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid
 
 export function AppProvider({ children }) {
   const { user } = useAuth()
-  const [state, setState] = useState({ clients: [], sites: [], jobs: [], operatives: [] })
+  const [state, setState] = useState({ clients: [], sites: [], jobs: [], operatives: [], attendanceEvents: [] })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const clientUuidByDisplayIdRef = useRef({})
@@ -93,19 +103,20 @@ export function AppProvider({ children }) {
 
   const fetchAll = useCallback(async () => {
     if (!user) {
-      setState({ clients: [], sites: [], jobs: [], operatives: [] })
+      setState({ clients: [], sites: [], jobs: [], operatives: [], attendanceEvents: [] })
       setError('')
       setLoading(false)
       return
     }
     setLoading(true)
 
-    const [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes] = await Promise.all([
+    const [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, attendanceRes] = await Promise.all([
       supabase.from('clients').select('*'),
       supabase.from('sites').select('*'),
       supabase.from('jobs').select('*').order('display_id', { ascending: false }),
       supabase.from('operatives').select('*'),
       supabase.from('operative_clients').select('*'),
+      supabase.from('attendance_events').select('*').order('occurred_at', { ascending: false }),
     ])
 
     const jobUuids = (jobsRes.data || []).map((j) => j.id)
@@ -117,7 +128,9 @@ export function AppProvider({ children }) {
     // perfectly normal empty account - the most alarming possible way to
     // report a network blip to someone who had data a minute ago. Bail out
     // instead, leaving whatever was last loaded on screen.
-    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, mediaRes].find((r) => r.error)
+    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, mediaRes, attendanceRes].find(
+      (r) => r.error
+    )
     if (failure) {
       setError(failure.error.message || 'Could not load your data.')
       setLoading(false)
@@ -131,6 +144,7 @@ export function AppProvider({ children }) {
     const operativeRows = operativesRes.data || []
     const operativeClientRows = operativeClientsRes.data || []
     const mediaRows = mediaRes.data || []
+    const attendanceRows = attendanceRes.data || []
 
     const clientDisplayIdByUuid = Object.fromEntries(clientRows.map((c) => [c.id, c.display_id]))
     const siteDisplayIdByUuid = Object.fromEntries(siteRows.map((s) => [s.id, s.display_id]))
@@ -153,11 +167,14 @@ export function AppProvider({ children }) {
       if (displayId) (clientIdsByOperativeId[r.operative_id] ||= []).push(displayId)
     })
 
+    const operativeNameById = Object.fromEntries(operativeRows.map((o) => [o.id, o.name]))
+
     setState({
       clients: clientRows.map(mapClient),
       sites: siteRows.map((s) => mapSite(s, clientDisplayIdByUuid)),
       jobs: jobRows.map((j) => mapJob(j, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid, videosByJobUuid)),
       operatives: operativeRows.map((r) => mapOperative(r, clientIdsByOperativeId)),
+      attendanceEvents: attendanceRows.map((r) => mapAttendanceEvent(r, operativeNameById)),
     })
     setLoading(false)
   }, [user])
@@ -514,6 +531,26 @@ export function AppProvider({ children }) {
     [fetchAll]
   )
 
+  // Plain data writes with no auth entanglement, so these go straight to
+  // Supabase under ordinary RLS like most other actions here - the
+  // alternation trigger is what actually enforces which one is legal to
+  // call next, this just surfaces that as a normal thrown error.
+  const clockIn = useCallback(async () => {
+    const { error } = await supabase
+      .from('attendance_events')
+      .insert({ organization_id: user.organizationId, operative_id: user.operativeId, event_type: 'clock_in' })
+    if (error) throw new Error(error.message)
+    await fetchAll()
+  }, [user, fetchAll])
+
+  const clockOut = useCallback(async () => {
+    const { error } = await supabase
+      .from('attendance_events')
+      .insert({ organization_id: user.organizationId, operative_id: user.operativeId, event_type: 'clock_out' })
+    if (error) throw new Error(error.message)
+    await fetchAll()
+  }, [user, fetchAll])
+
   const value = useMemo(
     () => ({
       ...state,
@@ -532,6 +569,8 @@ export function AppProvider({ children }) {
       inviteOperative,
       setOperativeActive,
       setOperativeClients,
+      clockIn,
+      clockOut,
       refreshData: fetchAll,
     }),
     [
@@ -551,6 +590,8 @@ export function AppProvider({ children }) {
       inviteOperative,
       setOperativeActive,
       setOperativeClients,
+      clockIn,
+      clockOut,
       fetchAll,
     ]
   )
