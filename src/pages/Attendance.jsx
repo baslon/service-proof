@@ -1,7 +1,15 @@
 import { useMemo, useState } from 'react'
 import DashboardLayout from '../components/DashboardLayout'
 import { useApp } from '../context/AppContext'
-import { formatDateTime } from '../utils/time'
+
+// A local formatter rather than utils/time's shared formatDateTime: this is
+// a timesheet, where the year matters (an attendance record still needs to
+// read unambiguously well after the year turns over), unlike that helper's
+// other callers which only ever show recent, same-year timestamps.
+function formatDateTime(value) {
+  if (!value) return '—'
+  return new Date(value).toLocaleString([], { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
 
 const EVENT_STYLE = {
   clock_in: { label: 'Clocked in', className: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' },
