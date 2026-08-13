@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import BookDemoModal from '../components/modals/BookDemoModal'
 import DashboardPreview from '../components/DashboardPreview'
 import SubmitPreview from '../components/SubmitPreview'
-import { COMPANY } from '../lib/company'
+import { COMPANY, CONTENT_LAST_REVIEWED } from '../lib/company'
 
 const PROBLEMS = [
   {
@@ -50,7 +50,7 @@ const PERSONAS = [
   { role: 'Client Contact', need: 'Wants confidence the contract is being delivered without micromanaging it.' },
 ]
 
-const FAQS = [
+export const FAQS = [
   {
     q: 'Do operatives need to install a separate app?',
     a: "No — operatives submit proof from their phone's browser. Nothing to install, nothing to update.",
@@ -243,19 +243,19 @@ export default function Landing() {
               Provaserve turns every cleaning job into evidence: timestamped photos, completion status, and a
               report your client can trust &mdash; without a single extra spreadsheet.
             </p>
-            <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row lg:justify-start">
-              <Link
-                to="/dashboard"
-                className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
-              >
-                See it in action
-              </Link>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <button
                 onClick={() => setBookingDemo(true)}
-                className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
               >
                 Book a demo
               </button>
+              <Link
+                to="/dashboard"
+                className="text-sm font-semibold text-indigo-100 underline decoration-indigo-300/50 underline-offset-4 transition hover:text-white"
+              >
+                See it in action
+              </Link>
             </div>
           </div>
 
@@ -362,7 +362,7 @@ export default function Landing() {
             Book a live walkthrough and we'll show you exactly how it'd work for your team, using your sites
             and your reporting needs.
           </p>
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <button
               onClick={() => setBookingDemo(true)}
               className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-500"
@@ -371,7 +371,7 @@ export default function Landing() {
             </button>
             <Link
               to="/pricing"
-              className="rounded-lg border border-white/30 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="text-sm font-semibold text-slate-300 underline decoration-slate-500 underline-offset-4 transition hover:text-white"
             >
               View plans &amp; pricing
             </Link>
@@ -401,6 +401,16 @@ export default function Landing() {
             {COMPANY.vatNumber}.
           </p>
           {COMPANY.registeredOffice && <p className="mt-1 text-xs">Registered office: {COMPANY.registeredOffice}</p>}
+          <p className="mt-1 text-xs">
+            Page content last reviewed{' '}
+            <time dateTime={CONTENT_LAST_REVIEWED}>
+              {new Date(CONTENT_LAST_REVIEWED).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              })}
+            </time>
+          </p>
         </div>
       </footer>
 
