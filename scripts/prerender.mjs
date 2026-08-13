@@ -17,8 +17,10 @@ const { render, getFaqs } = await import(pathToFileURL(ssrEntry).href)
 const appHtml = render('/')
 const faqs = getFaqs()
 
+// Kept to ~150 chars for search-snippet length — the full 40-60 word answer
+// lives on the page itself, right under the H1.
 const description =
-  "Provaserve turns every cleaning job into evidence: timestamped photos, completion status, and a report your client can trust."
+  'Can you prove a clean actually happened? Provaserve turns every job into timestamped photo evidence you and your client can both see.'
 const pageUrl = COMPANY.siteUrl + '/'
 
 const organizationSchema = {

@@ -85,25 +85,27 @@ function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="border-b border-slate-200 py-4">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="flex w-full items-center justify-between gap-4 text-left"
-      >
-        <span className="text-sm font-semibold text-slate-900">{q}</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          className={`h-5 w-5 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+      <h3>
+        <button
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="flex w-full items-center justify-between gap-4 text-left"
         >
-          <path
-            fillRule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-            clipRule="evenodd"
-          />
-        </svg>
-      </button>
+          <span className="text-sm font-semibold text-slate-900">{q}</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className={`h-5 w-5 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+              clipRule="evenodd"
+            />
+          </svg>
+        </button>
+      </h3>
       {open && <p className="mt-2 text-sm text-slate-500">{a}</p>}
     </div>
   )
@@ -236,12 +238,14 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
           <div className="text-center lg:text-left">
             <p className="mb-4 text-xs font-medium text-indigo-100">Proof-of-service for commercial cleaning</p>
-            <h1 className="mx-auto max-w-xl text-4xl font-bold leading-snug tracking-tight text-white sm:text-5xl sm:leading-snug lg:mx-0">
-              Stop guessing whether the clean actually happened.
+            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-snug tracking-tight text-white sm:text-4xl sm:leading-snug lg:mx-0">
+              Can you prove the clean happened? Every job now has photo proof.
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-indigo-100 lg:mx-0">
-              Provaserve turns every cleaning job into evidence: timestamped photos, completion status, and a
-              report your client can trust &mdash; without a single extra spreadsheet.
+              Provaserve turns every cleaning job into proof: your operative submits timestamped photos and a
+              completion status straight from their phone, so you and your client see the same evidence &mdash; no
+              rota checks, no spreadsheets, and no more &quot;did this get done?&quot; disputes eating your team&apos;s
+              time.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
               <button
@@ -267,7 +271,7 @@ export default function Landing() {
 
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">The evidence gap is costing you contracts</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Why is a lack of evidence costing you contracts?</h2>
           <p className="mt-4 text-slate-500">
             SME facilities and cleaning companies lose renewals and goodwill over disputes that a simple photo would settle.
           </p>
@@ -285,7 +289,7 @@ export default function Landing() {
       <section id="how-it-works" className="bg-slate-50 py-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">How it works</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900">How does Provaserve work?</h2>
             <p className="mt-4 text-slate-500">From scheduled job to client-ready report, in four steps.</p>
           </div>
           <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -304,7 +308,7 @@ export default function Landing() {
 
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Built for everyone on the contract</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Who is Provaserve built for?</h2>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {PERSONAS.map((p) => (
@@ -320,7 +324,7 @@ export default function Landing() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">
-              From the job site to the cleaning manager&apos;s dashboard
+              What does the evidence actually look like?
             </h2>
             <p className="mt-4 text-slate-500">
               The same job, seen from both ends: an operative capturing proof on their phone, and the dashboard a
@@ -357,7 +361,7 @@ export default function Landing() {
 
       <section id="book-demo" className="bg-slate-900 py-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white">See Provaserve on your own sites</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-white">Ready to see Provaserve on your own sites?</h2>
           <p className="mt-4 text-slate-300">
             Book a live walkthrough and we'll show you exactly how it'd work for your team, using your sites
             and your reporting needs.
