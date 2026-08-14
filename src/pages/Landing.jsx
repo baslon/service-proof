@@ -271,7 +271,7 @@ export default function Landing() {
 
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Why is a lack of evidence costing you contracts?</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Is lack of evidence costing you contracts?</h2>
           <p className="mt-4 text-slate-500">
             SME facilities and cleaning companies lose renewals and goodwill over disputes that a simple photo would settle.
           </p>
