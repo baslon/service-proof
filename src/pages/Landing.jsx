@@ -238,7 +238,7 @@ export default function Landing() {
         <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
           <div className="text-center lg:text-left">
             <p className="mb-4 text-xs font-medium text-indigo-100">Proof-of-service for commercial cleaning</p>
-            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-snug tracking-tight text-white sm:text-4xl sm:leading-snug lg:mx-0">
+            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-snug tracking-tight text-white sm:text-4xl sm:leading-snug lg:mx-0 lg:text-5xl">
               Can you prove the clean happened?
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-indigo-100 lg:mx-0">
