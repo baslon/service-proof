@@ -239,7 +239,7 @@ export default function Landing() {
           <div className="text-center lg:text-left">
             <p className="mb-4 text-xs font-medium text-indigo-100">Proof-of-service for commercial cleaning</p>
             <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-snug tracking-tight text-white sm:text-4xl sm:leading-snug lg:mx-0">
-              Can you prove the clean happened? Every job now has photo proof.
+              Can you prove the clean happened?
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-lg text-indigo-100 lg:mx-0">
               Provaserve turns every cleaning job into proof: your operative submits timestamped photos and a
