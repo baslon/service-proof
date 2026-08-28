@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import SiteHeader from '../components/SiteHeader'
+import SiteFooter from '../components/SiteFooter'
 import { supabase } from '../lib/supabaseClient'
 import { COMPANY } from '../lib/company'
 
@@ -46,29 +47,7 @@ export default function Pricing() {
 
   return (
     <div className="min-h-screen bg-zinc-50 font-geist text-zinc-900">
-      <header className="border-b border-zinc-200">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#16a34a"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-6 w-6"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="4" />
-              <path d="M8 12.5l2.6 2.6L16.5 9" />
-            </svg>
-            <span className="font-display text-base font-semibold tracking-tight text-zinc-900">{COMPANY.product}</span>
-          </Link>
-          <Link to="/login" className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900">
-            Sign in
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       <div className="mx-auto max-w-5xl px-6 py-16">
         <div className="text-center">
@@ -159,6 +138,8 @@ export default function Pricing() {
           })}
         </div>
       </div>
+
+      <SiteFooter />
     </div>
   )
 }
