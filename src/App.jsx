@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
+import ScrollToTop from './components/ScrollToTop'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -20,30 +21,33 @@ import RequireAuth from './components/RequireAuth'
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/superadmin" element={<SuperAdmin />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/pricing" element={<Pricing />} />
-      <Route path="/signup/success" element={<SignupSuccess />} />
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/superadmin" element={<SuperAdmin />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/pricing" element={<Pricing />} />
+        <Route path="/signup/success" element={<SignupSuccess />} />
 
-      <Route element={<RequireAuth roles={['admin']} />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/sites" element={<Sites />} />
-        <Route path="/schedules" element={<Schedules />} />
-        <Route path="/clients" element={<Clients />} />
-        <Route path="/operatives" element={<Operatives />} />
-        <Route path="/attendance" element={<Attendance />} />
-        <Route path="/report" element={<Report />} />
-        <Route path="/billing" element={<Billing />} />
-      </Route>
+        <Route element={<RequireAuth roles={['admin']} />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/sites" element={<Sites />} />
+          <Route path="/schedules" element={<Schedules />} />
+          <Route path="/clients" element={<Clients />} />
+          <Route path="/operatives" element={<Operatives />} />
+          <Route path="/attendance" element={<Attendance />} />
+          <Route path="/report" element={<Report />} />
+          <Route path="/billing" element={<Billing />} />
+        </Route>
 
-      <Route element={<RequireAuth roles={['admin', 'operative']} />}>
-        <Route path="/submit" element={<Submit />} />
-        <Route path="/set-password" element={<SetPassword />} />
-      </Route>
-    </Routes>
+        <Route element={<RequireAuth roles={['admin', 'operative']} />}>
+          <Route path="/submit" element={<Submit />} />
+          <Route path="/set-password" element={<SetPassword />} />
+        </Route>
+      </Routes>
+    </>
   )
 }
