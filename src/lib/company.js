@@ -6,7 +6,7 @@ export const COMPANY = {
   siteUrl: 'https://provaserve.app',
   legalName: 'Baslon (UK) Limited',
   registrationNumber: '5759884',
-  registeredIn: 'England',
+  registeredIn: 'England and Wales',
   vatNumber: '411 8537 11',
   registeredOffice: '3b Lockheed Court, Preston Farm, Stockton-on-Tees, England, TS18 3SH',
   contactEmail: 'contact@baslondigital.com',
