@@ -10,21 +10,19 @@ export default function LegalLayout({ title, children }) {
       <header className="border-b border-zinc-100">
         <div className="mx-auto flex max-w-3xl items-center px-6 py-4">
           <Link to="/" className="flex items-center gap-2" title="Back to home page">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M12 2.5L19 5.5V11C19 16 15.5 19.5 12 21C8.5 19.5 5 16 5 11V5.5Z" />
-                <path d="M8.5 11.5L11 14L15.5 9" />
-              </svg>
-            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#16a34a"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-7 w-7"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="4" />
+              <path d="M8 12.5l2.6 2.6L16.5 9" />
+            </svg>
             <span className="text-base font-semibold text-zinc-900">{COMPANY.product}</span>
           </Link>
         </div>
