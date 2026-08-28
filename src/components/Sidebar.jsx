@@ -69,8 +69,8 @@ export default function Sidebar({ open, onClose }) {
         <div className="fixed inset-0 z-40 bg-zinc-900/50 no-print lg:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`no-print fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 transform flex-col border-r border-zinc-200 bg-white transition-transform duration-200 ease-in-out lg:static lg:z-auto lg:tranzinc-x-0 ${
-          open ? 'tranzinc-x-0' : '-tranzinc-x-full'
+        className={`no-print fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 transform flex-col border-r border-zinc-200 bg-white transition-transform duration-200 ease-in-out lg:static lg:z-auto lg:translate-x-0 ${
+          open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between gap-2 border-b border-zinc-200 px-6 py-5">
