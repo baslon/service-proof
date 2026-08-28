@@ -3,6 +3,7 @@ import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Sites from './pages/Sites'
+import Schedules from './pages/Schedules'
 import Clients from './pages/Clients'
 import Operatives from './pages/Operatives'
 import Attendance from './pages/Attendance'
@@ -31,6 +32,7 @@ export default function App() {
       <Route element={<RequireAuth roles={['admin']} />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/sites" element={<Sites />} />
+        <Route path="/schedules" element={<Schedules />} />
         <Route path="/clients" element={<Clients />} />
         <Route path="/operatives" element={<Operatives />} />
         <Route path="/attendance" element={<Attendance />} />

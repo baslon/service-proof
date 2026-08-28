@@ -61,6 +61,41 @@ function mapAttendanceEvent(row, operativeNameById) {
   }
 }
 
+// Schedules have no display_id (they're an internal admin entity, never
+// shown to a cleaner the way a job's "SP-0041" is) - id is the raw uuid
+// throughout, the same choice already made for operatives.
+function mapSchedule(row, clientDisplayIdByUuid, siteDisplayIdByUuid, operativeIdsByScheduleId) {
+  return {
+    id: row.id,
+    clientId: clientDisplayIdByUuid[row.client_id] || '',
+    siteId: siteDisplayIdByUuid[row.site_id] || '',
+    taskType: row.task_type,
+    area: row.area || '',
+    instructions: row.instructions || '',
+    photosRequired: row.photos_required,
+    daysOfWeek: row.days_of_week || [],
+    startTime: row.start_time ? row.start_time.slice(0, 5) : '',
+    expectedDurationMinutes: row.expected_duration_minutes,
+    status: row.status,
+    effectiveStartDate: row.effective_start_date,
+    effectiveEndDate: row.effective_end_date,
+    notes: row.notes || '',
+    operativeIds: operativeIdsByScheduleId[row.id] || [],
+  }
+}
+
+function mapScheduleException(row) {
+  return {
+    id: row.id,
+    scheduleId: row.schedule_id,
+    exceptionDate: row.exception_date,
+    operativeId: row.operative_id,
+    type: row.type,
+    replacementOperativeId: row.replacement_operative_id,
+    notes: row.notes || '',
+  }
+}
+
 function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid, videosByJobUuid) {
   const photos = photosByJobUuid[row.id] || []
   const videos = videosByJobUuid[row.id] || []
@@ -94,7 +129,15 @@ function mapJob(row, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid
 
 export function AppProvider({ children }) {
   const { user } = useAuth()
-  const [state, setState] = useState({ clients: [], sites: [], jobs: [], operatives: [], attendanceEvents: [] })
+  const [state, setState] = useState({
+    clients: [],
+    sites: [],
+    jobs: [],
+    operatives: [],
+    attendanceEvents: [],
+    schedules: [],
+    scheduleExceptions: [],
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const clientUuidByDisplayIdRef = useRef({})
@@ -103,20 +146,41 @@ export function AppProvider({ children }) {
 
   const fetchAll = useCallback(async () => {
     if (!user) {
-      setState({ clients: [], sites: [], jobs: [], operatives: [], attendanceEvents: [] })
+      setState({
+        clients: [],
+        sites: [],
+        jobs: [],
+        operatives: [],
+        attendanceEvents: [],
+        schedules: [],
+        scheduleExceptions: [],
+      })
       setError('')
       setLoading(false)
       return
     }
     setLoading(true)
 
-    const [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, attendanceRes] = await Promise.all([
+    const [
+      clientsRes,
+      sitesRes,
+      jobsRes,
+      operativesRes,
+      operativeClientsRes,
+      attendanceRes,
+      schedulesRes,
+      scheduleOperativesRes,
+      scheduleExceptionsRes,
+    ] = await Promise.all([
       supabase.from('clients').select('*'),
       supabase.from('sites').select('*'),
       supabase.from('jobs').select('*').order('display_id', { ascending: false }),
       supabase.from('operatives').select('*'),
       supabase.from('operative_clients').select('*'),
       supabase.from('attendance_events').select('*').order('occurred_at', { ascending: false }),
+      supabase.from('schedules').select('*'),
+      supabase.from('schedule_operatives').select('*'),
+      supabase.from('schedule_exceptions').select('*').order('exception_date', { ascending: true }),
     ])
 
     const jobUuids = (jobsRes.data || []).map((j) => j.id)
@@ -128,9 +192,18 @@ export function AppProvider({ children }) {
     // perfectly normal empty account - the most alarming possible way to
     // report a network blip to someone who had data a minute ago. Bail out
     // instead, leaving whatever was last loaded on screen.
-    const failure = [clientsRes, sitesRes, jobsRes, operativesRes, operativeClientsRes, mediaRes, attendanceRes].find(
-      (r) => r.error
-    )
+    const failure = [
+      clientsRes,
+      sitesRes,
+      jobsRes,
+      operativesRes,
+      operativeClientsRes,
+      mediaRes,
+      attendanceRes,
+      schedulesRes,
+      scheduleOperativesRes,
+      scheduleExceptionsRes,
+    ].find((r) => r.error)
     if (failure) {
       setError(failure.error.message || 'Could not load your data.')
       setLoading(false)
@@ -145,6 +218,9 @@ export function AppProvider({ children }) {
     const operativeClientRows = operativeClientsRes.data || []
     const mediaRows = mediaRes.data || []
     const attendanceRows = attendanceRes.data || []
+    const scheduleRows = schedulesRes.data || []
+    const scheduleOperativeRows = scheduleOperativesRes.data || []
+    const scheduleExceptionRows = scheduleExceptionsRes.data || []
 
     const clientDisplayIdByUuid = Object.fromEntries(clientRows.map((c) => [c.id, c.display_id]))
     const siteDisplayIdByUuid = Object.fromEntries(siteRows.map((s) => [s.id, s.display_id]))
@@ -169,12 +245,19 @@ export function AppProvider({ children }) {
 
     const operativeNameById = Object.fromEntries(operativeRows.map((o) => [o.id, o.name]))
 
+    const operativeIdsByScheduleId = {}
+    scheduleOperativeRows.forEach((r) => {
+      ;(operativeIdsByScheduleId[r.schedule_id] ||= []).push(r.operative_id)
+    })
+
     setState({
       clients: clientRows.map(mapClient),
       sites: siteRows.map((s) => mapSite(s, clientDisplayIdByUuid)),
       jobs: jobRows.map((j) => mapJob(j, clientDisplayIdByUuid, siteDisplayIdByUuid, photosByJobUuid, videosByJobUuid)),
       operatives: operativeRows.map((r) => mapOperative(r, clientIdsByOperativeId)),
       attendanceEvents: attendanceRows.map((r) => mapAttendanceEvent(r, operativeNameById)),
+      schedules: scheduleRows.map((r) => mapSchedule(r, clientDisplayIdByUuid, siteDisplayIdByUuid, operativeIdsByScheduleId)),
+      scheduleExceptions: scheduleExceptionRows.map(mapScheduleException),
     })
     setLoading(false)
   }, [user])
@@ -462,6 +545,163 @@ export function AppProvider({ children }) {
     [fetchAll]
   )
 
+  // Schedules have no display_id and no advisory-lock RPC like jobs/sites/
+  // clients do - there's no numbering scheme to race over, just a plain
+  // insert, the same shape as attendance_events.
+  const addSchedule = useCallback(
+    async (payload) => {
+      const { data, error } = await supabase
+        .from('schedules')
+        .insert({
+          organization_id: user.organizationId,
+          client_id: clientUuidByDisplayIdRef.current[payload.clientId],
+          site_id: siteUuidByDisplayIdRef.current[payload.siteId],
+          task_type: payload.taskType,
+          area: payload.area || null,
+          instructions: payload.instructions || null,
+          photos_required: payload.photosRequired,
+          days_of_week: payload.daysOfWeek,
+          start_time: payload.startTime,
+          expected_duration_minutes: payload.expectedDurationMinutes || null,
+          effective_start_date: payload.effectiveStartDate,
+          effective_end_date: payload.effectiveEndDate || null,
+          notes: payload.notes || null,
+          created_by: user.id,
+        })
+        .select()
+        .single()
+      if (error) throw new Error(error.message)
+
+      if (payload.operativeIds?.length) {
+        const { error: rosterError } = await supabase
+          .from('schedule_operatives')
+          .insert(payload.operativeIds.map((operative_id) => ({ schedule_id: data.id, operative_id })))
+        if (rosterError) throw new Error(rosterError.message)
+      }
+      await fetchAll()
+    },
+    [user, fetchAll]
+  )
+
+  // Editing a Schedule only ever affects generation from this point forward
+  // - already-generated Job Instances are left exactly as they are (the
+  // same "leave existing instances alone" rule pausing follows too). There
+  // is nothing to reach back and fix up here, unlike addScheduleException
+  // below.
+  const updateSchedule = useCallback(
+    async (id, patch) => {
+      const columnPatch = {}
+      if ('taskType' in patch) columnPatch.task_type = patch.taskType
+      if ('area' in patch) columnPatch.area = patch.area
+      if ('instructions' in patch) columnPatch.instructions = patch.instructions
+      if ('photosRequired' in patch) columnPatch.photos_required = patch.photosRequired
+      if ('daysOfWeek' in patch) columnPatch.days_of_week = patch.daysOfWeek
+      if ('startTime' in patch) columnPatch.start_time = patch.startTime
+      if ('expectedDurationMinutes' in patch) columnPatch.expected_duration_minutes = patch.expectedDurationMinutes
+      if ('effectiveStartDate' in patch) columnPatch.effective_start_date = patch.effectiveStartDate
+      if ('effectiveEndDate' in patch) columnPatch.effective_end_date = patch.effectiveEndDate
+      if ('notes' in patch) columnPatch.notes = patch.notes
+
+      const { error } = await supabase.from('schedules').update(columnPatch).eq('id', id)
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
+  // Replaces the whole team roster rather than diffing - same shape as
+  // setOperativeClients, the list is always small enough that this is
+  // simpler than tracking adds/removes separately.
+  const setScheduleOperatives = useCallback(
+    async (scheduleId, operativeIds) => {
+      const { error: deleteError } = await supabase.from('schedule_operatives').delete().eq('schedule_id', scheduleId)
+      if (deleteError) throw new Error(deleteError.message)
+      if (operativeIds.length) {
+        const { error: insertError } = await supabase
+          .from('schedule_operatives')
+          .insert(operativeIds.map((operative_id) => ({ schedule_id: scheduleId, operative_id })))
+        if (insertError) throw new Error(insertError.message)
+      }
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
+  // Pausing only flips the status - the generator stops producing new jobs
+  // for it, and everything already generated is left alone (see
+  // supabase/migrations/20260816120000_schedule_pause_end_cancels_pending.sql).
+  // Ending also flips the status, but a database trigger on schedules
+  // additionally cancels this schedule's pending, not-yet-visited jobs -
+  // that half happens automatically, not from anything called here.
+  const setScheduleStatus = useCallback(
+    async (id, status) => {
+      const { error } = await supabase.from('schedules').update({ status }).eq('id', id)
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
+  // Exceptions change a single date without touching the Schedule itself,
+  // but the generation window runs ~14 days ahead, so by the time a manager
+  // logs a cover or cancellation the Job Instance for that date has usually
+  // already been created. Adding the exception alone wouldn't affect it
+  // until the schedule's next occurrence far in the future - so this also
+  // reaches back and fixes up any already-generated instance the exception
+  // applies to, through the same deleteJob/updateJob paths a manager would
+  // use by hand. A job that's already submitted or sealed is left alone
+  // regardless - the visit already happened, an exception can't undo that.
+  const addScheduleException = useCallback(
+    async (payload) => {
+      const { error } = await supabase.from('schedule_exceptions').insert({
+        schedule_id: payload.scheduleId,
+        exception_date: payload.exceptionDate,
+        operative_id: payload.operativeId || null,
+        type: payload.type,
+        replacement_operative_id: payload.type === 'cover' ? payload.replacementOperativeId : null,
+        notes: payload.notes || null,
+        created_by: user.id,
+      })
+      if (error) throw new Error(error.message)
+
+      let affectedQuery = supabase
+        .from('jobs')
+        .select('display_id')
+        .eq('schedule_id', payload.scheduleId)
+        .eq('schedule_occurrence_date', payload.exceptionDate)
+        .eq('status', 'Incomplete')
+        .is('submitted_time', null)
+      if (payload.operativeId) affectedQuery = affectedQuery.eq('operative_id', payload.operativeId)
+      const { data: affectedJobs, error: lookupError } = await affectedQuery
+      if (lookupError) throw new Error(lookupError.message)
+
+      for (const job of affectedJobs || []) {
+        if (payload.type === 'cancel') {
+          await deleteJob(job.display_id)
+        } else if (payload.type === 'cover') {
+          await updateJob(job.display_id, { operativeId: payload.replacementOperativeId })
+        }
+      }
+
+      await fetchAll()
+    },
+    [user, deleteJob, updateJob, fetchAll]
+  )
+
+  // Removing an exception only stops it applying to future generation runs
+  // - it does not retroactively restore a job addScheduleException already
+  // cancelled, or un-reassign one it already covered. Those already
+  // happened as real actions on real rows; undoing them is a manual fix
+  // through Edit Job, the same as undoing any other completed action here.
+  const deleteScheduleException = useCallback(
+    async (id) => {
+      const { error } = await supabase.from('schedule_exceptions').delete().eq('id', id)
+      if (error) throw new Error(error.message)
+      await fetchAll()
+    },
+    [fetchAll]
+  )
+
   // Creating another person's login account needs the service_role key,
   // which can never touch the browser — so this calls a serverless function
   // instead of talking to Supabase directly, unlike every other action here.
@@ -566,6 +806,12 @@ export function AppProvider({ children }) {
       deleteSite,
       addClient,
       deleteClient,
+      addSchedule,
+      updateSchedule,
+      setScheduleOperatives,
+      setScheduleStatus,
+      addScheduleException,
+      deleteScheduleException,
       inviteOperative,
       setOperativeActive,
       setOperativeClients,
@@ -587,6 +833,12 @@ export function AppProvider({ children }) {
       deleteSite,
       addClient,
       deleteClient,
+      addSchedule,
+      updateSchedule,
+      setScheduleOperatives,
+      setScheduleStatus,
+      addScheduleException,
+      deleteScheduleException,
       inviteOperative,
       setOperativeActive,
       setOperativeClients,

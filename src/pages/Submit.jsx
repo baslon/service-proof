@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import StatusBadge from '../components/StatusBadge'
 import ConfirmDialog from '../components/ConfirmDialog'
 import DataErrorBanner from '../components/DataErrorBanner'
-import { formatTime } from '../utils/time'
+import { formatTime, formatDateTime } from '../utils/time'
 import { uploadPhoto } from '../lib/uploadPhoto'
 import { uploadVideo } from '../lib/uploadVideo'
 
@@ -89,6 +89,7 @@ function JobList({ jobs, sites, clients, onSelect, unreliable }) {
             </div>
             <p className="mt-1 text-sm text-slate-700">{job.taskType}</p>
             <p className="text-xs text-slate-500">{site?.name}</p>
+            <p className="mt-1 text-xs font-medium text-slate-600">{formatDateTime(job.scheduledTime)}</p>
             <p className="mt-2 text-xs font-medium text-indigo-600">
               {job.photosSubmitted}/{job.photosRequired} photo(s) &rarr;
             </p>
@@ -272,6 +273,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
         <h2 className="mt-1 text-lg font-semibold text-slate-900">{job.taskType}</h2>
         <p className="text-sm text-slate-500">{site?.name}</p>
         <p className="text-sm text-slate-500">{job.area}</p>
+        <p className="mt-1 text-sm font-medium text-indigo-600">{formatDateTime(job.scheduledTime)}</p>
       </div>
 
       {job.instructions && (
@@ -506,12 +508,19 @@ export default function Submit() {
   const [showExitDiscardConfirm, setShowExitDiscardConfirm] = useState(false)
   const formRef = useRef(null)
 
-  const myJobs = jobs.filter(
-    (j) =>
-      ACTIONABLE_STATUSES.includes(j.status) &&
-      !j.resolvedAt &&
-      (user?.role === 'admin' || j.operativeId === user?.operativeId)
-  )
+  // A Schedule can generate up to two weeks of jobs in one batch, so the
+  // list is no longer implicitly "today's jobs" the way it was when a
+  // manager created one at a time - sort soonest-due first rather than the
+  // job-id order (newest created) that was fine when there was only ever
+  // one live job to find.
+  const myJobs = jobs
+    .filter(
+      (j) =>
+        ACTIONABLE_STATUSES.includes(j.status) &&
+        !j.resolvedAt &&
+        (user?.role === 'admin' || j.operativeId === user?.operativeId)
+    )
+    .sort((a, b) => (a.scheduledTime || '').localeCompare(b.scheduledTime || ''))
   const selectedJob = jobs.find((j) => j.id === selectedJobId) || null
   const selectedSite = selectedJob ? sites.find((s) => s.id === selectedJob.siteId) : null
   const selectedClientName = selectedJob ? clients.find((c) => c.id === selectedJob.clientId)?.name : null
