@@ -119,13 +119,10 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <a
-                  href={`mailto:${COMPANY.contactEmail}`}
-                  className="flex items-center gap-2 text-sm text-zinc-600 transition hover:text-zinc-900"
-                >
+                <Link to="/contact" className="flex items-center gap-2 text-sm text-zinc-600 transition hover:text-zinc-900">
                   <FooterIcon name="mail" className="h-4 w-4 shrink-0 text-zinc-400" />
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

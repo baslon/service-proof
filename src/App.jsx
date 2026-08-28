@@ -15,6 +15,7 @@ import SuperAdmin from './pages/SuperAdmin'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import Pricing from './pages/Pricing'
+import Contact from './pages/Contact'
 import SignupSuccess from './pages/SignupSuccess'
 import Billing from './pages/Billing'
 import RequireAuth from './components/RequireAuth'
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/contact" element={<Contact />} />
         <Route path="/signup/success" element={<SignupSuccess />} />
 
         <Route element={<RequireAuth roles={['admin']} />}>

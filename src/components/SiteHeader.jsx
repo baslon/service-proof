@@ -11,7 +11,7 @@ import { COMPANY } from '../lib/company'
 const NAV_LINKS = [
   { label: 'How it works', href: '/#how-it-works' },
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Contact', href: `mailto:${COMPANY.contactEmail}` },
+  { label: 'Contact', href: '/contact' },
 ]
 
 // The header used across every public page — home, pricing, and the legal
