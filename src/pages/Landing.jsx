@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import BookDemoModal from '../components/modals/BookDemoModal'
 import DashboardPreview from '../components/DashboardPreview'
 import SubmitPreview from '../components/SubmitPreview'
-import { COMPANY, CONTENT_LAST_REVIEWED } from '../lib/company'
+import { COMPANY } from '../lib/company'
 
 const PROBLEMS = [
   {
@@ -591,16 +591,6 @@ export default function Landing() {
               {COMPANY.vatNumber}.
             </p>
             {COMPANY.registeredOffice && <p className="mt-1 text-xs text-zinc-400">Registered office: {COMPANY.registeredOffice}</p>}
-            <p className="mt-1 text-xs text-zinc-400">
-              Page content last reviewed{' '}
-              <time dateTime={CONTENT_LAST_REVIEWED}>
-                {new Date(CONTENT_LAST_REVIEWED).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-              </time>
-            </p>
           </div>
         </div>
       </footer>
