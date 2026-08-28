@@ -66,16 +66,16 @@ export default function Sidebar({ open, onClose }) {
   return (
     <>
       {open && (
-        <div className="fixed inset-0 z-40 bg-slate-900/50 no-print lg:hidden" onClick={onClose} aria-hidden="true" />
+        <div className="fixed inset-0 z-40 bg-zinc-900/50 no-print lg:hidden" onClick={onClose} aria-hidden="true" />
       )}
       <aside
-        className={`no-print fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 transform flex-col border-r border-slate-200 bg-white transition-transform duration-200 ease-in-out lg:static lg:z-auto lg:translate-x-0 ${
-          open ? 'translate-x-0' : '-translate-x-full'
+        className={`no-print fixed inset-y-0 left-0 z-50 flex h-full w-64 shrink-0 transform flex-col border-r border-zinc-200 bg-white transition-transform duration-200 ease-in-out lg:static lg:z-auto lg:tranzinc-x-0 ${
+          open ? 'tranzinc-x-0' : '-tranzinc-x-full'
         }`}
       >
-        <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-6 py-5">
+        <div className="flex items-center justify-between gap-2 border-b border-zinc-200 px-6 py-5">
           <Link to="/" className="flex items-center gap-2" title="Back to home page">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
@@ -90,12 +90,12 @@ export default function Sidebar({ open, onClose }) {
                 <path d="M8.5 11.5L11 14L15.5 9" />
               </svg>
             </div>
-            <span className="text-base font-semibold text-slate-900">Provaserve</span>
+            <span className="text-base font-semibold text-zinc-900">Provaserve</span>
           </Link>
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 lg:hidden"
+            className="rounded-md p-1.5 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 lg:hidden"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path
@@ -108,7 +108,7 @@ export default function Sidebar({ open, onClose }) {
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-5">
-          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Navigation</p>
+          <p className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">Navigation</p>
           <ul className="mt-2 space-y-1">
             {NAV_LINKS.map((link) => {
               const active = location.pathname === link.to
@@ -118,7 +118,7 @@ export default function Sidebar({ open, onClose }) {
                     to={link.to}
                     onClick={onClose}
                     className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition ${
-                      active ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      active ? 'bg-green-50 text-green-700' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                     }`}
                   >
                     <Icon name={link.icon} className="h-4.5 w-4.5" />
@@ -129,7 +129,7 @@ export default function Sidebar({ open, onClose }) {
             })}
           </ul>
 
-          <p className="mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Filter by status</p>
+          <p className="mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-400">Filter by status</p>
           <ul className="mt-2 space-y-1">
             {STATUS_FILTERS.map((f) => {
               const active = onDashboard && activeStatus === f.value
@@ -139,11 +139,11 @@ export default function Sidebar({ open, onClose }) {
                     to={f.value ? `/dashboard?status=${encodeURIComponent(f.value)}` : '/dashboard'}
                     onClick={onClose}
                     className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition ${
-                      active ? 'bg-indigo-50 text-indigo-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      active ? 'bg-green-50 text-green-700' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
                     }`}
                   >
                     <span>{f.label}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${active ? 'bg-indigo-100' : 'bg-slate-100'}`}>
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${active ? 'bg-green-100' : 'bg-zinc-100'}`}>
                       {counts[f.value]}
                     </span>
                   </Link>
@@ -153,19 +153,19 @@ export default function Sidebar({ open, onClose }) {
           </ul>
         </nav>
 
-        <div className="border-t border-slate-200 p-3">
+        <div className="border-t border-zinc-200 p-3">
           {user && (
-            <div className="mb-3 flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+            <div className="mb-3 flex items-center justify-between rounded-lg bg-zinc-50 px-3 py-2">
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-800">{user.name}</p>
+                <p className="truncate text-sm font-medium text-zinc-800">{user.name}</p>
                 {user.organizationName && (
-                  <p className="truncate text-xs font-medium text-slate-600">{user.organizationName}</p>
+                  <p className="truncate text-xs font-medium text-zinc-600">{user.organizationName}</p>
                 )}
-                <p className="text-xs capitalize text-slate-400">{user.role}</p>
+                <p className="text-xs capitalize text-zinc-400">{user.role}</p>
               </div>
               <button
                 onClick={handleLogout}
-                className="shrink-0 text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                className="shrink-0 text-xs font-medium text-zinc-900 hover:text-zinc-600"
               >
                 Log out
               </button>
@@ -174,7 +174,7 @@ export default function Sidebar({ open, onClose }) {
           <Link
             to="/submit"
             onClick={onClose}
-            className="mb-2 flex w-full items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            className="mb-2 flex w-full items-center justify-center rounded-lg border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
           >
             Open mobile proof form
           </Link>
@@ -183,7 +183,7 @@ export default function Sidebar({ open, onClose }) {
               refreshData()
               onClose?.()
             }}
-            className="flex w-full items-center justify-center rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200"
+            className="flex w-full items-center justify-center rounded-lg bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-200"
           >
             Refresh data
           </button>

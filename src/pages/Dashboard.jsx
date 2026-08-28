@@ -111,29 +111,29 @@ export default function Dashboard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-zinc-900">Dashboard</h1>
             {/* The sidebar already shows this, but it scrolls out of view on a
                 long job list, and the whole point is to catch "which tenant
                 am I looking at" at a glance — right by the page title is
                 where that glance lands. */}
             {user?.organizationName && (
-              <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/20">
+              <span className="rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                 {user.organizationName}
               </span>
             )}
           </div>
-          <p className="mt-1 text-sm text-slate-500">Live evidence status across every client and site.</p>
+          <p className="mt-1 text-sm text-zinc-500">Live evidence status across every client and site.</p>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => setAddingOperative(true)}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             + Add operative
           </button>
           <button
             onClick={() => setScheduling(true)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             + Schedule new job
           </button>
@@ -142,8 +142,8 @@ export default function Dashboard() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {SUMMARY_CARDS.map((card) => (
-          <div key={card.label} className="rounded-xl border border-slate-200 bg-white p-5">
-            <p className="text-sm font-medium text-slate-500">{card.label}</p>
+          <div key={card.label} className="rounded-xl border border-zinc-200 bg-white p-5">
+            <p className="text-sm font-medium text-zinc-500">{card.label}</p>
             <p className={`mt-2 text-3xl font-bold ${card.color}`}>{dateFilteredJobs.filter(card.match).length}</p>
           </div>
         ))}
@@ -183,7 +183,7 @@ export default function Dashboard() {
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <select
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-auto"
           value={clientFilter}
           onChange={(e) => {
             setClientFilter(e.target.value)
@@ -199,7 +199,7 @@ export default function Dashboard() {
         </select>
 
         <select
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-auto"
           value={siteFilter}
           onChange={(e) => setSiteFilter(e.target.value)}
         >
@@ -212,7 +212,7 @@ export default function Dashboard() {
         </select>
 
         <select
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-auto"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -224,18 +224,18 @@ export default function Dashboard() {
           ))}
         </select>
 
-        <label className="flex w-full items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm sm:w-auto">
+        <label className="flex w-full items-center gap-2 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm sm:w-auto">
           <input
             type="checkbox"
             checked={showAllTime}
             onChange={(e) => setShowAllTime(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+            className="h-4 w-4 rounded border-zinc-300 text-green-600 focus:ring-green-600"
           />
           Show all time
         </label>
 
         {!showAllTime && jobs.length > dateFilteredJobs.length && (
-          <p className="w-full text-xs text-slate-400 sm:w-auto">
+          <p className="w-full text-xs text-zinc-400 sm:w-auto">
             {jobs.length - dateFilteredJobs.length} older job{jobs.length - dateFilteredJobs.length === 1 ? '' : 's'}{' '}
             outside the last 30 days hidden.
           </p>
@@ -245,26 +245,26 @@ export default function Dashboard() {
       {/* Mobile: card list */}
       <div className="mt-4 space-y-3 md:hidden">
         {pagedJobs.map((job) => (
-          <div key={job.id} className="rounded-xl border border-slate-200 bg-white p-4">
+          <div key={job.id} className="rounded-xl border border-zinc-200 bg-white p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-900">{job.id}</span>
+              <span className="text-sm font-semibold text-zinc-900">{job.id}</span>
               <StatusBadge status={job.status} />
             </div>
-            <p className="mt-2 text-sm font-medium text-slate-800">{clientName(job.clientId)}</p>
-            <p className="text-xs text-slate-400">{siteName(job.siteId)}</p>
+            <p className="mt-2 text-sm font-medium text-zinc-800">{clientName(job.clientId)}</p>
+            <p className="text-xs text-zinc-400">{siteName(job.siteId)}</p>
 
             <dl className="mt-3 space-y-1.5 text-sm">
               <div className="flex items-center justify-between">
-                <dt className="text-slate-400">Task</dt>
-                <dd className="text-right text-slate-700">{job.taskType}</dd>
+                <dt className="text-zinc-400">Task</dt>
+                <dd className="text-right text-zinc-700">{job.taskType}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="text-slate-400">Operative</dt>
-                <dd className="text-right text-slate-700">{operativeName(job.operativeId, operatives)}</dd>
+                <dt className="text-zinc-400">Operative</dt>
+                <dd className="text-right text-zinc-700">{operativeName(job.operativeId, operatives)}</dd>
               </div>
               <div className="flex items-center justify-between">
-                <dt className="text-slate-400">Evidence</dt>
-                <dd className="text-right text-slate-700">
+                <dt className="text-zinc-400">Evidence</dt>
+                <dd className="text-right text-zinc-700">
                   {job.photosSubmitted} / {job.photosRequired}
                 </dd>
               </div>
@@ -272,43 +272,43 @@ export default function Dashboard() {
 
             <button
               onClick={() => setEditingJob(job)}
-              className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              className="mt-3 w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50"
             >
               Edit
             </button>
           </div>
         ))}
         {filteredJobs.length === 0 && (
-          <p className="rounded-xl border border-dashed border-slate-300 py-10 text-center text-sm text-slate-400">
+          <p className="rounded-xl border border-dashed border-zinc-300 py-10 text-center text-sm text-zinc-400">
             No jobs match the current filters.
           </p>
         )}
       </div>
 
       {/* Desktop / tablet: table */}
-      <div className="mt-4 hidden rounded-xl border border-slate-200 bg-white md:block">
+      <div className="mt-4 hidden rounded-xl border border-zinc-200 bg-white md:block">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-zinc-200">
+            <thead className="bg-zinc-50">
               <tr>
                 {['Job', 'Client / Site', 'Task', 'Operative', 'Evidence', 'Status', ''].map((h) => (
-                  <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-100">
               {pagedJobs.map((job) => (
-                <tr key={job.id} className="hover:bg-slate-50">
-                  <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{job.id}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                    <div className="font-medium text-slate-800">{clientName(job.clientId)}</div>
-                    <div className="text-slate-400">{siteName(job.siteId)}</div>
+                <tr key={job.id} className="hover:bg-zinc-50">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-zinc-900">{job.id}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-600">
+                    <div className="font-medium text-zinc-800">{clientName(job.clientId)}</div>
+                    <div className="text-zinc-400">{siteName(job.siteId)}</div>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{job.taskType}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{operativeName(job.operativeId, operatives)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-600">{job.taskType}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-600">{operativeName(job.operativeId, operatives)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-600">
                     {job.photosSubmitted} / {job.photosRequired}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
@@ -317,7 +317,7 @@ export default function Dashboard() {
                   <td className="whitespace-nowrap px-4 py-3 text-right">
                     <button
                       onClick={() => setEditingJob(job)}
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                      className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
                     >
                       Edit
                     </button>
@@ -326,7 +326,7 @@ export default function Dashboard() {
               ))}
               {filteredJobs.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-4 py-10 text-center text-sm text-zinc-400">
                     No jobs match the current filters.
                   </td>
                 </tr>
@@ -338,7 +338,7 @@ export default function Dashboard() {
 
       {filteredJobs.length > 0 && (
         <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-zinc-500">
             Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredJobs.length)} of{' '}
             {filteredJobs.length} job{filteredJobs.length === 1 ? '' : 's'}
           </p>
@@ -346,17 +346,17 @@ export default function Dashboard() {
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Previous
             </button>
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-zinc-500">
               Page {currentPage} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>

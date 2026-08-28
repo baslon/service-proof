@@ -51,10 +51,10 @@ function LoginForm({ onSignedIn }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h1 className="text-xl font-bold text-slate-900">Superadmin</h1>
-        <p className="mt-1 text-sm text-slate-500">Cross-organization access. Restricted.</p>
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
+      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
+        <h1 className="text-xl font-bold text-zinc-900">Superadmin</h1>
+        <p className="mt-1 text-sm text-zinc-500">Cross-organization access. Restricted.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <FormField label="Email">
@@ -82,7 +82,7 @@ function LoginForm({ onSignedIn }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
@@ -121,7 +121,7 @@ function CreateOrganizationForm({ onCreated }) {
       <button
         type="submit"
         disabled={submitting}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
       >
         {submitting ? 'Creating…' : 'Create organization'}
       </button>
@@ -156,7 +156,7 @@ function InvitePersonForm({ title, actionPath, submitLabel, organizations }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+      <h2 className="text-base font-semibold text-zinc-900">{title}</h2>
       <FormField label="Organization">
         <select className={inputClass} value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} required>
           <option value="" disabled>
@@ -180,7 +180,7 @@ function InvitePersonForm({ title, actionPath, submitLabel, organizations }) {
       <button
         type="submit"
         disabled={submitting || !organizationId}
-        className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+        className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
       >
         {submitting ? 'Sending…' : submitLabel}
       </button>
@@ -222,7 +222,7 @@ function LimitField({ label, value, onSave, disabled }) {
   return (
     <div>
       <div className="flex items-center gap-2">
-        <span className="w-28 shrink-0 text-xs text-slate-500">{label}</span>
+        <span className="w-28 shrink-0 text-xs text-zinc-500">{label}</span>
         <input
           type="number"
           min="0"
@@ -235,8 +235,8 @@ function LimitField({ label, value, onSave, disabled }) {
           }}
           className={`w-24 rounded-lg border px-2 py-1 text-sm shadow-sm focus:outline-none ${
             disabled
-              ? 'cursor-not-allowed border-slate-200 bg-slate-50 text-slate-400'
-              : 'border-slate-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500'
+              ? 'cursor-not-allowed border-zinc-200 bg-zinc-50 text-zinc-400'
+              : 'border-zinc-300 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900'
           }`}
         />
         {isDirty && !disabled && (
@@ -244,7 +244,7 @@ function LimitField({ label, value, onSave, disabled }) {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="rounded-lg bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            className="rounded-lg bg-zinc-900 px-2.5 py-1 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save'}
           </button>
@@ -286,14 +286,14 @@ function LimitsSourceToggle({ org, onUpdated }) {
   }
 
   if (!org.stripe_subscription_id) {
-    return <p className="text-xs text-slate-400">No subscription — limits are manual.</p>
+    return <p className="text-xs text-zinc-400">No subscription — limits are manual.</p>
   }
 
   return (
     <div className="flex items-center gap-2">
       <span
         className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
-          isPlanControlled ? 'bg-indigo-50 text-indigo-700 ring-indigo-600/20' : 'bg-amber-50 text-amber-700 ring-amber-600/20'
+          isPlanControlled ? 'bg-green-50 text-green-700 ring-green-600/20' : 'bg-amber-50 text-amber-700 ring-amber-600/20'
         }`}
       >
         {isPlanControlled ? `Plan-controlled${org.plans?.name ? ` (${org.plans.name})` : ''}` : 'Manual override'}
@@ -302,7 +302,7 @@ function LimitsSourceToggle({ org, onUpdated }) {
         type="button"
         onClick={handleToggle}
         disabled={saving}
-        className="text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-60"
+        className="text-xs font-medium text-zinc-900 hover:text-zinc-600 disabled:opacity-60"
       >
         {saving ? 'Switching…' : isPlanControlled ? 'Switch to manual' : 'Return to plan'}
       </button>
@@ -316,7 +316,7 @@ function OrganizationRow({ org, onUpdated }) {
   return (
     <li className="py-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-medium text-slate-700">{org.name}</p>
+        <p className="font-medium text-zinc-700">{org.name}</p>
         <LimitsSourceToggle org={org} onUpdated={onUpdated} />
       </div>
       <div className="mt-2 space-y-2">
@@ -371,23 +371,23 @@ function Dashboard({ onSignOut }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
+    <div className="min-h-screen bg-zinc-50 px-4 py-10">
       <div className="mx-auto max-w-3xl space-y-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-900">Superadmin</h1>
-          <button onClick={onSignOut} className="text-sm font-medium text-slate-500 hover:text-slate-700">
+          <h1 className="text-xl font-bold text-zinc-900">Superadmin</h1>
+          <button onClick={onSignOut} className="text-sm font-medium text-zinc-500 hover:text-zinc-700">
             Sign out
           </button>
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-4 text-base font-semibold text-slate-900">Create organization</h2>
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-base font-semibold text-zinc-900">Create organization</h2>
           <CreateOrganizationForm onCreated={loadOrganizations} />
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <InvitePersonForm
             title="Invite admin"
             actionPath="create-admin"
@@ -396,7 +396,7 @@ function Dashboard({ onSignOut }) {
           />
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <InvitePersonForm
             title="Invite operative"
             actionPath="invite-operative"
@@ -405,13 +405,13 @@ function Dashboard({ onSignOut }) {
           />
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">Organizations ({organizations.length})</h2>
-          <p className="mt-1 text-xs text-slate-400">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+          <h2 className="text-base font-semibold text-zinc-900">Organizations ({organizations.length})</h2>
+          <p className="mt-1 text-xs text-zinc-400">
             Each limit is a total for the whole organization, shared across every admin on it. Leave blank for
             unlimited. Operative limit counts active operatives only.
           </p>
-          <ul className="mt-3 divide-y divide-slate-100 text-sm text-slate-600">
+          <ul className="mt-3 divide-y divide-zinc-100 text-sm text-zinc-600">
             {organizations.map((org) => (
               <OrganizationRow key={org.id} org={org} onUpdated={handleOrgUpdated} />
             ))}

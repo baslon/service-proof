@@ -3,17 +3,17 @@ export default function Modal({ open, onClose, title, children, maxWidth = 'max-
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex justify-center overflow-y-auto bg-slate-900/50 px-4 py-8 no-print ${
+      className={`fixed inset-0 z-50 flex justify-center overflow-y-auto bg-zinc-900/50 px-4 py-8 no-print ${
         centered ? 'items-center' : 'items-start'
       }`}
     >
       <div className={`w-full ${maxWidth} rounded-xl bg-white shadow-xl`}>
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4">
+          <h2 className="text-lg font-semibold text-zinc-900">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="rounded-md p-1.5 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path

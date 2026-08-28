@@ -143,8 +143,8 @@ export default function AddScheduleModal({ onClose }) {
                 onClick={() => toggleDay(d.value)}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition ${
                   form.daysOfWeek.includes(d.value)
-                    ? 'bg-indigo-600 text-white ring-indigo-600'
-                    : 'text-slate-600 ring-slate-300 hover:bg-slate-50'
+                    ? 'bg-zinc-900 text-white ring-zinc-900'
+                    : 'text-zinc-600 ring-zinc-300 hover:bg-zinc-50'
                 }`}
               >
                 {d.label}
@@ -187,20 +187,20 @@ export default function AddScheduleModal({ onClose }) {
         </FormField>
 
         <FormField label="Team">
-          <p className="mb-2 text-xs text-slate-500">
+          <p className="mb-2 text-xs text-zinc-500">
             Select everyone who covers this site on this schedule. Each gets their own job on each generated day.
           </p>
-          <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-2">
+          <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-zinc-200 p-2">
             {eligibleOperatives.length === 0 ? (
-              <p className="px-2 py-1 text-sm text-slate-400">No operative available for this client.</p>
+              <p className="px-2 py-1 text-sm text-zinc-400">No operative available for this client.</p>
             ) : (
               eligibleOperatives.map((o) => (
-                <label key={o.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
+                <label key={o.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-zinc-50">
                   <input
                     type="checkbox"
                     checked={form.operativeIds.includes(o.id)}
                     onChange={() => toggleOperative(o.id)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-zinc-300 text-green-600 focus:ring-green-600"
                   />
                   {o.name}
                 </label>
@@ -242,14 +242,14 @@ export default function AddScheduleModal({ onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {submitting ? 'Adding…' : 'Add schedule'}
           </button>

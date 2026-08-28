@@ -42,13 +42,13 @@ export default function ForgotPasswordModal({ onClose }) {
               />
             </svg>
           </div>
-          <p className="text-sm text-slate-600">
-            If an account exists for <strong className="text-slate-900">{email}</strong>, we've sent a link to
+          <p className="text-sm text-zinc-600">
+            If an account exists for <strong className="text-zinc-900">{email}</strong>, we've sent a link to
             reset the password.
           </p>
           <button
             onClick={onClose}
-            className="mt-6 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            className="mt-6 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             Close
           </button>
@@ -60,7 +60,7 @@ export default function ForgotPasswordModal({ onClose }) {
   return (
     <Modal open onClose={onClose} title="Reset your password" centered>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <p className="text-sm text-slate-500">Enter your email and we'll send you a link to reset your password.</p>
+        <p className="text-sm text-zinc-500">Enter your email and we'll send you a link to reset your password.</p>
 
         <FormField label="Email">
           <input
@@ -80,14 +80,14 @@ export default function ForgotPasswordModal({ onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={submitting}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Sending…' : 'Send reset link'}
           </button>

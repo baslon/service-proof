@@ -47,32 +47,32 @@ export default function Clients() {
     <DashboardLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Clients</h1>
-          <p className="mt-1 text-sm text-slate-500">Contract health and completion rates across your book.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Clients</h1>
+          <p className="mt-1 text-sm text-zinc-500">Contract health and completion rates across your book.</p>
         </div>
         <button
           onClick={() => setAdding(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           + Add new client
         </button>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-medium text-slate-500">Total clients</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{clients.length}</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-medium text-zinc-500">Total clients</p>
+          <p className="mt-2 text-3xl font-bold text-zinc-900">{clients.length}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-medium text-slate-500">Total sites</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{sites.length}</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-medium text-zinc-500">Total sites</p>
+          <p className="mt-2 text-3xl font-bold text-zinc-900">{sites.length}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-medium text-slate-500">Active jobs</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{activeJobsCount}</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-medium text-zinc-500">Active jobs</p>
+          <p className="mt-2 text-3xl font-bold text-zinc-900">{activeJobsCount}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-medium text-slate-500">Avg. completion rate</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-medium text-zinc-500">Avg. completion rate</p>
           <p className="mt-2 text-3xl font-bold text-emerald-600">{avgCompletion}%</p>
         </div>
       </div>
@@ -83,12 +83,12 @@ export default function Clients() {
           placeholder="Search clients..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-72"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-72"
         />
         <select
           value={sectorFilter}
           onChange={(e) => setSectorFilter(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-auto"
         >
           <option value="">All sectors</option>
           {SECTORS.map((s) => (
@@ -109,17 +109,17 @@ export default function Clients() {
                 setDeleteError('')
                 setActiveClient(client)
               }}
-              className="rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:shadow-md hover:ring-1 hover:ring-indigo-200"
+              className="rounded-xl border border-zinc-200 bg-white p-5 text-left transition hover:shadow-md hover:ring-1 hover:ring-zinc-300"
             >
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{client.sector}</p>
-              <h3 className="mt-1 text-base font-semibold text-slate-900">{client.name}</h3>
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{client.sector}</p>
+              <h3 className="mt-1 text-base font-semibold text-zinc-900">{client.name}</h3>
 
               <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-slate-500">
+                <div className="flex items-center justify-between text-xs text-zinc-500">
                   <span>Completion rate</span>
-                  <span className="font-semibold text-slate-700">{rate}%</span>
+                  <span className="font-semibold text-zinc-700">{rate}%</span>
                 </div>
-                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
                   <div
                     className={`h-full rounded-full ${rate >= 90 ? 'bg-emerald-500' : rate >= 75 ? 'bg-amber-500' : 'bg-red-500'}`}
                     style={{ width: `${rate}%` }}
@@ -127,7 +127,7 @@ export default function Clients() {
                 </div>
               </div>
 
-              <p className="mt-4 text-xs text-slate-400">
+              <p className="mt-4 text-xs text-zinc-400">
                 {clientSites.length} site{clientSites.length === 1 ? '' : 's'} &middot; {clientJobs.length} job
                 {clientJobs.length === 1 ? '' : 's'}
               </p>
@@ -135,7 +135,7 @@ export default function Clients() {
           )
         })}
         {filteredClients.length === 0 && (
-          <p className="col-span-full py-10 text-center text-sm text-slate-400">No clients match your search.</p>
+          <p className="col-span-full py-10 text-center text-sm text-zinc-400">No clients match your search.</p>
         )}
       </div>
 
@@ -151,50 +151,50 @@ export default function Clients() {
         {activeClient && (
           <div className="space-y-5">
             <div>
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-zinc-500">
                 <span>Completion rate</span>
-                <span className="font-semibold text-slate-700">{activeClientRate}%</span>
+                <span className="font-semibold text-zinc-700">{activeClientRate}%</span>
               </div>
-              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
                 <div className="h-full rounded-full bg-emerald-500" style={{ width: `${activeClientRate}%` }} />
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Contact</p>
-                <p className="mt-1 text-sm text-slate-700">{activeClient.contactName}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Contact</p>
+                <p className="mt-1 text-sm text-zinc-700">{activeClient.contactName}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Email</p>
-                <p className="mt-1 text-sm text-slate-700">{activeClient.contactEmail}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Email</p>
+                <p className="mt-1 text-sm text-zinc-700">{activeClient.contactEmail}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</p>
-                <p className="mt-1 text-sm text-slate-700">{activeClient.contactPhone}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Phone</p>
+                <p className="mt-1 text-sm text-zinc-700">{activeClient.contactPhone}</p>
               </div>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Contract start</p>
-              <p className="mt-1 text-sm text-slate-700">{activeClient.contractStartDate}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Contract start</p>
+              <p className="mt-1 text-sm text-zinc-700">{activeClient.contractStartDate}</p>
             </div>
 
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Notes</p>
-              <p className="mt-1 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{activeClient.notes}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Notes</p>
+              <p className="mt-1 rounded-lg bg-zinc-50 p-3 text-sm text-zinc-600">{activeClient.notes}</p>
             </div>
 
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Sites</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-400">Sites</p>
               <ul className="space-y-2">
                 {activeClientSites.map((s) => (
-                  <li key={s.id} className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700">
+                  <li key={s.id} className="rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-700">
                     {s.name}
-                    <span className="block text-xs text-slate-400">{s.address}</span>
+                    <span className="block text-xs text-zinc-400">{s.address}</span>
                   </li>
                 ))}
-                {activeClientSites.length === 0 && <li className="text-sm text-slate-400">No sites recorded.</li>}
+                {activeClientSites.length === 0 && <li className="text-sm text-zinc-400">No sites recorded.</li>}
               </ul>
             </div>
 
@@ -214,13 +214,13 @@ export default function Clients() {
                 }
               }}
               disabled={!activeClientCanDelete || deleting}
-              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
+              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-zinc-400 disabled:hover:bg-transparent"
             >
               {deleting ? 'Deleting…' : 'Delete client'}
             </button>
             {deleteError && <p className="text-center text-sm text-red-600">{deleteError}</p>}
             {!activeClientCanDelete && (
-              <p className="text-center text-xs text-slate-400">
+              <p className="text-center text-xs text-zinc-400">
                 Can&apos;t delete &mdash; this client still has {activeClientSites.length} site
                 {activeClientSites.length === 1 ? '' : 's'} and {activeClientJobCount} job
                 {activeClientJobCount === 1 ? '' : 's'}. Remove those first.

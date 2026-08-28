@@ -45,28 +45,26 @@ export default function Pricing() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-100 bg-white">
+    <div className="min-h-screen bg-zinc-50 font-geist text-zinc-900">
+      <header className="border-b border-zinc-200">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M12 2.5L19 5.5V11C19 16 15.5 19.5 12 21C8.5 19.5 5 16 5 11V5.5Z" />
-                <path d="M8.5 11.5L11 14L15.5 9" />
-              </svg>
-            </div>
-            <span className="text-base font-semibold text-slate-900">{COMPANY.product}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#16a34a"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="4" />
+              <path d="M8 12.5l2.6 2.6L16.5 9" />
+            </svg>
+            <span className="font-display text-base font-semibold tracking-tight text-zinc-900">{COMPANY.product}</span>
           </Link>
-          <Link to="/login" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+          <Link to="/login" className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900">
             Sign in
           </Link>
         </div>
@@ -74,16 +72,16 @@ export default function Pricing() {
 
       <div className="mx-auto max-w-5xl px-6 py-16">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Plans &amp; pricing</h1>
-          <p className="mt-3 text-slate-500">Choose the plan that matches how many sites you manage.</p>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-900">Plans &amp; pricing</h1>
+          <p className="mt-3 text-zinc-600">Choose the plan that matches how many sites you manage.</p>
         </div>
 
         <div className="mt-8 flex justify-center">
-          <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+          <div className="inline-flex rounded-lg border border-zinc-200 bg-white p-1">
             <button
               onClick={() => setInterval('monthly')}
               className={`rounded-md px-4 py-1.5 text-sm font-medium transition ${
-                interval === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                interval === 'monthly' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
               Monthly
@@ -91,16 +89,16 @@ export default function Pricing() {
             <button
               onClick={() => setInterval('annual')}
               className={`rounded-md px-4 py-1.5 text-sm font-medium transition ${
-                interval === 'annual' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                interval === 'annual' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:text-zinc-900'
               }`}
             >
-              Annual <span className="ml-1 rounded bg-amber-400 px-1.5 py-0.5 text-xs font-semibold text-slate-900">2 months free</span>
+              Annual <span className="ml-1 rounded bg-amber-400 px-1.5 py-0.5 text-xs font-semibold text-zinc-900">2 months free</span>
             </button>
           </div>
         </div>
 
         {error && <p className="mt-6 text-center text-sm text-red-600">{error}</p>}
-        {loading && <p className="mt-16 text-center text-sm text-slate-400">Loading plans…</p>}
+        {loading && <p className="mt-16 text-center text-sm text-zinc-400">Loading plans…</p>}
 
         <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-3">
           {plans.map((plan) => {
@@ -110,30 +108,30 @@ export default function Pricing() {
               <div
                 key={plan.id}
                 className={`relative rounded-2xl border bg-white p-6 shadow-sm ${
-                  isPopular ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-slate-200'
+                  isPopular ? 'border-green-600 ring-1 ring-green-600' : 'border-zinc-200'
                 }`}
               >
                 {isPopular && (
-                  <span className="absolute -top-3 left-6 rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
+                  <span className="absolute -top-3 left-6 rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white">
                     Most popular
                   </span>
                 )}
-                <h2 className="text-lg font-semibold text-slate-900">{plan.name}</h2>
+                <h2 className="font-display text-lg font-semibold text-zinc-900">{plan.name}</h2>
 
                 <div className="mt-3">
                   {plan.self_serve ? (
                     <>
-                      <span className="text-3xl font-bold text-slate-900">{formatPence(pence)}</span>
-                      <span className="text-sm text-slate-500">
+                      <span className="text-3xl font-bold text-zinc-900">{formatPence(pence)}</span>
+                      <span className="text-sm text-zinc-500">
                         /{interval === 'annual' ? 'year' : 'month'} + VAT
                       </span>
                     </>
                   ) : (
-                    <span className="text-3xl font-bold text-slate-900">Talk to us</span>
+                    <span className="text-3xl font-bold text-zinc-900">Talk to us</span>
                   )}
                 </div>
 
-                <ul className="mt-5 space-y-2 text-sm text-slate-600">
+                <ul className="mt-5 space-y-2 text-sm text-zinc-600">
                   <li>{plan.site_limit != null ? `Up to ${plan.site_limit} sites` : 'Unlimited sites'}</li>
                   <li>{plan.operative_limit != null ? `Up to ${plan.operative_limit} active operatives` : 'Unlimited operatives'}</li>
                 </ul>
@@ -143,14 +141,14 @@ export default function Pricing() {
                     <button
                       onClick={() => handleSubscribe(plan)}
                       disabled={checkingOutPlanId === plan.id || !plan[`stripe_price_id_${interval === 'annual' ? 'annual' : 'monthly'}`]}
-                      className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {checkingOutPlanId === plan.id ? 'Redirecting…' : `Subscribe to ${plan.name}`}
                     </button>
                   ) : (
                     <a
                       href={`mailto:${COMPANY.contactEmail}?subject=${encodeURIComponent('Enterprise plan enquiry')}`}
-                      className="block w-full rounded-lg border border-slate-300 px-4 py-2.5 text-center text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      className="block w-full rounded-lg border border-zinc-300 px-4 py-2.5 text-center text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
                     >
                       Talk to us
                     </a>

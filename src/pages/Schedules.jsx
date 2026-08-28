@@ -9,7 +9,7 @@ const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const STATUS_STYLE = {
   active: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   paused: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  ended: 'bg-slate-100 text-slate-500 ring-slate-500/10',
+  ended: 'bg-zinc-100 text-zinc-500 ring-zinc-500/10',
 }
 
 function formatDays(daysOfWeek) {
@@ -63,14 +63,14 @@ export default function Schedules() {
     <DashboardLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Schedules</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-zinc-900">Schedules</h1>
+          <p className="mt-1 text-sm text-zinc-500">
             The standing plan for each site. Jobs generate automatically from these — no need to create them by hand.
           </p>
         </div>
         <button
           onClick={() => setAdding(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           + Add schedule
         </button>
@@ -82,12 +82,12 @@ export default function Schedules() {
           placeholder="Search by site, client, or task..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-72"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-72"
         />
         <select
           value={clientFilter}
           onChange={(e) => setClientFilter(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-auto"
         >
           <option value="">All clients</option>
           {clients.map((c) => (
@@ -99,7 +99,7 @@ export default function Schedules() {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-auto"
         >
           <option value="">All statuses</option>
           <option value="active">Active</option>
@@ -113,24 +113,24 @@ export default function Schedules() {
           <button
             key={schedule.id}
             onClick={() => setActiveSchedule(schedule)}
-            className="rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:shadow-md hover:ring-1 hover:ring-indigo-200"
+            className="rounded-xl border border-zinc-200 bg-white p-5 text-left transition hover:shadow-md hover:ring-1 hover:ring-zinc-300"
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{clientName(schedule.clientId)}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{clientName(schedule.clientId)}</p>
               <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${STATUS_STYLE[schedule.status]}`}>
                 {schedule.status}
               </span>
             </div>
-            <h3 className="mt-1 text-base font-semibold text-slate-900">{siteName(schedule.siteId)}</h3>
-            <p className="mt-1 text-sm text-slate-500">{schedule.taskType}</p>
-            <p className="mt-3 text-sm text-slate-700">
+            <h3 className="mt-1 text-base font-semibold text-zinc-900">{siteName(schedule.siteId)}</h3>
+            <p className="mt-1 text-sm text-zinc-500">{schedule.taskType}</p>
+            <p className="mt-3 text-sm text-zinc-700">
               {formatDays(schedule.daysOfWeek)} · {formatTime(schedule.startTime)}
             </p>
-            <p className="mt-1 truncate text-xs text-slate-400">{operativeNames(schedule.operativeIds)}</p>
+            <p className="mt-1 truncate text-xs text-zinc-400">{operativeNames(schedule.operativeIds)}</p>
           </button>
         ))}
         {filteredSchedules.length === 0 && (
-          <p className="col-span-full py-10 text-center text-sm text-slate-400">No schedules match your search.</p>
+          <p className="col-span-full py-10 text-center text-sm text-zinc-400">No schedules match your search.</p>
         )}
       </div>
 

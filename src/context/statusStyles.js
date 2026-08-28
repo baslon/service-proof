@@ -4,14 +4,14 @@ export const STATUS_BADGE_STYLES = {
   'Completed & Evidenced': 'bg-emerald-100 text-emerald-700 ring-emerald-600/20',
   'Missing Evidence': 'bg-amber-100 text-amber-700 ring-amber-600/20',
   'At Risk': 'bg-red-100 text-red-700 ring-red-600/20',
-  Incomplete: 'bg-slate-100 text-slate-600 ring-slate-500/20',
+  Incomplete: 'bg-zinc-100 text-zinc-600 ring-zinc-500/20',
 }
 
 export const STATUS_TEXT_COLOR = {
   'Completed & Evidenced': 'text-emerald-600',
   'Missing Evidence': 'text-amber-600',
   'At Risk': 'text-red-600',
-  Incomplete: 'text-slate-600',
+  Incomplete: 'text-zinc-600',
 }
 
 // Defined once here so Dashboard, Sidebar, and Clients can't drift out of

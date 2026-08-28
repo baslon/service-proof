@@ -105,8 +105,8 @@ export default function Billing() {
 
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-bold text-slate-900">Billing</h1>
-      <p className="mt-1 text-sm text-slate-500">Your subscription plan and usage.</p>
+      <h1 className="text-2xl font-bold text-zinc-900">Billing</h1>
+      <p className="mt-1 text-sm text-zinc-500">Your subscription plan and usage.</p>
 
       {error && (
         <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 ring-1 ring-inset ring-red-600/20">
@@ -115,16 +115,16 @@ export default function Billing() {
       )}
 
       {loading ? (
-        <p className="mt-8 text-sm text-slate-400">Loading…</p>
+        <p className="mt-8 text-sm text-zinc-400">Loading…</p>
       ) : (
         <>
           {hasSubscription ? (
-            <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
+            <div className="mt-6 rounded-xl border border-zinc-200 bg-white p-6">
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Current plan</p>
-                  <p className="mt-1 text-xl font-semibold text-slate-900">{currentPlan?.name || 'Unknown plan'}</p>
-                  <p className="mt-1 text-sm capitalize text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Current plan</p>
+                  <p className="mt-1 text-xl font-semibold text-zinc-900">{currentPlan?.name || 'Unknown plan'}</p>
+                  <p className="mt-1 text-sm capitalize text-zinc-500">
                     {org.subscription_status || 'unknown status'}
                     {org.current_period_end && ` · renews ${formatDate(org.current_period_end)}`}
                   </p>
@@ -132,33 +132,33 @@ export default function Billing() {
                 <button
                   onClick={handleManageBilling}
                   disabled={portalLoading}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {portalLoading ? 'Opening…' : 'Manage billing'}
                 </button>
               </div>
-              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 text-sm">
+              <div className="mt-4 grid grid-cols-2 gap-4 border-t border-zinc-100 pt-4 text-sm">
                 <div>
-                  <p className="text-slate-400">Sites</p>
-                  <p className="font-medium text-slate-700">
+                  <p className="text-zinc-400">Sites</p>
+                  <p className="font-medium text-zinc-700">
                     {sites.length} / {org.site_limit ?? 'Unlimited'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-slate-400">Active operatives</p>
-                  <p className="font-medium text-slate-700">
+                  <p className="text-zinc-400">Active operatives</p>
+                  <p className="font-medium text-zinc-700">
                     {activeOperativeCount} / {org.operative_limit ?? 'Unlimited'}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="mt-6 rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center">
-              <p className="text-sm text-slate-600">
+            <div className="mt-6 rounded-xl border border-dashed border-zinc-300 bg-white p-6 text-center">
+              <p className="text-sm text-zinc-600">
                 This organization doesn&apos;t have a paid subscription yet — choose a plan below to get started.
               </p>
               {(user?.siteLimit != null || user?.operativeLimit != null) && (
-                <p className="mt-2 text-xs text-slate-400">
+                <p className="mt-2 text-xs text-zinc-400">
                   Currently on manually-set limits: {user?.siteLimit ?? 'unlimited'} sites,{' '}
                   {user?.operativeLimit ?? 'unlimited'} operatives.
                 </p>
@@ -168,12 +168,12 @@ export default function Billing() {
 
           <div className="mt-8">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-slate-900">{hasSubscription ? 'Change plan' : 'Choose a plan'}</h2>
-              <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1">
+              <h2 className="text-base font-semibold text-zinc-900">{hasSubscription ? 'Change plan' : 'Choose a plan'}</h2>
+              <div className="inline-flex rounded-lg border border-zinc-200 bg-white p-1">
                 <button
                   onClick={() => setInterval('monthly')}
                   className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-                    interval === 'monthly' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                    interval === 'monthly' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:text-zinc-900'
                   }`}
                 >
                   Monthly
@@ -181,7 +181,7 @@ export default function Billing() {
                 <button
                   onClick={() => setInterval('annual')}
                   className={`rounded-md px-3 py-1 text-xs font-medium transition ${
-                    interval === 'annual' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                    interval === 'annual' ? 'bg-zinc-900 text-white' : 'text-zinc-600 hover:text-zinc-900'
                   }`}
                 >
                   Annual
@@ -196,14 +196,14 @@ export default function Billing() {
                 return (
                   <div
                     key={plan.id}
-                    className={`rounded-xl border p-5 ${isCurrent ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-slate-200 bg-white'}`}
+                    className={`rounded-xl border p-5 ${isCurrent ? 'border-green-600 ring-1 ring-green-600' : 'border-zinc-200 bg-white'}`}
                   >
-                    <p className="text-sm font-semibold text-slate-900">{plan.name}</p>
-                    <p className="mt-1 text-lg font-bold text-slate-900">
+                    <p className="text-sm font-semibold text-zinc-900">{plan.name}</p>
+                    <p className="mt-1 text-lg font-bold text-zinc-900">
                       {plan.self_serve ? (
                         <>
                           {formatPence(pence)}
-                          <span className="text-xs font-normal text-slate-500">
+                          <span className="text-xs font-normal text-zinc-500">
                             /{interval === 'annual' ? 'yr' : 'mo'} + VAT
                           </span>
                         </>
@@ -211,20 +211,20 @@ export default function Billing() {
                         'Talk to us'
                       )}
                     </p>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-zinc-500">
                       {plan.site_limit != null ? `${plan.site_limit} sites` : 'Unlimited sites'} ·{' '}
                       {plan.operative_limit != null ? `${plan.operative_limit} operatives` : 'Unlimited operatives'}
                     </p>
                     <div className="mt-4">
                       {isCurrent ? (
-                        <span className="block rounded-lg bg-slate-100 px-3 py-1.5 text-center text-xs font-medium text-slate-500">
+                        <span className="block rounded-lg bg-zinc-100 px-3 py-1.5 text-center text-xs font-medium text-zinc-500">
                           Current plan
                         </span>
                       ) : plan.self_serve ? (
                         <button
                           onClick={() => (hasSubscription ? handleSwitchPlan(plan) : handleSubscribe(plan))}
                           disabled={switchingPlanId === plan.id}
-                          className="w-full rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="w-full rounded-lg bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {switchingPlanId === plan.id
                             ? hasSubscription
@@ -235,7 +235,7 @@ export default function Billing() {
                               : `Subscribe to ${plan.name}`}
                         </button>
                       ) : (
-                        <span className="block rounded-lg border border-slate-300 px-3 py-1.5 text-center text-xs font-medium text-slate-500">
+                        <span className="block rounded-lg border border-zinc-300 px-3 py-1.5 text-center text-xs font-medium text-zinc-500">
                           Contact us
                         </span>
                       )}

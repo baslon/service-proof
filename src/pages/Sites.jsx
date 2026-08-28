@@ -53,28 +53,28 @@ export default function Sites() {
     <DashboardLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Sites</h1>
-          <p className="mt-1 text-sm text-slate-500">Every site under management, with live job status.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Sites</h1>
+          <p className="mt-1 text-sm text-zinc-500">Every site under management, with live job status.</p>
         </div>
         <button
           onClick={() => setAdding(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           + Add new site
         </button>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-medium text-slate-500">Total sites</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">{sites.length}</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-medium text-zinc-500">Total sites</p>
+          <p className="mt-2 text-3xl font-bold text-zinc-900">{sites.length}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-medium text-slate-500">Missing evidence</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-medium text-zinc-500">Missing evidence</p>
           <p className="mt-2 text-3xl font-bold text-amber-600">{totalMissing}</p>
         </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5">
-          <p className="text-sm font-medium text-slate-500">At risk</p>
+        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+          <p className="text-sm font-medium text-zinc-500">At risk</p>
           <p className="mt-2 text-3xl font-bold text-red-600">{totalAtRisk}</p>
         </div>
       </div>
@@ -91,12 +91,12 @@ export default function Sites() {
           placeholder="Search by name, address, or client..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-72"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-72"
         />
         <select
           value={clientFilter}
           onChange={(e) => setClientFilter(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-700 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:w-auto"
+          className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900 sm:w-auto"
         >
           <option value="">All clients</option>
           {clients.map((c) => (
@@ -122,24 +122,24 @@ export default function Sites() {
                 setDeleteError('')
                 setActiveSite(site)
               }}
-              className="rounded-xl border border-slate-200 bg-white p-5 text-left transition hover:shadow-md hover:ring-1 hover:ring-indigo-200"
+              className="rounded-xl border border-zinc-200 bg-white p-5 text-left transition hover:shadow-md hover:ring-1 hover:ring-zinc-300"
             >
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">{clientName(site.clientId)}</p>
-              <h3 className="mt-1 text-base font-semibold text-slate-900">{site.name}</h3>
-              <p className="mt-1 text-sm text-slate-500">{site.address}</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">{clientName(site.clientId)}</p>
+              <h3 className="mt-1 text-base font-semibold text-zinc-900">{site.name}</h3>
+              <p className="mt-1 text-sm text-zinc-500">{site.address}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {breakdown['Completed & Evidenced'] > 0 && (
                   <StatusBadge status="Completed & Evidenced" className="!px-2 !py-0.5" />
                 )}
                 {breakdown['Missing Evidence'] > 0 && <StatusBadge status="Missing Evidence" className="!px-2 !py-0.5" />}
                 {breakdown['At Risk'] > 0 && <StatusBadge status="At Risk" className="!px-2 !py-0.5" />}
-                {siteJobs.length === 0 && <span className="text-xs text-slate-400">No jobs logged</span>}
+                {siteJobs.length === 0 && <span className="text-xs text-zinc-400">No jobs logged</span>}
               </div>
             </button>
           )
         })}
         {filteredSites.length === 0 && (
-          <p className="col-span-full py-10 text-center text-sm text-slate-400">No sites match your search.</p>
+          <p className="col-span-full py-10 text-center text-sm text-zinc-400">No sites match your search.</p>
         )}
       </div>
 
@@ -155,41 +155,41 @@ export default function Sites() {
         {activeSite && (
           <div className="space-y-5">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Address</p>
-              <p className="mt-1 text-sm text-slate-700">
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Address</p>
+              <p className="mt-1 text-sm text-zinc-700">
                 {activeSite.address}, {activeSite.postcode}
               </p>
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Site contact</p>
-                <p className="mt-1 text-sm text-slate-700">{activeSite.siteContact}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Site contact</p>
+                <p className="mt-1 text-sm text-zinc-700">{activeSite.siteContact}</p>
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</p>
-                <p className="mt-1 text-sm text-slate-700">{activeSite.phone}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Phone</p>
+                <p className="mt-1 text-sm text-zinc-700">{activeSite.phone}</p>
               </div>
             </div>
             <div>
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Access notes</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Access notes</p>
                 <button
                   onClick={() => copyAccessNotes(activeSite.accessNotes)}
-                  className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                  className="text-xs font-medium text-zinc-900 hover:text-zinc-600"
                 >
                   {copied ? 'Copied!' : 'Copy'}
                 </button>
               </div>
-              <p className="mt-1 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{activeSite.accessNotes}</p>
+              <p className="mt-1 rounded-lg bg-zinc-50 p-3 text-sm text-zinc-600">{activeSite.accessNotes}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Added</p>
-              <p className="mt-1 text-sm text-slate-700">{activeSite.addedDate}</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Added</p>
+              <p className="mt-1 text-sm text-zinc-700">{activeSite.addedDate}</p>
             </div>
 
             <Link
               to={`/dashboard?site=${activeSite.id}`}
-              className="block w-full rounded-lg bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-indigo-700"
+              className="block w-full rounded-lg bg-zinc-900 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-zinc-800"
             >
               View jobs for this site
             </Link>
@@ -210,13 +210,13 @@ export default function Sites() {
                 }
               }}
               disabled={activeSiteJobCount > 0 || deleting}
-              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-slate-400 disabled:hover:bg-transparent"
+              className="w-full rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:text-zinc-400 disabled:hover:bg-transparent"
             >
               {deleting ? 'Deleting…' : 'Delete site'}
             </button>
             {deleteError && <p className="text-center text-sm text-red-600">{deleteError}</p>}
             {activeSiteJobCount > 0 && (
-              <p className="text-center text-xs text-slate-400">
+              <p className="text-center text-xs text-zinc-400">
                 Can&apos;t delete &mdash; {activeSiteJobCount} job{activeSiteJobCount === 1 ? '' : 's'} still
                 reference{activeSiteJobCount === 1 ? 's' : ''} this site. Reassign or delete{' '}
                 {activeSiteJobCount === 1 ? 'it' : 'them'} first.

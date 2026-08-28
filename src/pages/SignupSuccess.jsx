@@ -3,8 +3,8 @@ import { COMPANY } from '../lib/company'
 
 export default function SignupSuccess() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
+      <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
             <path
@@ -14,11 +14,11 @@ export default function SignupSuccess() {
             />
           </svg>
         </div>
-        <h1 className="mt-4 text-xl font-bold text-slate-900">You&apos;re subscribed</h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <h1 className="mt-4 text-xl font-bold text-zinc-900">You&apos;re subscribed</h1>
+        <p className="mt-2 text-sm text-zinc-500">
           Check your email for a link to set your password and get started with {COMPANY.product}.
         </p>
-        <Link to="/login" className="mt-6 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-700">
+        <Link to="/login" className="mt-6 inline-block text-sm font-medium text-zinc-900 hover:text-zinc-600">
           Already set your password? Sign in
         </Link>
       </div>

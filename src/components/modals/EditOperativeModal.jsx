@@ -38,17 +38,17 @@ export default function EditOperativeModal({ operative, onClose }) {
     <Modal open onClose={onClose} title={operative.name}>
       <form onSubmit={handleSave} className="space-y-5">
         <div>
-          <span className="mb-1 block text-sm font-medium text-slate-700">Status</span>
-          <label className="flex items-start gap-3 rounded-lg border border-slate-200 px-3 py-2.5">
+          <span className="mb-1 block text-sm font-medium text-zinc-700">Status</span>
+          <label className="flex items-start gap-3 rounded-lg border border-zinc-200 px-3 py-2.5">
             <input
               type="checkbox"
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-green-600 focus:ring-green-600"
             />
             <span className="text-sm">
-              <span className="font-medium text-slate-800">Active</span>
-              <span className="block text-xs text-slate-500">
+              <span className="font-medium text-zinc-800">Active</span>
+              <span className="block text-xs text-zinc-500">
                 Inactive operatives can&apos;t be assigned to new jobs and can&apos;t sign in. Past jobs still show
                 their name — nothing about their history changes.
               </span>
@@ -57,23 +57,23 @@ export default function EditOperativeModal({ operative, onClose }) {
         </div>
 
         <div>
-          <span className="mb-1 block text-sm font-medium text-slate-700">Clients</span>
-          <p className="mb-2 text-xs text-slate-500">
+          <span className="mb-1 block text-sm font-medium text-zinc-700">Clients</span>
+          <p className="mb-2 text-xs text-zinc-500">
             Leave every box unchecked to make this operative available for every client. Check one or more to limit
             them to just those clients — useful for someone who only covers specific sites, or who occasionally covers
             for another client.
           </p>
-          <div className="max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-2">
+          <div className="max-h-48 space-y-1.5 overflow-y-auto rounded-lg border border-zinc-200 p-2">
             {clients.length === 0 ? (
-              <p className="px-2 py-1 text-sm text-slate-400">No clients yet.</p>
+              <p className="px-2 py-1 text-sm text-zinc-400">No clients yet.</p>
             ) : (
               clients.map((c) => (
-                <label key={c.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
+                <label key={c.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-zinc-50">
                   <input
                     type="checkbox"
                     checked={selectedClientIds.includes(c.id)}
                     onChange={() => toggleClient(c.id)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-zinc-300 text-green-600 focus:ring-green-600"
                   />
                   {c.name}
                 </label>
@@ -88,14 +88,14 @@ export default function EditOperativeModal({ operative, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {saving ? 'Saving…' : 'Save changes'}
           </button>

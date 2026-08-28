@@ -84,19 +84,19 @@ export const FAQS = [
 function FaqItem({ q, a }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border-b border-slate-200 py-4">
+    <div className="border-b border-zinc-200 py-4">
       <h3>
         <button
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           className="flex w-full items-center justify-between gap-4 text-left"
         >
-          <span className="text-sm font-semibold text-slate-900">{q}</span>
+          <span className="text-sm font-semibold text-zinc-900">{q}</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
-            className={`h-5 w-5 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+            className={`h-5 w-5 shrink-0 text-zinc-400 transition-transform ${open ? 'rotate-180' : ''}`}
           >
             <path
               fillRule="evenodd"
@@ -106,7 +106,7 @@ function FaqItem({ q, a }) {
           </svg>
         </button>
       </h3>
-      {open && <p className="mt-2 text-sm text-slate-500">{a}</p>}
+      {open && <p className="mt-2 text-sm text-zinc-500">{a}</p>}
     </div>
   )
 }
@@ -125,26 +125,24 @@ export default function Landing() {
   const [bookingDemo, setBookingDemo] = useState(false)
 
   return (
-    <div className="bg-white">
-      <header className="border-b border-slate-100">
+    <div className="bg-zinc-50 font-geist text-zinc-900">
+      <header className="border-b border-zinc-200">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-4 sm:px-6">
           <div className="flex shrink-0 items-center gap-2">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-              >
-                <path d="M12 2.5L19 5.5V11C19 16 15.5 19.5 12 21C8.5 19.5 5 16 5 11V5.5Z" />
-                <path d="M8.5 11.5L11 14L15.5 9" />
-              </svg>
-            </div>
-            <span className="text-base font-semibold text-slate-900">{COMPANY.product}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#16a34a"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="4" />
+              <path d="M8 12.5l2.6 2.6L16.5 9" />
+            </svg>
+            <span className="font-display text-base font-semibold tracking-tight text-zinc-900">{COMPANY.product}</span>
           </div>
 
           <nav className="hidden items-center gap-7 sm:flex">
@@ -152,12 +150,12 @@ export default function Landing() {
               <a
                 key={link.label}
                 href={link.href}
-                className="text-sm font-medium text-slate-600 transition hover:text-slate-900"
+                className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900"
               >
                 {link.label}
               </a>
             ))}
-            <Link to="/login" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
+            <Link to="/login" className="text-sm font-medium text-zinc-600 transition hover:text-zinc-900">
               Sign in
             </Link>
           </nav>
@@ -165,7 +163,7 @@ export default function Landing() {
           <div className="flex shrink-0 items-center gap-2">
             <button
               onClick={() => setBookingDemo(true)}
-              className="whitespace-nowrap rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-700 sm:px-4 sm:py-2 sm:text-sm"
+              className="whitespace-nowrap rounded-md bg-zinc-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-zinc-800 sm:px-4 sm:py-2 sm:text-sm"
             >
               Book a demo
             </button>
@@ -173,7 +171,7 @@ export default function Landing() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Open menu"
               aria-expanded={menuOpen}
-              className="rounded-md p-2 text-slate-500 transition hover:bg-slate-100 sm:hidden"
+              className="rounded-md p-2 text-zinc-500 transition hover:bg-zinc-100 sm:hidden"
             >
               {menuOpen ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -202,13 +200,13 @@ export default function Landing() {
         </div>
 
         {menuOpen && (
-          <nav className="flex flex-col gap-1 border-t border-slate-100 px-6 py-4 sm:hidden">
+          <nav className="flex flex-col gap-1 border-t border-zinc-200 px-6 py-4 sm:hidden">
             {NAV_LINKS.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                className="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100"
               >
                 {link.label}
               </a>
@@ -216,7 +214,7 @@ export default function Landing() {
             <Link
               to="/login"
               onClick={() => setMenuOpen(false)}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              className="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-100"
             >
               Sign in
             </Link>
@@ -224,82 +222,101 @@ export default function Landing() {
         )}
       </header>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-indigo-700 via-indigo-600 to-slate-900">
-        {/* Faint grid texture — CSS-only depth for the flat gradient. */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
-
-        <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:items-center lg:py-28">
-          <div className="text-center lg:text-left">
-            <p className="mb-4 text-xs font-medium text-indigo-100">Proof-of-service for commercial cleaning</p>
-            <h1 className="mx-auto max-w-2xl text-3xl font-bold leading-snug tracking-tight text-white sm:text-4xl sm:leading-snug lg:mx-0 lg:text-5xl">
-              Can you prove the clean happened?
-            </h1>
-            <p className="mx-auto mt-6 max-w-xl text-lg text-indigo-100 lg:mx-0">
-              Provaserve turns every cleaning job into proof: your operative submits timestamped photos and a
-              completion status straight from their phone, so you and your client see the same evidence &mdash; no
-              rota checks, no spreadsheets, and no more &quot;did this get done?&quot; disputes eating your team&apos;s
-              time.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
-              <button
-                onClick={() => setBookingDemo(true)}
-                className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-indigo-700 shadow-lg transition hover:bg-indigo-50"
+      <section className="bg-dot-grid px-6 pb-20 pt-20 sm:pb-28 sm:pt-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="font-display text-4xl font-semibold leading-[1.1] tracking-tight text-zinc-900 sm:text-5xl sm:leading-[1.08] lg:text-6xl">
+            Can you{' '}
+            <span className="relative inline-block">
+              prove
+              <svg
+                viewBox="0 0 160 14"
+                preserveAspectRatio="none"
+                className="absolute -bottom-2 left-0 h-3 w-full"
+                aria-hidden="true"
               >
-                Book a demo
-              </button>
-              <Link
-                to="/dashboard"
-                className="text-sm font-semibold text-indigo-100 underline decoration-indigo-300/50 underline-offset-4 transition hover:text-white"
+                <path
+                  d="M2 9 C 30 2, 60 12, 80 6 C 100 1, 130 11, 158 5"
+                  fill="none"
+                  stroke="#16a34a"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>{' '}
+            the clean happened?
+          </h1>
+          <p className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-zinc-600">
+            Provaserve turns every cleaning job into proof: your operative submits timestamped photos and a
+            completion status straight from their phone, so you and your client see the same evidence &mdash; no
+            rota checks, no spreadsheets, and no more &quot;did this get done?&quot; disputes eating your team&apos;s
+            time.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-6 sm:flex-row">
+            <button
+              onClick={() => setBookingDemo(true)}
+              className="rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition hover:bg-zinc-800"
+            >
+              Book a demo
+            </button>
+            <Link
+              to="/dashboard"
+              className="flex items-center gap-1.5 text-sm font-medium text-zinc-900 transition hover:text-zinc-600"
+            >
+              See it in action
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3.5 w-3.5"
               >
-                See it in action
-              </Link>
-            </div>
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </Link>
           </div>
+        </div>
 
-          <div className="mx-auto w-full min-w-0 max-w-md lg:mx-0 lg:max-w-none">
-            <DashboardPreview />
-          </div>
+        <div className="mx-auto mt-16 w-full max-w-3xl min-w-0">
+          <DashboardPreview />
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Is lack of evidence costing you contracts?</h2>
-          <p className="mt-4 text-slate-500">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-zinc-900">
+            Is lack of evidence costing you contracts?
+          </h2>
+          <p className="mt-4 text-zinc-600">
             SME facilities and cleaning companies lose renewals and goodwill over disputes that a simple photo would settle.
           </p>
         </div>
-        <div className="mt-14 grid gap-8 sm:grid-cols-3">
+        <div className="mt-14 grid gap-6 sm:grid-cols-3">
           {PROBLEMS.map((p) => (
-            <div key={p.title} className="rounded-xl border border-slate-200 p-6">
-              <h3 className="text-lg font-semibold text-slate-900">{p.title}</h3>
-              <p className="mt-2 text-sm text-slate-500">{p.body}</p>
+            <div key={p.title} className="rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
+              <h3 className="font-display text-lg font-semibold tracking-tight text-zinc-900">{p.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-zinc-600">{p.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="how-it-works" className="bg-slate-50 py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section id="how-it-works" className="px-6 py-24">
+        <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">How does Provaserve work?</h2>
-            <p className="mt-4 text-slate-500">From scheduled job to client-ready report, in four steps.</p>
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-zinc-900">How does Provaserve work?</h2>
+            <p className="mt-4 text-zinc-600">From scheduled job to client-ready report, in four steps.</p>
           </div>
-          <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {STEPS.map((s) => (
-              <div key={s.step} className="relative rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
-                <div className="mb-4 flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+              <div key={s.step} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+                <div className="mb-4 flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-sm font-semibold text-white">
                   {s.step}
                 </div>
-                <h3 className="text-base font-semibold text-slate-900">{s.title}</h3>
-                <p className="mt-2 text-sm text-slate-500">{s.body}</p>
+                <h3 className="text-base font-semibold text-zinc-900">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-zinc-600">{s.body}</p>
               </div>
             ))}
           </div>
@@ -308,25 +325,25 @@ export default function Landing() {
 
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Who is Provaserve built for?</h2>
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-zinc-900">Who is Provaserve built for?</h2>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {PERSONAS.map((p) => (
-            <div key={p.role} className="rounded-xl border border-slate-200 p-6">
-              <h3 className="text-base font-semibold text-slate-900">{p.role}</h3>
-              <p className="mt-2 text-sm text-slate-500">{p.need}</p>
+            <div key={p.role} className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+              <h3 className="text-base font-semibold text-zinc-900">{p.role}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-600">{p.need}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bg-slate-50 py-24">
-        <div className="mx-auto max-w-7xl px-6">
+      <section className="px-6 py-24">
+        <div className="mx-auto max-w-7xl">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-zinc-900">
               What does the evidence actually look like?
             </h2>
-            <p className="mt-4 text-slate-500">
+            <p className="mt-4 text-zinc-600">
               The same job, seen from both ends: an operative capturing proof on their phone, and the dashboard a
               cleaning manager sees on the admin dashboard.
             </p>
@@ -334,13 +351,13 @@ export default function Landing() {
           <div className="mt-14 grid min-w-0 gap-12 sm:grid-cols-2 sm:items-center">
             <div className="min-w-0">
               <SubmitPreview />
-              <p className="mt-6 text-center text-sm text-slate-500">
+              <p className="mt-6 text-center text-sm text-zinc-600">
                 Operatives submit proof from the job site &mdash; no separate app to install.
               </p>
             </div>
             <div className="min-w-0">
               <DashboardPreview />
-              <p className="mt-6 text-center text-sm text-slate-500">
+              <p className="mt-6 text-center text-sm text-zinc-600">
                 Cleaning managers see every site&apos;s status live, all in one dashboard.
               </p>
             </div>
@@ -350,7 +367,7 @@ export default function Landing() {
 
       <section className="mx-auto max-w-3xl px-6 py-24">
         <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Frequently asked questions</h2>
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-zinc-900">Frequently asked questions</h2>
         </div>
         <div className="mt-10">
           {FAQS.map((item) => (
@@ -359,53 +376,102 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="book-demo" className="bg-slate-900 py-24">
-        <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white">Ready to see Provaserve on your own sites?</h2>
-          <p className="mt-4 text-slate-300">
-            Book a live walkthrough and we'll show you exactly how it'd work for your team, using your sites
-            and your reporting needs.
-          </p>
-          <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <button
-              onClick={() => setBookingDemo(true)}
-              className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-indigo-500"
-            >
-              Book a demo
-            </button>
-            <Link
-              to="/pricing"
-              className="text-sm font-semibold text-slate-300 underline decoration-slate-500 underline-offset-4 transition hover:text-white"
-            >
-              View plans &amp; pricing
-            </Link>
+      <section id="book-demo" className="px-6 py-24">
+        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl bg-zinc-900 px-8 py-20 text-center sm:px-16">
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(22,163,74,0.16), transparent), radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
+              backgroundSize: 'auto, 26px 26px',
+            }}
+          />
+
+          <div className="relative">
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Ready to see <span className="text-green-400">Provaserve</span> on your own sites?
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-zinc-400">
+              Book a live walkthrough and we'll show you exactly how it'd work for your team, using your sites
+              and your reporting needs.
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <button
+                onClick={() => setBookingDemo(true)}
+                className="flex items-center gap-2 rounded-md bg-white px-6 py-3 text-sm font-semibold text-zinc-900 transition hover:bg-zinc-100"
+              >
+                Book a demo
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-3.5 w-3.5"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+              <Link
+                to="/pricing"
+                className="rounded-md border border-zinc-700 bg-zinc-800/50 px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800"
+              >
+                See pricing
+              </Link>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+              {[
+                'No app for operatives to install',
+                'Demo on your own sites',
+                'Cancel or change plans anytime',
+              ].map((item) => (
+                <span key={item} className="flex items-center gap-1.5 text-sm text-zinc-300">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4ade80"
+                    strokeWidth="2.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-3.5 w-3.5 shrink-0"
+                  >
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <footer className="border-t border-slate-100 py-8">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-slate-400">
+      <footer className="border-t border-zinc-200 py-8">
+        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-zinc-500">
           <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <span>&copy; {new Date().getFullYear()} {COMPANY.product}</span>
             <span aria-hidden="true">&middot;</span>
-            <Link to="/privacy" className="transition hover:text-slate-600">
+            <Link to="/privacy" className="transition hover:text-zinc-900">
               Privacy
             </Link>
             <span aria-hidden="true">&middot;</span>
-            <Link to="/terms" className="transition hover:text-slate-600">
+            <Link to="/terms" className="transition hover:text-zinc-900">
               Terms
             </Link>
             <span aria-hidden="true">&middot;</span>
-            <a href={`mailto:${COMPANY.contactEmail}`} className="transition hover:text-slate-600">
+            <a href={`mailto:${COMPANY.contactEmail}`} className="transition hover:text-zinc-900">
               Contact
             </a>
           </p>
-          <p className="mt-2 text-xs">
+          <p className="mt-2 text-xs text-zinc-400">
             {COMPANY.legalName}, registered in {COMPANY.registeredIn} no. {COMPANY.registrationNumber}. VAT{' '}
             {COMPANY.vatNumber}.
           </p>
-          {COMPANY.registeredOffice && <p className="mt-1 text-xs">Registered office: {COMPANY.registeredOffice}</p>}
-          <p className="mt-1 text-xs">
+          {COMPANY.registeredOffice && <p className="mt-1 text-xs text-zinc-400">Registered office: {COMPANY.registeredOffice}</p>}
+          <p className="mt-1 text-xs text-zinc-400">
             Page content last reviewed{' '}
             <time dateTime={CONTENT_LAST_REVIEWED}>
               {new Date(CONTENT_LAST_REVIEWED).toLocaleDateString('en-GB', {

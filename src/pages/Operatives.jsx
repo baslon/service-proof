@@ -14,7 +14,7 @@ function formatDateTime(value) {
 const ACCOUNT_STATUS_STYLE = {
   active: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   invited: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  not_invited: 'bg-slate-100 text-slate-500 ring-slate-500/10',
+  not_invited: 'bg-zinc-100 text-zinc-500 ring-zinc-500/10',
 }
 
 function ResendButton({ operativeId, onResend }) {
@@ -42,7 +42,7 @@ function ResendButton({ operativeId, onResend }) {
       <button
         onClick={handleClick}
         disabled={state === 'sending'}
-        className="text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-60"
+        className="text-xs font-medium text-zinc-900 hover:text-zinc-600 disabled:opacity-60"
       >
         {state === 'sending' ? 'Sending…' : 'Resend invite'}
       </button>
@@ -127,12 +127,12 @@ export default function Operatives() {
     <DashboardLayout>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Operatives</h1>
-          <p className="mt-1 text-sm text-slate-500">Everyone with access to submit proof for your organization.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Operatives</h1>
+          <p className="mt-1 text-sm text-zinc-500">Everyone with access to submit proof for your organization.</p>
         </div>
         <button
           onClick={() => setAdding(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+          className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
         >
           + Add operative
         </button>
@@ -160,31 +160,31 @@ export default function Operatives() {
           left to scroll sideways. */}
       <div className="mt-6 space-y-3 md:hidden">
         {loading ? (
-          <p className="rounded-xl border border-dashed border-slate-300 py-8 text-center text-sm text-slate-400">
+          <p className="rounded-xl border border-dashed border-zinc-300 py-8 text-center text-sm text-zinc-400">
             Loading…
           </p>
         ) : operatives.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-300 py-8 text-center text-sm text-slate-400">
+          <p className="rounded-xl border border-dashed border-zinc-300 py-8 text-center text-sm text-zinc-400">
             No operatives yet — invite your first one above.
           </p>
         ) : (
           operatives.map((op) => (
-            <div key={op.id} className="rounded-xl border border-slate-200 bg-white p-4">
+            <div key={op.id} className="rounded-xl border border-zinc-200 bg-white p-4">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-semibold text-slate-900">{op.name}</span>
+                <span className="text-sm font-semibold text-zinc-900">{op.name}</span>
                 <span
                   className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                    op.active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-500 ring-slate-500/10'
+                    op.active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-zinc-100 text-zinc-500 ring-zinc-500/10'
                   }`}
                 >
                   {op.active ? 'Active' : 'Inactive'}
                 </span>
               </div>
-              <p className="mt-1 truncate text-xs text-slate-500">{op.email || '—'}</p>
+              <p className="mt-1 truncate text-xs text-zinc-500">{op.email || '—'}</p>
 
               <dl className="mt-3 space-y-1.5 text-sm">
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400">Account</dt>
+                  <dt className="text-zinc-400">Account</dt>
                   <dd>
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ring-1 ring-inset ${ACCOUNT_STATUS_STYLE[op.inviteStatus] || ACCOUNT_STATUS_STYLE.not_invited}`}>
                       {op.inviteStatus.replace('_', ' ')}
@@ -192,17 +192,17 @@ export default function Operatives() {
                   </dd>
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <dt className="shrink-0 text-slate-400">Clients</dt>
-                  <dd className="truncate text-right text-slate-700">{clientNames(op.clientIds)}</dd>
+                  <dt className="shrink-0 text-zinc-400">Clients</dt>
+                  <dd className="truncate text-right text-zinc-700">{clientNames(op.clientIds)}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt className="text-slate-400">Invited</dt>
-                  <dd className="text-slate-700">{formatDateTime(op.invitedAt)}</dd>
+                  <dt className="text-zinc-400">Invited</dt>
+                  <dd className="text-zinc-700">{formatDateTime(op.invitedAt)}</dd>
                 </div>
               </dl>
 
-              <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-                <button onClick={() => setEditing(op)} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+              <div className="mt-3 flex items-center justify-between border-t border-zinc-100 pt-3">
+                <button onClick={() => setEditing(op)} className="text-xs font-medium text-zinc-900 hover:text-zinc-600">
                   Edit
                 </button>
                 <ResendButton operativeId={op.id} onResend={handleResend} />
@@ -213,40 +213,40 @@ export default function Operatives() {
       </div>
 
       {/* Desktop: table */}
-      <div className="mt-6 hidden rounded-xl border border-slate-200 bg-white md:block">
+      <div className="mt-6 hidden rounded-xl border border-zinc-200 bg-white md:block">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-zinc-200">
+            <thead className="bg-zinc-50">
               <tr>
                 {['Name', 'Email', 'Employment', 'Account', 'Clients', 'Invited', ''].map((h) => (
-                  <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-100">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-zinc-400">
                     Loading…
                   </td>
                 </tr>
               ) : operatives.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-slate-400">
+                  <td colSpan={7} className="px-4 py-8 text-center text-sm text-zinc-400">
                     No operatives yet — invite your first one above.
                   </td>
                 </tr>
               ) : (
                 operatives.map((op) => (
-                  <tr key={op.id} className="hover:bg-slate-50">
-                    <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">{op.name}</td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{op.email || '—'}</td>
+                  <tr key={op.id} className="hover:bg-zinc-50">
+                    <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-zinc-900">{op.name}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-600">{op.email || '—'}</td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <span
                         className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
-                          op.active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-500 ring-slate-500/10'
+                          op.active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-zinc-100 text-zinc-500 ring-zinc-500/10'
                         }`}
                       >
                         {op.active ? 'Active' : 'Inactive'}
@@ -257,13 +257,13 @@ export default function Operatives() {
                         {op.inviteStatus.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="max-w-xs truncate px-4 py-3 text-sm text-slate-600" title={clientNames(op.clientIds)}>
+                    <td className="max-w-xs truncate px-4 py-3 text-sm text-zinc-600" title={clientNames(op.clientIds)}>
                       {clientNames(op.clientIds)}
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">{formatDateTime(op.invitedAt)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-600">{formatDateTime(op.invitedAt)}</td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <div className="flex items-center justify-end gap-3">
-                        <button onClick={() => setEditing(op)} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+                        <button onClick={() => setEditing(op)} className="text-xs font-medium text-zinc-900 hover:text-zinc-600">
                           Edit
                         </button>
                         <ResendButton operativeId={op.id} onResend={handleResend} />
@@ -281,7 +281,7 @@ export default function Operatives() {
           someone has actually signed in - so it can't be read as "this person
           is up and running", only as "this account exists". "Employment" is
           the separate flag that actually controls new assignments and login. */}
-      <p className="mt-3 text-xs text-slate-400">
+      <p className="mt-3 text-xs text-zinc-400">
         Account reflects whether a login exists, not whether the operative has signed in yet — use Resend invite if
         their link stopped working. Employment controls whether they can be assigned new jobs and sign in at all.
       </p>

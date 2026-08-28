@@ -212,8 +212,8 @@ export default function EditJobModal({ job, onClose }) {
     <Modal open onClose={attemptClose} title={isSealed ? `Job ${job.id}` : `Edit job ${job.id}`}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <p className="text-xs font-medium text-slate-400">{clientName}</p>
-          <p className="text-sm text-slate-500">
+          <p className="text-xs font-medium text-zinc-400">{clientName}</p>
+          <p className="text-sm text-zinc-500">
             {job.taskType} &middot; {job.area}
           </p>
         </div>
@@ -257,18 +257,18 @@ export default function EditJobModal({ job, onClose }) {
         )}
 
         {needsResolution && (
-          <div className="rounded-lg border border-slate-200 p-3">
+          <div className="rounded-lg border border-zinc-200 p-3">
             {!resolving ? (
               <button
                 type="button"
                 onClick={() => setResolving(true)}
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                className="text-sm font-medium text-zinc-900 hover:text-zinc-600"
               >
                 Mark resolved
               </button>
             ) : (
               <div className="space-y-2">
-                <p className="text-sm font-medium text-slate-700">How was this resolved?</p>
+                <p className="text-sm font-medium text-zinc-700">How was this resolved?</p>
                 <textarea
                   rows={2}
                   value={resolutionNoteInput}
@@ -288,7 +288,7 @@ export default function EditJobModal({ job, onClose }) {
                       setResolutionNoteInput('')
                       setResolvingError('')
                     }}
-                    className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-50"
+                    className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 transition hover:bg-zinc-50"
                   >
                     Cancel
                   </button>
@@ -296,7 +296,7 @@ export default function EditJobModal({ job, onClose }) {
                     type="button"
                     onClick={handleResolve}
                     disabled={resolvingSubmitting || !resolutionNoteInput.trim()}
-                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {resolvingSubmitting ? 'Saving…' : 'Confirm resolved'}
                   </button>
@@ -307,16 +307,16 @@ export default function EditJobModal({ job, onClose }) {
         )}
 
         <div>
-          <span className="mb-1 block text-sm font-medium text-slate-700">
+          <span className="mb-1 block text-sm font-medium text-zinc-700">
             Photo evidence ({photos.length} / {job.photosRequired})
           </span>
           <div className="grid grid-cols-4 gap-2">
             {photos.map((p) => (
-              <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+              <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200">
                 <button
                   type="button"
                   onClick={() => setViewingPhoto(p)}
-                  className="h-full w-full transition hover:ring-2 hover:ring-indigo-400"
+                  className="h-full w-full transition hover:ring-2 hover:ring-zinc-400"
                 >
                   <img src={p.dataUrl} alt="Evidence" className="h-full w-full object-cover" />
                 </button>
@@ -325,13 +325,13 @@ export default function EditJobModal({ job, onClose }) {
                     type="button"
                     onClick={() => removePhoto(p.id)}
                     aria-label="Delete photo"
-                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white transition hover:bg-red-600"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900/70 text-xs text-white transition hover:bg-red-600"
                   >
                     &times;
                   </button>
                 )}
                 {p.capturedAt && (
-                  <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                  <span className="absolute bottom-1 left-1 rounded bg-zinc-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
                     {formatTime(p.capturedAt)}
                   </span>
                 )}
@@ -343,7 +343,7 @@ export default function EditJobModal({ job, onClose }) {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
                 aria-label="Add photo"
-                className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition hover:border-indigo-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-zinc-300 text-zinc-400 transition hover:border-zinc-400 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {uploading ? (
                   <span className="text-xs">Uploading…</span>
@@ -357,7 +357,7 @@ export default function EditJobModal({ job, onClose }) {
           </div>
           <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={addPhotos} className="hidden" />
           {photos.length === 0 && !isSealed && (
-            <p className="mt-1.5 text-xs text-slate-400">No photos submitted yet — add one above if needed.</p>
+            <p className="mt-1.5 text-xs text-zinc-400">No photos submitted yet — add one above if needed.</p>
           )}
           {photos.length !== (job.photos?.length || 0) && (
             <p className="mt-1.5 text-xs text-amber-600">
@@ -369,14 +369,14 @@ export default function EditJobModal({ job, onClose }) {
         <div>
           {/* Purely supplementary — never counted toward photosRequired or
               any evidence check, so no (X / Y) here the way photos has one. */}
-          <span className="mb-1 block text-sm font-medium text-slate-700">Video (optional)</span>
+          <span className="mb-1 block text-sm font-medium text-zinc-700">Video (optional)</span>
           <div className="grid grid-cols-4 gap-2">
             {videos.map((v) => (
-              <div key={v.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+              <div key={v.id} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200">
                 <button
                   type="button"
                   onClick={() => setViewingVideo(v)}
-                  className="relative h-full w-full transition hover:ring-2 hover:ring-indigo-400"
+                  className="relative h-full w-full transition hover:ring-2 hover:ring-zinc-400"
                 >
                   <video src={v.dataUrl} className="h-full w-full object-cover" muted />
                   <span className="absolute inset-0 flex items-center justify-center">
@@ -390,13 +390,13 @@ export default function EditJobModal({ job, onClose }) {
                     type="button"
                     onClick={() => removeVideo(v.id)}
                     aria-label="Delete video"
-                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white transition hover:bg-red-600"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900/70 text-xs text-white transition hover:bg-red-600"
                   >
                     &times;
                   </button>
                 )}
                 {v.capturedAt && (
-                  <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                  <span className="absolute bottom-1 left-1 rounded bg-zinc-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
                     {formatTime(v.capturedAt)}
                   </span>
                 )}
@@ -408,7 +408,7 @@ export default function EditJobModal({ job, onClose }) {
                 onClick={() => videoInputRef.current?.click()}
                 disabled={uploadingVideo}
                 aria-label="Add video"
-                className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 transition hover:border-indigo-400 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex aspect-square items-center justify-center rounded-lg border border-dashed border-zinc-300 text-zinc-400 transition hover:border-zinc-400 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {uploadingVideo ? (
                   <span className="text-xs">Uploading…</span>
@@ -502,7 +502,7 @@ export default function EditJobModal({ job, onClose }) {
           <button
             type="button"
             onClick={attemptClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             {isSealed ? 'Close' : 'Cancel'}
           </button>
@@ -510,7 +510,7 @@ export default function EditJobModal({ job, onClose }) {
             <button
               type="submit"
               disabled={uploading || uploadingVideo || saving}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>
@@ -520,7 +520,7 @@ export default function EditJobModal({ job, onClose }) {
 
       {viewingPhoto && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-slate-900/80 p-6"
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-zinc-900/80 p-6"
           onClick={() => setViewingPhoto(null)}
         >
           <img
@@ -536,7 +536,7 @@ export default function EditJobModal({ job, onClose }) {
 
       {viewingVideo && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-slate-900/80 p-6"
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-zinc-900/80 p-6"
           onClick={() => setViewingVideo(null)}
         >
           <video

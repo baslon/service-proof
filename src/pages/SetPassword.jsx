@@ -39,10 +39,10 @@ export default function SetPassword() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4">
+      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-8 shadow-sm">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-zinc-900 text-white">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -57,15 +57,15 @@ export default function SetPassword() {
               <path d="M8.5 11.5L11 14L15.5 9" />
             </svg>
           </div>
-          <span className="text-base font-semibold text-slate-900">Provaserve</span>
+          <span className="text-base font-semibold text-zinc-900">Provaserve</span>
         </div>
 
-        <h1 className="mt-6 text-xl font-bold text-slate-900">Set your password</h1>
-        <p className="mt-1 text-sm text-slate-500">Choose a password for your account.</p>
+        <h1 className="mt-6 text-xl font-bold text-zinc-900">Set your password</h1>
+        <p className="mt-1 text-sm text-zinc-500">Choose a password for your account.</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">New password</span>
+            <span className="mb-1 block text-sm font-medium text-zinc-700">New password</span>
             <input
               type="password"
               className={inputClass}
@@ -76,7 +76,7 @@ export default function SetPassword() {
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-slate-700">Confirm password</span>
+            <span className="mb-1 block text-sm font-medium text-zinc-700">Confirm password</span>
             <input
               type="password"
               className={inputClass}
@@ -91,7 +91,7 @@ export default function SetPassword() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+            className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {submitting ? 'Saving…' : 'Set password and continue'}
           </button>

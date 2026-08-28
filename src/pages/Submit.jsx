@@ -41,11 +41,11 @@ function ClockControl() {
   }
 
   return (
-    <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-2.5">
+    <div className="shrink-0 border-b border-zinc-200 bg-white px-4 py-2.5">
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <p className="text-[11px] text-slate-400">Shift status</p>
-          <p className={`truncate text-sm font-medium ${clockedIn ? 'text-emerald-600' : 'text-slate-500'}`}>
+          <p className="text-[11px] text-zinc-400">Shift status</p>
+          <p className={`truncate text-sm font-medium ${clockedIn ? 'text-emerald-600' : 'text-zinc-500'}`}>
             {clockedIn ? `Clocked in since ${formatTime(myEvents[0].occurredAt)}` : 'Not clocked in'}
           </p>
         </div>
@@ -53,7 +53,7 @@ function ClockControl() {
           onClick={handleClick}
           disabled={submitting}
           className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-60 ${
-            clockedIn ? 'bg-slate-600' : 'bg-indigo-600'
+            clockedIn ? 'bg-zinc-600' : 'bg-zinc-900'
           }`}
         >
           {submitting ? 'Saving…' : clockedIn ? 'Clock out' : 'Clock in'}
@@ -74,10 +74,10 @@ function JobList({ jobs, sites, clients, onSelect, unreliable }) {
           <button
             key={job.id}
             onClick={() => onSelect(job)}
-            className="block w-full rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm active:bg-slate-50"
+            className="block w-full rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm active:bg-zinc-50"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-semibold text-slate-900">
+              <span className="text-sm font-semibold text-zinc-900">
                 {job.id}
                 {clientName ? ` — ${clientName}` : ''}
               </span>
@@ -87,10 +87,10 @@ function JobList({ jobs, sites, clients, onSelect, unreliable }) {
                 className="!px-2 !py-0.5"
               />
             </div>
-            <p className="mt-1 text-sm text-slate-700">{job.taskType}</p>
-            <p className="text-xs text-slate-500">{site?.name}</p>
-            <p className="mt-1 text-xs font-medium text-slate-600">{formatDateTime(job.scheduledTime)}</p>
-            <p className="mt-2 text-xs font-medium text-indigo-600">
+            <p className="mt-1 text-sm text-zinc-700">{job.taskType}</p>
+            <p className="text-xs text-zinc-500">{site?.name}</p>
+            <p className="mt-1 text-xs font-medium text-zinc-600">{formatDateTime(job.scheduledTime)}</p>
+            <p className="mt-2 text-xs font-medium text-zinc-600">
               {job.photosSubmitted}/{job.photosRequired} photo(s) &rarr;
             </p>
           </button>
@@ -100,7 +100,7 @@ function JobList({ jobs, sites, clients, onSelect, unreliable }) {
           failed to arrive — an operative could walk off site on the strength
           of it. Stay silent about it unless the list is actually trustworthy. */}
       {jobs.length === 0 && !unreliable && (
-        <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-400">
+        <div className="rounded-xl border border-dashed border-zinc-300 p-8 text-center text-sm text-zinc-400">
           No jobs pending right now. Nice work.
         </div>
       )}
@@ -265,39 +265,39 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
 
   return (
     <div className="px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-4">
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
           {job.id}
           {clientName ? ` — ${clientName}` : ''}
         </p>
-        <h2 className="mt-1 text-lg font-semibold text-slate-900">{job.taskType}</h2>
-        <p className="text-sm text-slate-500">{site?.name}</p>
-        <p className="text-sm text-slate-500">{job.area}</p>
-        <p className="mt-1 text-sm font-medium text-indigo-600">{formatDateTime(job.scheduledTime)}</p>
+        <h2 className="mt-1 text-lg font-semibold text-zinc-900">{job.taskType}</h2>
+        <p className="text-sm text-zinc-500">{site?.name}</p>
+        <p className="text-sm text-zinc-500">{job.area}</p>
+        <p className="mt-1 text-sm font-medium text-zinc-600">{formatDateTime(job.scheduledTime)}</p>
       </div>
 
       {job.instructions && (
-        <div className="mt-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">Instructions</p>
-          <p className="mt-1 text-sm text-slate-700">{job.instructions}</p>
+        <div className="mt-4 rounded-xl border border-zinc-200 bg-zinc-100 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-700">Instructions</p>
+          <p className="mt-1 text-sm text-zinc-700">{job.instructions}</p>
         </div>
       )}
 
       <div className="mt-4 space-y-4">
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">How did this job go?</p>
+          <p className="mb-2 text-sm font-medium text-zinc-700">How did this job go?</p>
           <div className="space-y-2">
             {COMPLETION_OPTIONS.map((opt) => (
               <label
                 key={opt}
                 className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm ${
-                  completionStatus === opt ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-200 text-slate-700'
+                  completionStatus === opt ? 'border-green-600 bg-green-50 text-green-700' : 'border-zinc-200 text-zinc-700'
                 }`}
               >
                 <input
                   type="radio"
                   name="completionStatus"
-                  className="h-4 w-4 text-indigo-600"
+                  className="h-4 w-4 text-green-600"
                   checked={completionStatus === opt}
                   onChange={() => {
                     setCompletionStatus(opt)
@@ -311,22 +311,22 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">Photo evidence</p>
+          <p className="mb-2 text-sm font-medium text-zinc-700">Photo evidence</p>
 
           {photos.length > 0 && (
             <div className="mb-3 grid grid-cols-3 gap-2">
               {photos.map((p) => (
-                <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+                <div key={p.id} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200">
                   <img src={p.dataUrl} alt="Evidence" className="h-full w-full object-cover" />
                   <button
                     onClick={() => removePhoto(p.id)}
                     aria-label="Remove photo"
-                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900/70 text-xs text-white"
                   >
                     &times;
                   </button>
                   {p.capturedAt && (
-                    <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    <span className="absolute bottom-1 left-1 rounded bg-zinc-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
                       {formatTime(p.capturedAt)}
                     </span>
                   )}
@@ -347,22 +347,22 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={slotsLeft <= 0 || uploading}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 py-6 text-sm font-medium text-slate-500 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-indigo-400 hover:text-indigo-600"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 py-6 text-sm font-medium text-zinc-500 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-zinc-400 hover:text-zinc-900"
           >
             {uploading ? 'Uploading…' : slotsLeft > 0 ? 'Tap to take or upload a photo' : 'All required photos added'}
           </button>
-          <p className="mt-2 text-center text-sm font-medium text-slate-600">
+          <p className="mt-2 text-center text-sm font-medium text-zinc-600">
             {photos.length} / {job.photosRequired} required
           </p>
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">Video (optional)</p>
+          <p className="mb-2 text-sm font-medium text-zinc-700">Video (optional)</p>
 
           {videos.length > 0 && (
             <div className="mb-3 grid grid-cols-3 gap-2">
               {videos.map((v) => (
-                <div key={v.id} className="group relative aspect-square overflow-hidden rounded-lg border border-slate-200">
+                <div key={v.id} className="group relative aspect-square overflow-hidden rounded-lg border border-zinc-200">
                   <video src={v.dataUrl} className="h-full w-full object-cover" muted />
                   <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-7 w-7 text-white drop-shadow">
@@ -372,12 +372,12 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
                   <button
                     onClick={() => removeVideo(v.id)}
                     aria-label="Remove video"
-                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/70 text-xs text-white"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-zinc-900/70 text-xs text-white"
                   >
                     &times;
                   </button>
                   {v.capturedAt && (
-                    <span className="absolute bottom-1 left-1 rounded bg-slate-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                    <span className="absolute bottom-1 left-1 rounded bg-zinc-900/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
                       {formatTime(v.capturedAt)}
                     </span>
                   )}
@@ -398,7 +398,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
           <button
             onClick={() => videoInputRef.current?.click()}
             disabled={uploadingVideo}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-slate-300 py-6 text-sm font-medium text-slate-500 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-indigo-400 hover:text-indigo-600"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 py-6 text-sm font-medium text-zinc-500 transition disabled:cursor-not-allowed disabled:opacity-50 hover:border-zinc-400 hover:text-zinc-900"
           >
             {uploadingVideo ? 'Uploading…' : 'Tap to record or upload a short video'}
           </button>
@@ -406,7 +406,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-slate-700">
+          <p className="mb-2 text-sm font-medium text-zinc-700">
             Notes<span className="text-red-500"> (required)</span>
           </p>
           <textarea
@@ -421,7 +421,7 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
                 ? 'Provide a progress update note'
                 : 'Add notes about this job...'
             }
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
           />
         </div>
 
@@ -431,15 +431,15 @@ const SubmissionForm = forwardRef(function SubmissionForm({ job, site, clientNam
       <div className="mt-6 flex gap-2">
         <button
           onClick={handleCancelClick}
-          className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700"
+          className="flex-1 rounded-lg border border-zinc-300 px-4 py-2.5 text-sm font-medium text-zinc-700"
         >
           Cancel
         </button>
         <button
           onClick={handleSubmitClick}
           disabled={!completionStatus || uploading || uploadingVideo || submitting}
-          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:bg-slate-300 ${
-            completionStatus === 'Unable to complete' ? 'bg-slate-600' : 'bg-indigo-600'
+          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:bg-zinc-300 ${
+            completionStatus === 'Unable to complete' ? 'bg-zinc-600' : 'bg-zinc-900'
           }`}
         >
           {submitting ? 'Saving…' : completionStatus === 'Unable to complete' ? 'Save' : 'Submit proof'}
@@ -557,32 +557,32 @@ export default function Submit() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-200 sm:py-8">
-      <div className="mx-auto flex h-screen w-full flex-col overflow-hidden bg-slate-50 sm:h-auto sm:max-w-sm sm:rounded-[2rem] sm:border-8 sm:border-slate-900 sm:shadow-2xl">
-        <div className="flex shrink-0 items-center justify-between bg-slate-900 px-4 py-3">
-          <button onClick={handleExit} className="text-xs font-medium text-slate-300">
+    <div className="min-h-screen bg-zinc-200 sm:py-8">
+      <div className="mx-auto flex h-screen w-full flex-col overflow-hidden bg-zinc-50 sm:h-auto sm:max-w-sm sm:rounded-[2rem] sm:border-8 sm:border-zinc-900 sm:shadow-2xl">
+        <div className="flex shrink-0 items-center justify-between bg-zinc-900 px-4 py-3">
+          <button onClick={handleExit} className="text-xs font-medium text-zinc-300">
             &larr; Exit
           </button>
           <span className="text-sm font-semibold text-white">Provaserve Field</span>
           <span className="w-9" />
         </div>
 
-        <div className="flex shrink-0 flex-col gap-0.5 border-b border-slate-200 bg-slate-100 px-4 py-2">
+        <div className="flex shrink-0 flex-col gap-0.5 border-b border-zinc-200 bg-zinc-100 px-4 py-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500">
-              Signed in as <span className="font-medium text-slate-700">{user?.name}</span>
+            <span className="text-xs text-zinc-500">
+              Signed in as <span className="font-medium text-zinc-700">{user?.name}</span>
             </span>
-            <button onClick={handleLogout} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+            <button onClick={handleLogout} className="text-xs font-medium text-zinc-900 hover:text-zinc-600">
               Log out
             </button>
           </div>
-          {user?.organizationName && <span className="text-xs text-slate-400">{user.organizationName}</span>}
+          {user?.organizationName && <span className="text-xs text-zinc-400">{user.organizationName}</span>}
         </div>
 
         {user?.role === 'operative' && <ClockControl />}
 
-        <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-3">
-          <h1 className="text-base font-semibold text-slate-900">
+        <div className="shrink-0 border-b border-zinc-200 bg-white px-4 py-3">
+          <h1 className="text-base font-semibold text-zinc-900">
             {selectedJob ? 'Submit proof' : `Your jobs (${myJobs.length})`}
           </h1>
         </div>
@@ -613,7 +613,7 @@ export default function Submit() {
               )}
               {error && <DataErrorBanner className="mx-4 mt-4" />}
               {loading && myJobs.length === 0 && (
-                <p className="px-4 py-8 text-center text-sm text-slate-400">Loading your jobs…</p>
+                <p className="px-4 py-8 text-center text-sm text-zinc-400">Loading your jobs…</p>
               )}
               <JobList
                 jobs={myJobs}

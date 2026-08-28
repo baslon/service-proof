@@ -18,7 +18,7 @@ const DAYS = [
 const STATUS_STYLE = {
   active: 'bg-emerald-50 text-emerald-700 ring-emerald-600/20',
   paused: 'bg-amber-50 text-amber-700 ring-amber-600/20',
-  ended: 'bg-slate-100 text-slate-500 ring-slate-500/10',
+  ended: 'bg-zinc-100 text-zinc-500 ring-zinc-500/10',
 }
 
 function sameIdSet(a, b) {
@@ -58,7 +58,7 @@ function StatusControls({ schedule, onChange }) {
               type="button"
               disabled={working}
               onClick={() => run('paused')}
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-60"
+              className="text-xs font-medium text-zinc-900 hover:text-zinc-600 disabled:opacity-60"
             >
               Pause
             </button>
@@ -67,7 +67,7 @@ function StatusControls({ schedule, onChange }) {
               type="button"
               disabled={working}
               onClick={() => run('active')}
-              className="text-xs font-medium text-indigo-600 hover:text-indigo-700 disabled:opacity-60"
+              className="text-xs font-medium text-zinc-900 hover:text-zinc-600 disabled:opacity-60"
             >
               Resume
             </button>
@@ -154,28 +154,28 @@ function ExceptionsSection({ schedule }) {
 
   return (
     <div>
-      <p className="text-sm font-medium text-slate-700">Exceptions</p>
-      <p className="mt-1 text-xs text-slate-500">
+      <p className="text-sm font-medium text-zinc-700">Exceptions</p>
+      <p className="mt-1 text-xs text-zinc-500">
         Cover or cancel a single date without touching the schedule above. If that date's job already exists, it's
         updated immediately — otherwise the change applies whenever it's next generated.
       </p>
 
       <div className="mt-3 space-y-2">
         {exceptions.length === 0 ? (
-          <p className="text-sm text-slate-400">No exceptions logged.</p>
+          <p className="text-sm text-zinc-400">No exceptions logged.</p>
         ) : (
           exceptions.map((ex) => (
-            <div key={ex.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm">
+            <div key={ex.id} className="flex items-center justify-between gap-2 rounded-lg border border-zinc-200 px-3 py-2 text-sm">
               <div>
-                <span className="font-medium text-slate-800">{ex.exceptionDate}</span>{' '}
-                <span className="text-slate-500">
+                <span className="font-medium text-zinc-800">{ex.exceptionDate}</span>{' '}
+                <span className="text-zinc-500">
                   {ex.type === 'cancel'
                     ? ex.operativeId
                       ? `${operativeName(ex.operativeId)} cancelled`
                       : 'Whole schedule cancelled'
                     : `${operativeName(ex.operativeId)} covered by ${operativeName(ex.replacementOperativeId)}`}
                 </span>
-                {ex.notes && <p className="text-xs text-slate-400">{ex.notes}</p>}
+                {ex.notes && <p className="text-xs text-zinc-400">{ex.notes}</p>}
               </div>
               <button
                 type="button"
@@ -190,7 +190,7 @@ function ExceptionsSection({ schedule }) {
         )}
       </div>
 
-      <form onSubmit={handleAdd} className="mt-4 space-y-3 rounded-lg border border-dashed border-slate-300 p-3">
+      <form onSubmit={handleAdd} className="mt-4 space-y-3 rounded-lg border border-dashed border-zinc-300 p-3">
         <div className="grid grid-cols-2 gap-3">
           <FormField label="Date">
             <input type="date" className={inputClass} value={form.exceptionDate} onChange={set('exceptionDate')} />
@@ -238,7 +238,7 @@ function ExceptionsSection({ schedule }) {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-900 disabled:opacity-60"
+          className="w-full rounded-lg bg-zinc-800 px-3 py-2 text-sm font-medium text-white transition hover:bg-zinc-900 disabled:opacity-60"
         >
           {submitting ? 'Adding…' : 'Add exception'}
         </button>
@@ -312,7 +312,7 @@ export default function ScheduleDetailModal({ schedule, onClose }) {
     <Modal open onClose={onClose} title={site?.name || 'Schedule'} maxWidth="max-w-2xl">
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500">{client?.name}</p>
+          <p className="text-sm text-zinc-500">{client?.name}</p>
           <StatusControls schedule={schedule} onChange={onClose} />
         </div>
 
@@ -338,8 +338,8 @@ export default function ScheduleDetailModal({ schedule, onClose }) {
                   onClick={() => toggleDay(d.value)}
                   className={`rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition ${
                     form.daysOfWeek.includes(d.value)
-                      ? 'bg-indigo-600 text-white ring-indigo-600'
-                      : 'text-slate-600 ring-slate-300 hover:bg-slate-50'
+                      ? 'bg-zinc-900 text-white ring-zinc-900'
+                      : 'text-zinc-600 ring-zinc-300 hover:bg-zinc-50'
                   }`}
                 >
                   {d.label}
@@ -381,14 +381,14 @@ export default function ScheduleDetailModal({ schedule, onClose }) {
           </FormField>
 
           <FormField label="Team">
-            <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-slate-200 p-2">
+            <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-zinc-200 p-2">
               {eligibleOperatives.map((o) => (
-                <label key={o.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-slate-50">
+                <label key={o.id} className="flex items-center gap-2 rounded px-2 py-1 text-sm hover:bg-zinc-50">
                   <input
                     type="checkbox"
                     checked={operativeIds.includes(o.id)}
                     onChange={() => toggleOperative(o.id)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded border-zinc-300 text-green-600 focus:ring-green-600"
                   />
                   {o.name}
                 </label>
@@ -396,7 +396,7 @@ export default function ScheduleDetailModal({ schedule, onClose }) {
             </div>
           </FormField>
 
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-zinc-400">
             Changes here only affect jobs generated from now on — anything already generated is untouched.
           </p>
 
@@ -407,21 +407,21 @@ export default function ScheduleDetailModal({ schedule, onClose }) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
             >
               Close
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:opacity-60"
+              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save changes'}
             </button>
           </div>
         </form>
 
-        <div className="border-t border-slate-200 pt-5">
+        <div className="border-t border-zinc-200 pt-5">
           <ExceptionsSection schedule={schedule} />
         </div>
       </div>

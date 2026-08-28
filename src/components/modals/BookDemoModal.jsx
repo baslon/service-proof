@@ -32,14 +32,14 @@ export default function BookDemoModal({ onClose }) {
               />
             </svg>
           </div>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-zinc-600">
             Thanks{form.name ? `, ${form.name.split(' ')[0]}` : ''} — we've got your demo request for{' '}
-            <strong className="text-slate-900">{form.company || 'your organisation'}</strong>. Someone from our team
+            <strong className="text-zinc-900">{form.company || 'your organisation'}</strong>. Someone from our team
             will reach out within one business day to find a time.
           </p>
           <button
             onClick={onClose}
-            className="mt-6 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            className="mt-6 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             Close
           </button>
@@ -51,7 +51,7 @@ export default function BookDemoModal({ onClose }) {
   return (
     <Modal open onClose={onClose} title="Book a demo" centered>
       <form onSubmit={handleSubmit} className="space-y-4">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-zinc-500">
           Tell us a bit about your team and we'll set up a live walkthrough of Provaserve for your sites.
         </p>
 
@@ -86,13 +86,13 @@ export default function BookDemoModal({ onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             Request demo
           </button>
