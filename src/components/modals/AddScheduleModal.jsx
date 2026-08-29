@@ -35,7 +35,7 @@ export default function AddScheduleModal({ onClose }) {
     expectedDurationMinutes: '',
     operativeIds: [],
     area: '',
-    photosRequired: 6,
+    photosRequired: 3,
     instructions: '',
     notes: '',
     effectiveStartDate: todayIso(),

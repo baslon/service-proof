@@ -16,7 +16,7 @@ export default function ScheduleJobModal({ onClose }) {
     operativeId: operatives.find((o) => isEligibleFor(o, initialClientId))?.id || '',
     area: '',
     scheduledTime: '',
-    photosRequired: 6,
+    photosRequired: 3,
     instructions: '',
     notes: '',
   })
