@@ -16,6 +16,29 @@ const EVENT_STYLE = {
   clock_out: { label: 'Clocked out', className: 'bg-zinc-100 text-zinc-600 ring-zinc-500/10' },
 }
 
+// within_geofence is null whenever there was nothing to check against (no
+// device location, or none of that day's sites are geocoded yet) - shown
+// as "Unknown" rather than folded into either true/false badge, since it's
+// a genuinely different case from "checked and failed."
+// docs/gps-geofencing-clock-in-scope.md.
+function LocationBadge({ withinGeofence }) {
+  if (withinGeofence === true) {
+    return (
+      <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+        On-site
+      </span>
+    )
+  }
+  if (withinGeofence === false) {
+    return (
+      <span className="inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+        Off-site
+      </span>
+    )
+  }
+  return <span className="text-xs text-zinc-400">Unknown</span>
+}
+
 export default function Attendance() {
   const { attendanceEvents, operatives } = useApp()
   const [operativeId, setOperativeId] = useState('')
@@ -51,7 +74,7 @@ export default function Attendance() {
           <table className="min-w-full divide-y divide-zinc-200">
             <thead className="bg-zinc-50">
               <tr>
-                {['Operative', 'Event', 'Time'].map((h) => (
+                {['Operative', 'Event', 'Time', 'Location'].map((h) => (
                   <th key={h} className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">
                     {h}
                   </th>
@@ -61,7 +84,7 @@ export default function Attendance() {
             <tbody className="divide-y divide-zinc-100">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-sm text-zinc-400">
+                  <td colSpan={4} className="px-4 py-8 text-center text-sm text-zinc-400">
                     No attendance recorded yet.
                   </td>
                 </tr>
@@ -77,6 +100,9 @@ export default function Attendance() {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-zinc-600">{formatDateTime(e.occurredAt)}</td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <LocationBadge withinGeofence={e.withinGeofence} />
+                      </td>
                     </tr>
                   )
                 })

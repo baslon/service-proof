@@ -182,9 +182,9 @@ org's operatives — `within_geofence` is written `null` (same as "no
 coordinates available," not `false`), so a disabled org's attendance log
 doesn't fill up with false "off-site" flags.
 
-Superadmin's existing `/api/superadmin/*` surface gets one new action to
-flip this per organization, alongside the existing limit-override calls —
-no new endpoint pattern, just one more field on an org record superadmin
+Superadmin's `/api/superadmin` endpoint gets one new action to flip this
+per organization, alongside the existing limit-override actions — no new
+endpoint pattern, just one more field on an org record superadmin
 can already edit.
 
 ## Open questions still needing input

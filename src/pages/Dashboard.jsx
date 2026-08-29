@@ -20,7 +20,7 @@ const SUMMARY_CARDS = [
 ]
 
 export default function Dashboard() {
-  const { clients, sites, jobs, operatives } = useApp()
+  const { clients, sites, jobs, operatives, attendanceEvents } = useApp()
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const [clientFilter, setClientFilter] = useState(searchParams.get('client') || '')
@@ -77,6 +77,21 @@ export default function Dashboard() {
   const isNearLimit = (count, limit) => limit != null && count / limit >= 0.8
   const siteLimitNear = isNearLimit(sites.length, user?.siteLimit)
   const operativeLimitNear = isNearLimit(activeOperativeCount, user?.operativeLimit)
+
+  // Clock-ins only, not clock-outs - an operative who's already on site
+  // clocking out somewhere off-radius isn't the case this is meant to
+  // flag. Scoped to today so this doesn't accumulate stale flags from
+  // weeks ago. docs/gps-geofencing-clock-in-scope.md.
+  const offSiteClockInsToday = attendanceEvents.filter((e) => {
+    if (e.eventType !== 'clock_in' || e.withinGeofence !== false) return false
+    const occurred = new Date(e.occurredAt)
+    const now = new Date()
+    return (
+      occurred.getFullYear() === now.getFullYear() &&
+      occurred.getMonth() === now.getMonth() &&
+      occurred.getDate() === now.getDate()
+    )
+  }).length
 
   const sitesForFilter = useMemo(
     () => (clientFilter ? sites.filter((s) => s.clientId === clientFilter) : sites),
@@ -165,6 +180,17 @@ export default function Dashboard() {
             <strong>{atRiskCount}</strong> job{atRiskCount === 1 ? '' : 's'} at risk of contract breach.
           </span>
           <Link to="/dashboard?status=At%20Risk" className="font-medium underline underline-offset-2">
+            Review now
+          </Link>
+        </div>
+      )}
+      {offSiteClockInsToday > 0 && (
+        <div className="mt-3 flex items-center justify-between rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-inset ring-amber-600/20">
+          <span>
+            <strong>{offSiteClockInsToday}</strong> clock-in{offSiteClockInsToday === 1 ? '' : 's'} today outside the
+            expected site radius.
+          </span>
+          <Link to="/attendance" className="font-medium underline underline-offset-2">
             Review now
           </Link>
         </div>

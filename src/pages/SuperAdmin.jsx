@@ -5,19 +5,22 @@ import FormField, { inputClass } from '../components/FormField'
 // Deliberately separate from AuthContext/RequireAuth: a superadmin has no
 // organization of its own and no profiles row, so the regular login flow
 // (which requires a profile to load) doesn't apply here. This page manages
-// its own auth state and talks directly to the api/superadmin/* endpoints,
-// which are the actual authorization boundary - this page is just the UI.
-async function callApi(path, { method = 'GET', body } = {}) {
+// its own auth state and talks directly to api/superadmin.js, which is the
+// actual authorization boundary - this page is just the UI. One endpoint
+// rather than one file per action - see that file's own comment for why
+// (Vercel's Hobby plan function cap). Every call, reads included, is a
+// POST carrying an `action` field.
+async function callApi(action, body) {
   const {
     data: { session },
   } = await supabase.auth.getSession()
-  const res = await fetch(`/api/superadmin/${path}`, {
-    method,
+  const res = await fetch('/api/superadmin', {
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${session?.access_token || ''}`,
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: JSON.stringify({ action, ...body }),
   })
   const data = await res.json()
   if (!res.ok) throw new Error(data.error || 'Request failed')
@@ -102,7 +105,7 @@ function CreateOrganizationForm({ onCreated }) {
     setError('')
     setSubmitting(true)
     try {
-      const { organization } = await callApi('create-organization', { method: 'POST', body: { name } })
+      const { organization } = await callApi('create-organization', { name })
       setName('')
       onCreated(organization)
     } catch (err) {
@@ -143,7 +146,7 @@ function InvitePersonForm({ title, actionPath, submitLabel, organizations }) {
     setSuccess('')
     setSubmitting(true)
     try {
-      await callApi(actionPath, { method: 'POST', body: { organizationId, name, email } })
+      await callApi(actionPath, { organizationId, name, email })
       setSuccess(`Invited ${name}.`)
       setName('')
       setEmail('')
@@ -270,8 +273,8 @@ function LimitsSourceToggle({ org, onUpdated }) {
     try {
       const nextSource = isPlanControlled ? 'manual' : 'plan'
       const { limitsSource, siteLimit, operativeLimit } = await callApi('set-limits-source', {
-        method: 'POST',
-        body: { organizationId: org.id, limitsSource: nextSource },
+        organizationId: org.id,
+        limitsSource: nextSource,
       })
       onUpdated(org.id, {
         limits_source: limitsSource,
@@ -311,6 +314,54 @@ function LimitsSourceToggle({ org, onUpdated }) {
   )
 }
 
+// Decision 6, docs/gps-geofencing-clock-in-scope.md: a superadmin-only
+// operational kill-switch per organization, not another plan gate -
+// geofencing is available on every tier (decision 5), this just lets it be
+// paused for one org (e.g. sites that can't be geocoded reliably).
+function GeofencingToggle({ org, onUpdated }) {
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const enabled = org.geofencing_enabled !== false
+
+  const handleToggle = async () => {
+    setError('')
+    setSaving(true)
+    try {
+      const { geofencingEnabled } = await callApi('set-geofencing-enabled', {
+        organizationId: org.id,
+        geofencingEnabled: !enabled,
+      })
+      onUpdated(org.id, { geofencing_enabled: geofencingEnabled })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-36 shrink-0 text-xs text-zinc-500">GPS geofencing</span>
+      <span
+        className={`rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
+          enabled ? 'bg-green-50 text-green-700 ring-green-600/20' : 'bg-zinc-100 text-zinc-600 ring-zinc-500/10'
+        }`}
+      >
+        {enabled ? 'Enabled' : 'Disabled'}
+      </span>
+      <button
+        type="button"
+        onClick={handleToggle}
+        disabled={saving}
+        className="text-xs font-medium text-zinc-900 hover:text-zinc-600 disabled:opacity-60"
+      >
+        {saving ? 'Switching…' : enabled ? 'Disable' : 'Enable'}
+      </button>
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  )
+}
+
 function OrganizationRow({ org, onUpdated }) {
   const planControlled = org.limits_source === 'plan'
   return (
@@ -320,15 +371,13 @@ function OrganizationRow({ org, onUpdated }) {
         <LimitsSourceToggle org={org} onUpdated={onUpdated} />
       </div>
       <div className="mt-2 space-y-2">
+        <GeofencingToggle org={org} onUpdated={onUpdated} />
         <LimitField
           label="Site limit"
           value={org.site_limit}
           disabled={planControlled}
           onSave={async (v) => {
-            const { siteLimit } = await callApi('set-site-limit', {
-              method: 'POST',
-              body: { organizationId: org.id, siteLimit: v },
-            })
+            const { siteLimit } = await callApi('set-site-limit', { organizationId: org.id, siteLimit: v })
             onUpdated(org.id, { site_limit: siteLimit })
           }}
         />
@@ -338,8 +387,8 @@ function OrganizationRow({ org, onUpdated }) {
           disabled={planControlled}
           onSave={async (v) => {
             const { operativeLimit } = await callApi('set-operative-limit', {
-              method: 'POST',
-              body: { organizationId: org.id, operativeLimit: v },
+              organizationId: org.id,
+              operativeLimit: v,
             })
             onUpdated(org.id, { operative_limit: operativeLimit })
           }}

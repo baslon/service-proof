@@ -22,8 +22,8 @@ anything that needs the service_role key (invites, billing, superadmin).
 - **Operative** — a cleaner. Sees only their own assigned jobs, through the
   Submit page.
 - **Superadmin** — cross-tenant, no organization of its own. A separate
-  login flow (`/superadmin`) and its own set of `/api/superadmin/*`
-  endpoints, entirely outside the normal admin/operative model.
+  login flow (`/superadmin`) and its own `/api/superadmin` endpoint,
+  entirely outside the normal admin/operative model.
 
 ## Entities
 

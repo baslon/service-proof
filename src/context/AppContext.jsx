@@ -7,6 +7,30 @@ import { removeVideoObjects } from '../lib/uploadVideo'
 
 const AppContext = createContext(null)
 
+// The browser's own Geolocation API, wrapped so a denied permission, a
+// timeout, or a browser with no support all resolve the same way - to
+// nulls - rather than rejecting. Callers never need a try/catch: this is
+// meant to degrade, not block, the action it's feeding into (clock in/out).
+// See docs/gps-geofencing-clock-in-scope.md.
+function getCurrentPosition() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve({ latitude: null, longitude: null, accuracy: null })
+      return
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) =>
+        resolve({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        }),
+      () => resolve({ latitude: null, longitude: null, accuracy: null }),
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    )
+  })
+}
+
 // Every component in the app was built against display codes like "SP-0041"
 // as the job/client/site "id" — Supabase's real primary keys are UUIDs, with
 // the display code stored separately as display_id. Rather than touch every
@@ -37,6 +61,8 @@ function mapSite(row, clientDisplayIdByUuid) {
     phone: row.phone,
     accessNotes: row.access_notes,
     addedDate: row.added_date,
+    latitude: row.latitude,
+    longitude: row.longitude,
   }
 }
 
@@ -58,6 +84,7 @@ function mapAttendanceEvent(row, operativeNameById) {
     operativeName: operativeNameById[row.operative_id] || 'Unknown',
     eventType: row.event_type,
     occurredAt: row.occurred_at,
+    withinGeofence: row.within_geofence,
   }
 }
 
@@ -491,8 +518,35 @@ export function AppProvider({ children }) {
     [fetchAll]
   )
 
+  // Geocoding is best-effort, not a precondition for creating a site - a
+  // failed or unconfigured lookup just means this site has no coordinates
+  // yet (create_site's p_latitude/p_longitude default to null), so its
+  // geofence check is skipped later rather than blocking site creation on
+  // a third-party API call. See docs/gps-geofencing-clock-in-scope.md.
+  const geocodeAddress = useCallback(async (address, postcode) => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const res = await fetch('/api/geocode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token || ''}`,
+        },
+        body: JSON.stringify({ address, postcode }),
+      })
+      const data = await res.json()
+      if (!res.ok) return { latitude: null, longitude: null }
+      return { latitude: data.latitude ?? null, longitude: data.longitude ?? null }
+    } catch {
+      return { latitude: null, longitude: null }
+    }
+  }, [])
+
   const addSite = useCallback(
     async (payload) => {
+      const { latitude, longitude } = await geocodeAddress(payload.address, payload.postcode)
       const { error } = await supabase.rpc('create_site', {
         p_organization_id: user.organizationId,
         p_client_id: clientUuidByDisplayIdRef.current[payload.clientId],
@@ -502,11 +556,13 @@ export function AppProvider({ children }) {
         p_site_contact: payload.siteContact,
         p_phone: payload.phone,
         p_access_notes: payload.accessNotes,
+        p_latitude: latitude,
+        p_longitude: longitude,
       })
       if (error) throw new Error(error.message)
       await fetchAll()
     },
-    [user, fetchAll]
+    [user, fetchAll, geocodeAddress]
   )
 
   const deleteSite = useCallback(
@@ -771,25 +827,42 @@ export function AppProvider({ children }) {
     [fetchAll]
   )
 
-  // Plain data writes with no auth entanglement, so these go straight to
-  // Supabase under ordinary RLS like most other actions here - the
-  // alternation trigger is what actually enforces which one is legal to
-  // call next, this just surfaces that as a normal thrown error.
+  // Goes through record_attendance_event rather than a direct insert, so
+  // the geofence distance check happens server-side, where it can't be
+  // spoofed by trusting whatever a client claims about its own location
+  // (docs/gps-geofencing-clock-in-scope.md). The alternation trigger still
+  // fires exactly as before - it fires on the underlying insert regardless
+  // of which path reaches it, RPC or direct - this just adds the location
+  // write on top. current_org()/current_operative() inside the RPC replace
+  // the user.organizationId/operativeId this used to pass explicitly.
+  //
+  // Geolocation never blocks the clock-in/out itself: a denied permission,
+  // a timeout, or no location at all just means p_lat/p_lng go through as
+  // null, and record_attendance_event records the event with
+  // within_geofence left null ("unknown") rather than refusing it.
   const clockIn = useCallback(async () => {
-    const { error } = await supabase
-      .from('attendance_events')
-      .insert({ organization_id: user.organizationId, operative_id: user.operativeId, event_type: 'clock_in' })
+    const { latitude, longitude, accuracy } = await getCurrentPosition()
+    const { error } = await supabase.rpc('record_attendance_event', {
+      p_event_type: 'clock_in',
+      p_lat: latitude,
+      p_lng: longitude,
+      p_accuracy: accuracy,
+    })
     if (error) throw new Error(error.message)
     await fetchAll()
-  }, [user, fetchAll])
+  }, [fetchAll])
 
   const clockOut = useCallback(async () => {
-    const { error } = await supabase
-      .from('attendance_events')
-      .insert({ organization_id: user.organizationId, operative_id: user.operativeId, event_type: 'clock_out' })
+    const { latitude, longitude, accuracy } = await getCurrentPosition()
+    const { error } = await supabase.rpc('record_attendance_event', {
+      p_event_type: 'clock_out',
+      p_lat: latitude,
+      p_lng: longitude,
+      p_accuracy: accuracy,
+    })
     if (error) throw new Error(error.message)
     await fetchAll()
-  }, [user, fetchAll])
+  }, [fetchAll])
 
   const value = useMemo(
     () => ({
